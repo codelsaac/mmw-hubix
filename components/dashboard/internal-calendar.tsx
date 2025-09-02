@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CalendarIcon, Clock, MapPin, Users, Plus, ChevronLeft, ChevronRight, CheckCircle2, Loader2, AlertCircle, Globe } from "lucide-react"
 import { useCalendar } from "@/hooks/use-calendar"
 import { useDashboard } from "@/hooks/use-dashboard"
+import { useAuth } from "@/hooks/use-auth"
 
 const eventTypes = {
   meeting: { color: "bg-blue-500", label: "Meeting" },
@@ -41,6 +42,7 @@ export function InternalCalendar() {
   
   const { events, loading, error, createInternalEvent, createPublicEvent } = useCalendar()
   const { addActivity } = useDashboard()
+  const { user, isAdmin } = useAuth()
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -100,9 +102,14 @@ export function InternalCalendar() {
       }
 
       // Create either internal or public event based on toggle
-      console.log('Creating event:', { isCreatePublic, eventData })
+      console.log('Creating event:', { isCreatePublic, eventData, isAdmin })
       
-      if (isCreatePublic) {
+      // Only allow admins to create public events
+      if (isCreatePublic && !isAdmin) {
+        throw new Error('Only administrators can create public events')
+      }
+      
+      if (isCreatePublic && isAdmin) {
         console.log('Creating public event with data:', { ...eventData, isVisible: true })
         await createPublicEvent({
           ...eventData,
@@ -291,19 +298,22 @@ export function InternalCalendar() {
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="isPublic" 
-                  checked={isCreatePublic}
-                  onChange={(e) => setIsCreatePublic(e.target.checked)}
-                  className="rounded"
-                />
-                <label htmlFor="isPublic" className="text-sm font-medium flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  Make this a public event (visible to all students)
-                </label>
-              </div>
+              {/* Only show public event option for admins */}
+              {isAdmin && (
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="isPublic" 
+                    checked={isCreatePublic}
+                    onChange={(e) => setIsCreatePublic(e.target.checked)}
+                    className="rounded"
+                  />
+                  <label htmlFor="isPublic" className="text-sm font-medium flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Make this a public event (visible to all students)
+                  </label>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsAddEventOpen(false)} disabled={isSubmitting}>
