@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------
+//  AUTHENTICATION
+// ------------------
+
+// Required by NextAuth.js
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Required by NextAuth.js
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// User model for IT Prefects
+model User {
+  id                  String    @id @default(cuid())
+  name                String?
+  email               String?   @unique
+  emailVerified       DateTime?
+  image               String?
+  role                String    @default("member") // 'member' or 'admin'
+  department          String?   // IT, Admin, Student, etc.
+  accounts            Account[]
+  sessions            Session[]
+  
+  // Content creation relations
+  createdResources    Resource[]
+  createdAnnouncements Announcement[]
+  createdPublicEvents PublicEvent[]
+  createdInternalEvents InternalEvent[]
+  createdTrainingVideos TrainingVideo[]
+  
+  // Activity and Task relations
+  createdActivities   Activity[] @relation("CreatedActivities")
+  assignedActivities  Activity[] @relation("AssignedActivities")
+  createdTasks        Task[]     @relation("CreatedTasks")
+  assignedTasks       Task[]     @relation("AssignedTasks")
+}
+
+// Required by NextAuth.js
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ------------------
+//  APP CONTENT
+// ------------------
+
+// Module 1.1: Homepage / Resource Hub
+model Resource {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  description String
+  category    String
+  status      String   @default("active") // active, maintenance, inactive
+  clicks      Int      @default(0)
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  creator     User?    @relation(fields: [createdBy], references: [id])
+}
+
+// Module 1.2: Club Announcements Section (Enhanced for admin management)
+model Announcement {
+  id             String   @id @default(cuid())
+  title          String
+  club           String
+  date           DateTime
+  time           String
+  location       String
+  description    String
+  attendees      Int      @default(0)
+  maxAttendees   Int
+  type           String // Workshop, Event, Competition
+  status         String   @default("active") // active, cancelled, completed
+  isPublic       Boolean  @default(true) // visible to all students
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  creator        User?    @relation(fields: [createdBy], references: [id])
+}
+
+// Module 3.1: Public Calendar Events (Admin managed, student visible)
+model PublicEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  eventType   String   @default("general") // general, academic, sports, cultural
+  isVisible   Boolean  @default(true)
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  creator     User?    @relation(fields: [createdBy], references: [id])
+}
+
+// Module 3.2: Internal IT Prefect Events
+model InternalEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  eventType   String   @default("meeting") // meeting, training, maintenance
+  attendees   String?  // JSON string of user IDs
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  creator     User?    @relation(fields: [createdBy], references: [id])
+}
+
+// Module 3.3: IT Prefect Activities (for dashboard)
+model Activity {
+  id          String   @id @default(cuid())
+  type        String   // meeting, training, system, announcement
+  title       String
+  description String
+  status      String   @default("new") // completed, new, in-progress
+  priority    String   @default("medium") // high, medium, low
+  assignedTo  String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  assignee    User?    @relation("AssignedActivities", fields: [assignedTo], references: [id])
+  creator     User?    @relation("CreatedActivities", fields: [createdBy], references: [id])
+}
+
+// Module 3.4: IT Prefect Tasks
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  priority    String   @default("medium") // high, medium, low
+  status      String   @default("pending") // pending, in-progress, completed
+  assignedTo  String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  assignee    User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  creator     User?    @relation("CreatedTasks", fields: [createdBy], references: [id])
+}
+
+// Module 3.5: Training Video Library
+model TrainingVideo {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  videoUrl    String
+  category    String
+  duration    Int?     // in minutes
+  isPublic    Boolean  @default(false) // visible to all students
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  creator     User?    @relation(fields: [createdBy], references: [id])
+}
