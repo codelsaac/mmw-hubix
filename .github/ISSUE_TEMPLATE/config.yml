@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: GitHub Discussions
-    url: https://github.com/codelsaac/mmw-hubix/discussions
-    about: Ask questions and discuss ideas with the community
-  - name: School IT Support
-    url: mailto:itprefect@cccmmw.edu.hk
-    about: Contact the IT Prefect team for school-specific issues
