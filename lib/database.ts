@@ -337,8 +337,23 @@ export const TaskDB = {
 // ==========================================
 
 export const InternalEventDB = {
-  // Get all internal events
-  async getInternalEvents() {
+  // Get internal events for a specific user (private to each user)
+  async getInternalEvents(userId?: string) {
+    const whereClause = userId ? { createdBy: userId } : {}
+    
+    return await prisma.internalEvent.findMany({
+      where: whereClause,
+      include: {
+        creator: {
+          select: { name: true, email: true }
+        }
+      },
+      orderBy: { startTime: 'asc' }
+    })
+  },
+
+  // Get all internal events (admin only - for management purposes)
+  async getAllInternalEvents() {
     return await prisma.internalEvent.findMany({
       include: {
         creator: {

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
 import { InternalEventDB, prisma } from '@/lib/database'
 
-// GET /api/dashboard/internal-events - Get all internal IT Prefect events
+// GET /api/dashboard/internal-events - Get internal events for current user
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -13,7 +13,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const events = await InternalEventDB.getInternalEvents()
+    // For regular IT Prefects: only show their own events
+    // For admins: show all internal events (for management purposes)
+    const events = session.user.role === 'admin' 
+      ? await InternalEventDB.getAllInternalEvents()
+      : await InternalEventDB.getInternalEvents(session.user.id)
+    
     return NextResponse.json(events)
   } catch (error) {
     console.error('Error fetching internal events:', error)

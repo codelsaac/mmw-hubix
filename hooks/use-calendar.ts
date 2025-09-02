@@ -49,32 +49,30 @@ export function useCalendar() {
         }))
       }
 
-      // Only load public events if user is admin
-      // Regular IT Prefects should only see internal events
+      // Load public events (shared between all accounts)
+      // All authenticated users can see public events
       let publicEvents: CalendarEvent[] = []
-      if (user?.role === 'admin') {
-        const publicResponse = await fetch('/api/admin/calendar')
-        
-        if (publicResponse.ok) {
-          const data = await publicResponse.json()
+      const publicResponse = await fetch('/api/admin/calendar')
+      
+      if (publicResponse.ok) {
+        const data = await publicResponse.json()
+        publicEvents = data.map((event: any) => ({
+          ...event,
+          startTime: new Date(event.startTime),
+          endTime: new Date(event.endTime),
+          isInternal: false
+        }))
+      } else if (publicResponse.status !== 401) {
+        // If not unauthorized, try public endpoint
+        const fallbackResponse = await fetch('/api/public/calendar')
+        if (fallbackResponse.ok) {
+          const data = await fallbackResponse.json()
           publicEvents = data.map((event: any) => ({
             ...event,
             startTime: new Date(event.startTime),
             endTime: new Date(event.endTime),
             isInternal: false
           }))
-        } else if (publicResponse.status !== 401) {
-          // If not unauthorized, try public endpoint
-          const fallbackResponse = await fetch('/api/public/calendar')
-          if (fallbackResponse.ok) {
-            const data = await fallbackResponse.json()
-            publicEvents = data.map((event: any) => ({
-              ...event,
-              startTime: new Date(event.startTime),
-              endTime: new Date(event.endTime),
-              isInternal: false
-            }))
-          }
         }
       }
 

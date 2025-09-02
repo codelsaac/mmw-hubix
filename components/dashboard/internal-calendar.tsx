@@ -386,7 +386,11 @@ export function InternalCalendar() {
                           <div
                             className={`w-3 h-3 rounded-full ${eventTypes[event.eventType as keyof typeof eventTypes]?.color || 'bg-gray-500'} mt-1`}
                           />
-                          {!event.isInternal && <Globe className="w-3 h-3 text-blue-600" title="Public Event" />}
+                          {event.isInternal ? (
+                            <div className="w-3 h-3 rounded-full bg-gray-400" title="Private Event (Only visible to you)" />
+                          ) : (
+                            <Globe className="w-3 h-3 text-blue-600" title="Public Event (Shared with all users)" />
+                          )}
                         </div>
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center justify-between">
@@ -395,8 +399,10 @@ export function InternalCalendar() {
                               <Badge variant="outline" className="text-xs">
                                 {eventTypes[event.eventType as keyof typeof eventTypes]?.label || 'General'}
                               </Badge>
-                              {!event.isInternal && (
-                                <Badge variant="secondary" className="text-xs">Public</Badge>
+                              {event.isInternal ? (
+                                <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">Private</Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">Public</Badge>
                               )}
                             </div>
                           </div>
@@ -460,7 +466,11 @@ export function InternalCalendar() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   Event Details
-                  {!selectedEvent.isInternal && <Globe className="w-4 h-4 text-blue-600" title="Public Event" />}
+                  {selectedEvent.isInternal ? (
+                    <div className="w-4 h-4 rounded-full bg-gray-400" title="Private Event (Only visible to you)" />
+                  ) : (
+                    <Globe className="w-4 h-4 text-blue-600" title="Public Event (Shared with all users)" />
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -507,9 +517,13 @@ export function InternalCalendar() {
                     <CheckCircle2 className="w-3 h-3 mr-2" />
                     Join Event
                   </Button>
-                  {!selectedEvent.isInternal && (
+                  {selectedEvent.isInternal ? (
                     <div className="text-xs text-center text-muted-foreground">
-                      This is a public event visible to all students
+                      This is a private event only visible to you
+                    </div>
+                  ) : (
+                    <div className="text-xs text-center text-muted-foreground">
+                      This is a public event visible to all users
                     </div>
                   )}
                 </div>
