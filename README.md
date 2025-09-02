@@ -23,7 +23,7 @@
 
 1. **克隆專案**
    ```bash
-   git clone https://github.com/your-org/mmw-hubix.git
+   git clone https://github.com/codelsaac/mmw-hubix.git
    cd mmw-hubix
    ```
 
@@ -231,9 +231,9 @@ export const siteConfig = {
 
 如有問題或建議，請：
 
-- 提交 [Issue](https://github.com/your-org/mmw-hubix/issues)
+- 提交 [Issue](https://github.com/codelsaac/mmw-hubix/issues)
 - 聯繫開發團隊
-- 查看專案 [Wiki](https://github.com/your-org/mmw-hubix/wiki)
+- 查看專案 [Wiki](https://github.com/codelsaac/mmw-hubix/wiki)
 
 ## 📄 授權
 
