@@ -227,14 +227,6 @@ export const siteConfig = {
 4. 推送分支：`git push origin feature/new-feature`
 5. 提交 Pull Request
 
-## 📞 支援
-
-如有問題或建議，請：
-
-- 提交 [Issue](https://github.com/codelsaac/mmw-hubix/issues)
-- 聯繫開發團隊
-- 查看專案 [Wiki](https://github.com/codelsaac/mmw-hubix/wiki)
-
 ## 📄 授權
 
 本專案採用 MIT 授權條款 - 查看 [LICENSE](LICENSE) 文件了解詳情。
