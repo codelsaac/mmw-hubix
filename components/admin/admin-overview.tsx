@@ -1,108 +1,131 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield } from "lucide-react"
+import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield, Link, Video } from "lucide-react"
 import NextLink from "next/link"
+import { useEffect, useState } from "react"
 
-const adminStats = [
-  {
-    title: "Resource Links",
-    value: "36",
-    description: "Active homepage links",
-    icon: PlayCircle, // Renamed from Link to avoid conflict
-    trend: "+3 this week",
-    href: "/admin/resources",
-  },
-  {
-    title: "Announcements",
-    value: "12",
-    description: "Published club events",
-    icon: FileText,
-    trend: "+2 pending approval",
-    href: "/admin/announcements",
-  },
-  {
-    title: "Team Members",
-    value: "15",
-    description: "Active IT Prefects",
-    icon: Users,
-    trend: "+1 new member",
-    href: "/admin/users",
-  },
-  {
-    title: "Training Videos",
-    value: "24",
-    description: "Available resources",
-    icon: Calendar, // Renamed from Link to avoid conflict
-    trend: "98% completion rate",
-    href: "/dashboard/training",
-  },
-]
+interface AdminStats {
+  announcements: {
+    total: number
+    published: number
+    pending: number
+  }
+  resources: {
+    total: number
+    active: number
+  }
+  users: {
+    total: number
+    admins: number
+    prefects: number
+  }
+  trainingVideos: {
+    total: number
+    active: number
+  }
+}
 
-const recentActivity = [
-  {
-    id: 1,
-    type: "resource",
-    title: "New Resource Added",
-    description: "Library System link updated",
-    user: "Sarah Chen",
-    time: "2 hours ago",
-    status: "completed",
-  },
-  {
-    id: 2,
-    type: "announcement",
-    title: "Event Published",
-    description: "Computer Club Workshop scheduled",
-    user: "Marcus Johnson",
-    time: "4 hours ago",
-    status: "published",
-  },
-  {
-    id: 3,
-    type: "user",
-    title: "Role Updated",
-    description: "Alex Thompson promoted to Senior Prefect",
-    user: "Sarah Chen",
-    time: "1 day ago",
-    status: "completed",
-  },
-  {
-    id: 4,
-    type: "system",
-    title: "Backup Completed",
-    description: "Weekly system backup successful",
-    user: "System",
-    time: "2 days ago",
-    status: "automated",
-  },
-]
-
-const pendingTasks = [
-  {
-    id: 1,
-    title: "Review Pending Announcements",
-    description: "3 club events awaiting approval",
-    priority: "high",
-    dueDate: "Today",
-  },
-  {
-    id: 2,
-    title: "Update Training Materials",
-    description: "New security protocols documentation",
-    priority: "medium",
-    dueDate: "This Week",
-  },
-  {
-    id: 3,
-    title: "User Access Review",
-    description: "Quarterly access permissions audit",
-    priority: "medium",
-    dueDate: "Next Week",
-  },
-]
+interface RecentActivity {
+  id: string
+  type: string
+  title: string
+  description: string
+  user: string
+  time: string
+  status: string
+}
 
 export function AdminOverview() {
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsResponse, activityResponse] = await Promise.all([
+          fetch('/api/admin/stats'),
+          fetch('/api/admin/recent-activity')
+        ])
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json()
+          setStats(statsData)
+        }
+
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json()
+          setRecentActivity(activityData)
+        }
+      } catch (error) {
+        console.error('Error fetching admin data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Unable to load admin data</CardTitle>
+            <CardDescription>Please try refreshing the page</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
+  const adminStats = [
+    {
+      title: "Resource Links",
+      value: stats.resources.total.toString(),
+      description: "Total resources",
+      icon: Link,
+      trend: `${stats.resources.active} active`,
+      href: "/admin/resources",
+    },
+    {
+      title: "Announcements",
+      value: stats.announcements.total.toString(),
+      description: "Total announcements",
+      icon: FileText,
+      trend: `${stats.announcements.pending} pending`,
+      href: "/admin/announcements",
+    },
+    {
+      title: "Team Members",
+      value: stats.users.total.toString(),
+      description: "IT Prefect members",
+      icon: Users,
+      trend: `${stats.users.admins} admins`,
+      href: "/admin/users",
+    },
+    {
+      title: "Training Videos",
+      value: stats.trainingVideos.total.toString(),
+      description: "Available videos",
+      icon: Video,
+      trend: `${stats.trainingVideos.active} active`,
+      href: "/dashboard/training",
+    },
+  ]
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -134,18 +157,18 @@ export function AdminOverview() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5" />
-              Recent Admin Activity
-            </CardTitle>
-            <CardDescription>Latest content management actions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recentActivity.map((activity) => (
+      {/* Recent Activity */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Recent Admin Activity
+          </CardTitle>
+          <CardDescription>Latest content management actions</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-primary rounded-full mt-2" />
                 <div className="flex-1 space-y-1">
@@ -170,40 +193,14 @@ export function AdminOverview() {
                   </p>
                 </div>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Pending Tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              Pending Tasks
-            </CardTitle>
-            <CardDescription>Items requiring admin attention</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {pendingTasks.map((task) => (
-              <div key={task.id} className="flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <p className="text-sm font-medium">{task.title}</p>
-                  <p className="text-xs text-muted-foreground">{task.description}</p>
-                  <p className="text-xs text-muted-foreground">Due: {task.dueDate}</p>
-                </div>
-                <Badge
-                  variant={
-                    task.priority === "high" ? "destructive" : task.priority === "medium" ? "default" : "secondary"
-                  }
-                  className="text-xs ml-2"
-                >
-                  {task.priority}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No recent activity to display
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card>
@@ -212,10 +209,10 @@ export function AdminOverview() {
           <CardDescription>Common administrative tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <NextLink href="/admin/resources">
               <Button variant="outline" className="w-full justify-start bg-transparent">
-                <PlayCircle className="w-4 h-4 mr-2" />
+                <Link className="w-4 h-4 mr-2" />
                 Manage Resources
               </Button>
             </NextLink>
@@ -241,12 +238,6 @@ export function AdminOverview() {
               <Button variant="outline" className="w-full justify-start bg-transparent">
                 <Activity className="w-4 h-4 mr-2" />
                 Analytics
-              </Button>
-            </NextLink>
-            <NextLink href="/admin/logs">
-              <Button variant="outline" className="w-full justify-start bg-transparent">
-                <Calendar className="w-4 h-4 mr-2" />
-                System Logs
               </Button>
             </NextLink>
           </div>
