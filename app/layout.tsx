@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { cn } from "@/lib/utils"
 import { Header } from "@/components/header";
 import { SessionProvider } from "@/components/auth/session-provider";
+import { DiscreteAdminLogin } from "@/components/discrete-admin-login";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const sourceSans = Source_Sans_3({
@@ -61,6 +62,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <div className="relative flex min-h-screen flex-col bg-background">
             <Header />
             <main className="flex-1">{children}</main>
+            <DiscreteAdminLogin />
           </div>
         </SessionProvider>
       </body>

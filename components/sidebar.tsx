@@ -8,13 +8,11 @@ import { Badge } from "@/components/ui/badge"
 import { MessageCircle, LogIn, HelpCircle, Settings, ExternalLink, X, Shield } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { LoginDialog } from "@/components/auth/login-dialog"
-import { AdminLoginDialog } from "@/components/auth/admin-login-dialog"
 import { UserMenu } from "@/components/auth/user-menu"
 import { AIChat } from "@/components/ai-chat"
 
 export function Sidebar() {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false)
-  const [adminLoginDialogOpen, setAdminLoginDialogOpen] = useState(false)
   const [aiChatOpen, setAiChatOpen] = useState(false)
   const { user, isAuthenticated } = useAuth()
 
@@ -113,23 +111,13 @@ export function Sidebar() {
               <Settings className="w-4 h-4 mr-2" />
               Report Issue
             </Button>
-            {isAuthenticated && user?.role === "admin" ? (
+            {isAuthenticated && user?.role === "admin" && (
               <Link href="/admin">
                 <Button variant="ghost" size="sm" className="w-full justify-start">
                   <Shield className="w-4 h-4 mr-2" />
                   Admin Panel
                 </Button>
               </Link>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => setAdminLoginDialogOpen(true)}
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Admin Login
-              </Button>
             )}
           </CardContent>
         </Card>
@@ -138,7 +126,6 @@ export function Sidebar() {
       </aside>
 
       <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-      <AdminLoginDialog open={adminLoginDialogOpen} onOpenChange={setAdminLoginDialogOpen} />
     </>
   )
 }
