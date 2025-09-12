@@ -46,18 +46,23 @@ const getResourceIcon = (name: string, category: string) => {
 export function ResourceHub() {
   const [resources, setResources] = useState<Resource[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    const loadedResources = resourceService.getResources()
-    setResources(loadedResources)
+    setIsHydrated(true)
+    
+    if (typeof window !== 'undefined') {
+      const loadedResources = resourceService.getResources()
+      setResources(loadedResources)
 
-    const handleResourcesUpdated = (event: CustomEvent) => {
-      setResources(event.detail)
-    }
+      const handleResourcesUpdated = (event: CustomEvent) => {
+        setResources(event.detail)
+      }
 
-    window.addEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
-    return () => {
-      window.removeEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
+      window.addEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
+      return () => {
+        window.removeEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
+      }
     }
   }, [])
 
@@ -80,12 +85,42 @@ export function ResourceHub() {
   )
 
   const handleResourceClick = (resource: Resource) => {
-    resourceService.updateResource(resource.id, { clicks: resource.clicks + 1 })
-    window.open(resource.url, "_blank", "noopener,noreferrer")
+    if (typeof window !== 'undefined') {
+      resourceService.updateResource(resource.id, { clicks: resource.clicks + 1 })
+      window.open(resource.url, "_blank", "noopener,noreferrer")
+    }
+  }
+
+  // Don't render content until hydrated to prevent mismatch
+  if (!isHydrated) {
+    return (
+      <section className="space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-serif font-bold text-foreground">Resource Hub</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Quick access to all essential school resources, tools, and information in one centralized location.
+          </p>
+        </div>
+        <div className="max-w-md mx-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search resources..."
+              className="pl-10"
+              value=""
+              disabled
+            />
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading resources...</p>
+        </div>
+      </section>
+    )
   }
 
   return (
-    <section className="space-y-6" suppressHydrationWarning>
+    <section className="space-y-6">
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-serif font-bold text-foreground">Resource Hub</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">

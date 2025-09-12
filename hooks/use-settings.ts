@@ -10,24 +10,31 @@ export function useSettings() {
   const [settings, setSettings] = useState<Settings>({
     isMaintenanceMode: false
   })
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Load settings from localStorage on mount
   useEffect(() => {
-    const savedSettings = localStorage.getItem('app-settings')
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings)
-        setSettings(parsed)
-      } catch (error) {
-        console.error('Failed to parse saved settings:', error)
+    setIsHydrated(true)
+    
+    if (typeof window !== 'undefined') {
+      const savedSettings = localStorage.getItem('app-settings')
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings)
+          setSettings(parsed)
+        } catch (error) {
+          console.error('Failed to parse saved settings:', error)
+        }
       }
     }
   }, [])
 
-  // Save settings to localStorage whenever they change
+  // Save settings to localStorage whenever they change (only after hydration)
   useEffect(() => {
-    localStorage.setItem('app-settings', JSON.stringify(settings))
-  }, [settings])
+    if (isHydrated && typeof window !== 'undefined') {
+      localStorage.setItem('app-settings', JSON.stringify(settings))
+    }
+  }, [settings, isHydrated])
 
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }))
@@ -35,6 +42,7 @@ export function useSettings() {
 
   return {
     ...settings,
-    updateSettings
+    updateSettings,
+    isHydrated
   }
 }
