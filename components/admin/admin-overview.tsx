@@ -1,43 +1,51 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield } from "lucide-react"
 import NextLink from "next/link"
 
-const adminStats = [
-  {
-    title: "Resource Links",
-    value: "36",
-    description: "Active homepage links",
-    icon: PlayCircle, // Renamed from Link to avoid conflict
-    trend: "+3 this week",
-    href: "/admin/resources",
-  },
-  {
-    title: "Announcements",
-    value: "12",
-    description: "Published club events",
-    icon: FileText,
-    trend: "+2 pending approval",
-    href: "/admin/announcements",
-  },
-  {
-    title: "Team Members",
-    value: "15",
-    description: "Active IT Prefects",
-    icon: Users,
-    trend: "+1 new member",
-    href: "/admin/users",
-  },
-  {
-    title: "Training Videos",
-    value: "24",
-    description: "Available resources",
-    icon: Calendar, // Renamed from Link to avoid conflict
-    trend: "98% completion rate",
-    href: "/dashboard/training",
-  },
-]
+import { useTrainingVideos } from "@/hooks/use-training-videos"
+
+const useAdminStats = () => {
+  const { videos } = useTrainingVideos()
+  
+  return [
+    {
+      title: "Resource Links",
+      value: "0",
+      description: "Active homepage links",
+      icon: PlayCircle,
+      trend: "No links configured",
+      href: "/admin/resources",
+    },
+    {
+      title: "Announcements",
+      value: "0",
+      description: "Published club events",
+      icon: FileText,
+      trend: "No announcements",
+      href: "/admin/announcements",
+    },
+    {
+      title: "Team Members",
+      value: "6",
+      description: "Active IT Prefects",
+      icon: Users,
+      trend: "Demo accounts active",
+      href: "/admin/users",
+    },
+    {
+      title: "Training Videos",
+      value: videos.length.toString(),
+      description: "Available resources",
+      icon: Calendar,
+      trend: videos.length > 0 ? `${videos.length} videos uploaded` : "No videos uploaded",
+      href: "/dashboard/training",
+    },
+  ]
+}
 
 const recentActivity = [
   {
@@ -103,6 +111,8 @@ const pendingTasks = [
 ]
 
 export function AdminOverview() {
+  const adminStats = useAdminStats()
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -117,7 +127,7 @@ export function AdminOverview() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {adminStats.map((stat) => (
+        {adminStats.map((stat: any) => (
           <NextLink key={stat.title} href={stat.href}>
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

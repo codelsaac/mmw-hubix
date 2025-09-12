@@ -45,7 +45,7 @@ export function ProtectedRoute({ children, requiredRole = "prefect" }: Protected
     )
   }
 
-  if (requiredRole === "admin" && user.role !== "admin") {
+  if (requiredRole === "admin" && user.role !== "ADMIN") {
     return (
       <div className="flex items-center justify-center min-h-[400px] p-6">
         <Card className="w-full max-w-md">

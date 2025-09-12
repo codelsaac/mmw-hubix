@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   PlayCircle,
   Search,
@@ -34,6 +35,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { useTrainingVideos } from "@/hooks/use-training-videos"
+import { VideoPlayer } from "@/components/video-player"
 
 const categories = [
   { id: "all", name: "All Videos", icon: BookOpen, count: 24 },
@@ -64,40 +66,96 @@ export function TrainingLibrary() {
     updateViews(video.id)
   }
 
-  const handleUploadVideo = (formData: FormData) => {
+  const handleUploadVideo = async (formData: FormData) => {
     const title = formData.get("title") as string
     const description = formData.get("description") as string
     const category = formData.get("category") as string
     const instructor = formData.get("instructor") as string
-    const youtubeUrl = formData.get("youtubeUrl") as string
+    const difficulty = formData.get("difficulty") as string
+    const videoUrl = formData.get("videoUrl") as string
 
-    const getYouTubeVideoId = (url: string) => {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-      const match = url.match(regExp)
-      return match && match[2].length === 11 ? match[2] : null
-    }
-
-    const videoId = getYouTubeVideoId(youtubeUrl)
-    if (!videoId) {
-      alert("Please enter a valid YouTube URL")
+    if (!title || !category || !difficulty || !videoUrl) {
+      alert("請填寫必填欄位：標題、類別、難度和影片連結")
       return
     }
 
-    const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-    const videoUrl = `https://www.youtube.com/embed/${videoId}`
+    const processVideoUrl = (url: string) => {
+      // YouTube URL processing
+      const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+      const youtubeMatch = url.match(youtubeRegExp)
+      
+      if (youtubeMatch && youtubeMatch[2].length === 11) {
+        const videoId = youtubeMatch[2]
+        return {
+          type: 'youtube',
+          embedUrl: `https://www.youtube.com/embed/${videoId}`,
+          thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+        }
+      }
+
+      // Google Drive URL processing
+      const driveRegExp = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
+      const driveMatch = url.match(driveRegExp)
+      
+      if (driveMatch) {
+        const fileId = driveMatch[1]
+        return {
+          type: 'googledrive',
+          embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+          thumbnail: "/placeholder.svg?height=128&width=320&text=Google+Drive+Video"
+        }
+      }
+
+      // Direct video URL (MP4, etc.)
+      if (url.match(/\.(mp4|webm|ogg|avi|mov)(\?.*)?$/i)) {
+        return {
+          type: 'direct',
+          embedUrl: url,
+          thumbnail: "/placeholder.svg?height=128&width=320&text=Video+File"
+        }
+      }
+
+      return null
+    }
+
+    const processedVideo = processVideoUrl(videoUrl)
+    
+    if (!processedVideo) {
+      alert("Please enter a valid video URL (YouTube, Google Drive, or direct video file)")
+      return
+    }
 
     const newVideo = addVideo({
       title,
       description,
       category,
       instructor: instructor || "IT Prefect",
-      duration: "-- min", // Would be fetched from YouTube API in real implementation
-      thumbnail,
-      videoUrl,
+      difficulty: difficulty || "Beginner",
+      duration: "-- min",
+      thumbnail: processedVideo.thumbnail,
+      videoUrl: processedVideo.embedUrl,
     })
 
-    console.log("[v0] YouTube video added to library:", newVideo)
+    console.log(`[v0] ${processedVideo.type} video added to library:`, newVideo)
     setShowUploadDialog(false)
+  }
+
+  const getVideoDuration = (file: File): Promise<number | null> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src)
+        resolve(video.duration)
+      }
+      
+      video.onerror = () => {
+        resolve(null)
+      }
+      
+      video.src = URL.createObjectURL(file)
+    })
   }
 
   const handleDeleteVideo = (videoId: number, e: React.MouseEvent) => {
@@ -133,16 +191,16 @@ export function TrainingLibrary() {
                 Upload Video
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Upload Training Video</DialogTitle>
                 <DialogDescription>Add a new training video to the library</DialogDescription>
               </DialogHeader>
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
                   const formData = new FormData(e.currentTarget)
-                  handleUploadVideo(formData)
+                  await handleUploadVideo(formData)
                 }}
                 className="space-y-4"
               >
@@ -154,32 +212,60 @@ export function TrainingLibrary() {
                   <Label htmlFor="description">Description</Label>
                   <Textarea id="description" name="description" placeholder="Describe the video content" />
                 </div>
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select name="category" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="basics">IT Basics</SelectItem>
-                      <SelectItem value="security">Security</SelectItem>
-                      <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select name="category" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="basics">IT Basics</SelectItem>
+                        <SelectItem value="security">Security</SelectItem>
+                        <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="difficulty">Difficulty</Label>
+                    <Select name="difficulty" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Beginner">Beginner</SelectItem>
+                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                        <SelectItem value="Advanced">Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div>
-                  <Label htmlFor="youtubeUrl">YouTube URL</Label>
+                  <Label htmlFor="instructor">Instructor (Optional)</Label>
+                  <Input id="instructor" name="instructor" placeholder="Enter instructor name" />
+                </div>
+                
+                <div>
+                  <Label htmlFor="videoUrl">Video URL</Label>
                   <Input
-                    id="youtubeUrl"
-                    name="youtubeUrl"
+                    id="videoUrl"
+                    name="videoUrl"
                     type="url"
-                    placeholder="https://www.youtube.com/watch?v=..."
+                    placeholder="YouTube, Google Drive, or direct video URL..."
                     required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Supports YouTube, Google Drive, and direct video file links
+                  </p>
                 </div>
+                
                 <div className="flex gap-2">
-                  <Button type="submit" className="flex-1">
-                    Upload Video
+                  <Button 
+                    type="submit" 
+                    className="flex-1"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Add Video
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setShowUploadDialog(false)}>
                     Cancel
@@ -360,23 +446,12 @@ export function TrainingLibrary() {
             </div>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="aspect-video bg-black rounded-lg flex items-center justify-center">
-              {selectedVideo?.videoUrl ? (
-                <iframe
-                  src={selectedVideo.videoUrl}
-                  className="w-full h-full rounded-lg"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={selectedVideo.title}
-                />
-              ) : (
-                <div className="text-center text-white">
-                  <PlayCircle className="w-16 h-16 mx-auto mb-4" />
-                  <p className="text-lg font-medium">Video Player</p>
-                  <p className="text-sm opacity-75">Playing: {selectedVideo?.title}</p>
-                  <p className="text-xs opacity-50 mt-2">Duration: {selectedVideo?.duration}</p>
-                </div>
-              )}
+            <div className="aspect-video bg-black rounded-lg">
+              <VideoPlayer 
+                videoUrl={selectedVideo?.videoUrl}
+                title={selectedVideo?.title}
+                className="w-full h-full"
+              />
             </div>
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <div className="flex items-center gap-1">

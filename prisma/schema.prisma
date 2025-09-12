@@ -40,15 +40,18 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// User model for IT Prefects
+// User model for IT Prefects with enhanced role system
 model User {
   id                  String    @id @default(cuid())
   name                String?
   email               String?   @unique
   emailVerified       DateTime?
   image               String?
-  role                String    @default("member") // 'member' or 'admin'
+  role                UserRole  @default(IT_PREFECT) // ADMIN, HELPER, IT_PREFECT
   department          String?   // IT, Admin, Student, etc.
+  permissions         String?   // JSON string of specific permissions
+  isActive            Boolean   @default(true)
+  lastLoginAt         DateTime?
   accounts            Account[]
   sessions            Session[]
   
@@ -73,6 +76,13 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Enum for user roles
+enum UserRole {
+  ADMIN      // Full system access - can manage entire website and IT Perfect system
+  HELPER     // IT Perfect system management only - can manage IT Perfect system but not website admin
+  IT_PREFECT // View only - can only view training videos and resources
 }
 
 // ------------------

@@ -8,6 +8,7 @@ import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/icons"
 import { Badge } from "@/components/ui/badge"
+import { RoleBasedNav } from "@/components/role-based-nav"
 
 export function MainNav() {
   const pathname = usePathname()
@@ -20,20 +21,7 @@ export function MainNav() {
           {siteConfig.name}
         </span>
       </Link>
-      <nav className="flex items-center gap-6 text-sm">
-        {siteConfig.mainNav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "transition-colors hover:text-foreground/80",
-              pathname === item.href ? "text-foreground" : "text-foreground/60"
-            )}
-          >
-            {item.title}
-          </Link>
-        ))}
-      </nav>
+      <RoleBasedNav />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-# MMW Hubix - Project Rules & Guidelines
+## MMW Hubix - Project Rules & Guidelines
 
 ## 🤖 AI Assistant Rules
 

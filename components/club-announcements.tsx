@@ -13,24 +13,24 @@ export function ClubAnnouncements() {
 
   if (loading) {
     return (
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
+      <section className="space-y-6" suppressHydrationWarning>
+        <div className="flex items-center justify-between" suppressHydrationWarning>
+          <div suppressHydrationWarning>
             <h2 className="text-2xl font-serif font-bold text-foreground">Club Announcements</h2>
             <p className="text-muted-foreground">
               Stay updated with the latest events and activities from school clubs
             </p>
           </div>
         </div>
-        <div className="text-center py-8 text-muted-foreground">Loading announcements...</div>
+        <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>Loading announcements...</div>
       </section>
     )
   }
 
   return (
-    <section className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+    <section className="space-y-6" suppressHydrationWarning>
+      <div className="flex items-center justify-between" suppressHydrationWarning>
+        <div suppressHydrationWarning>
           <h2 className="text-2xl font-serif font-bold text-foreground">Club Announcements</h2>
           <p className="text-muted-foreground">Stay updated with the latest events and activities from school clubs</p>
         </div>
@@ -40,16 +40,16 @@ export function ClubAnnouncements() {
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4" suppressHydrationWarning>
         {activeAnnouncements.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">No active announcements at the moment.</div>
+          <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>No active announcements at the moment.</div>
         ) : (
           activeAnnouncements.map((announcement) => (
-            <Card key={announcement.id} className="hover:shadow-md transition-shadow">
+            <Card key={announcement.id} className="hover:shadow-md transition-shadow" suppressHydrationWarning>
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                <div className="flex items-start justify-between" suppressHydrationWarning>
+                  <div className="space-y-1" suppressHydrationWarning>
+                    <div className="flex items-center gap-2" suppressHydrationWarning>
                       <Badge variant="secondary" className="text-xs">
                         {announcement.club}
                       </Badge>
@@ -64,30 +64,31 @@ export function ClubAnnouncements() {
               <CardContent className="space-y-4">
                 <CardDescription className="text-sm leading-relaxed">{announcement.description}</CardDescription>
 
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground" suppressHydrationWarning>
+                  <div className="flex items-center gap-1" suppressHydrationWarning>
                     <Calendar className="w-4 h-4" />
-                    <span>
+                    <span suppressHydrationWarning>
                       {new Date(announcement.date).toLocaleDateString()} at {announcement.time}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" suppressHydrationWarning>
                     <MapPin className="w-4 h-4" />
                     <span>{announcement.location}</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" suppressHydrationWarning>
                     <Users className="w-4 h-4" />
-                    <span>
+                    <span suppressHydrationWarning>
                       {announcement.attendees}/{announcement.maxAttendees} attending
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <div className="w-full bg-muted rounded-full h-2">
+                <div className="flex items-center justify-between pt-2" suppressHydrationWarning>
+                  <div className="w-full bg-muted rounded-full h-2" suppressHydrationWarning>
                     <div
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{ width: `${(announcement.attendees / announcement.maxAttendees) * 100}%` }}
+                      suppressHydrationWarning
                     />
                   </div>
                   <Button

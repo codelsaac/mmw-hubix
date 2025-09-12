@@ -1,17 +1,26 @@
 "use client"
 
 import { signIn, signOut } from "next-auth/react"
+import { UserRole } from "@/lib/permissions"
 
 export class AuthService {
   private static instance: AuthService | null = null
   
-  // Admin passwords for demo purposes
-  private readonly ADMIN_PASSWORDS = ["admin123", "mmw-admin-2025"]
-  
-  // Demo user accounts
+  // Enhanced user accounts with role-based access control
   private readonly DEMO_ACCOUNTS = [
-    { email: "admin@cccmmw.edu.hk", password: "mmw2025", role: "admin" },
-    { email: "itprefect@cccmmw.edu.hk", password: "prefect123", role: "user" }
+    // Admin accounts - Full system access
+    { email: "admin@cccmmw.edu.hk", password: "mmw2025", role: UserRole.ADMIN, name: "系統管理員" },
+    { email: "admin@cccmmw.edu.hk", password: "admin123", role: UserRole.ADMIN, name: "系統管理員" },
+    { email: "admin@cccmmw.edu.hk", password: "mmw-admin-2025", role: UserRole.ADMIN, name: "系統管理員" },
+    
+    // Helper accounts - IT Perfect system management only
+    { email: "helper@cccmmw.edu.hk", password: "helper123", role: UserRole.HELPER, name: "IT助手" },
+    { email: "ithelper@cccmmw.edu.hk", password: "ithelper2025", role: UserRole.HELPER, name: "IT系統助手" },
+    
+    // IT Prefect accounts - View only access
+    { email: "itprefect@cccmmw.edu.hk", password: "prefect123", role: UserRole.IT_PREFECT, name: "IT學會成員" },
+    { email: "student1@cccmmw.edu.hk", password: "student123", role: UserRole.IT_PREFECT, name: "張同學" },
+    { email: "student2@cccmmw.edu.hk", password: "student456", role: UserRole.IT_PREFECT, name: "李同學" }
   ]
 
   private constructor() {}
@@ -49,11 +58,10 @@ export class AuthService {
   }
 
   async signInWithPassword(password: string): Promise<void> {
-    // Check if password matches admin passwords and map to admin account
-    let adminAccount = null
-    if (password === "admin123" || password === "mmw-admin-2025") {
-      adminAccount = { email: "admin@cccmmw.edu.hk", password: "mmw2025" }
-    }
+    // Check if password matches any admin account passwords
+    const adminAccount = this.DEMO_ACCOUNTS.find(acc => 
+      acc.role === UserRole.ADMIN && acc.password === password
+    )
 
     if (!adminAccount) {
       throw new Error("Invalid admin password")
@@ -86,10 +94,21 @@ export class AuthService {
   }
 
   isValidAdminPassword(password: string): boolean {
-    return this.ADMIN_PASSWORDS.includes(password)
+    return this.DEMO_ACCOUNTS.some(acc => 
+      acc.role === UserRole.ADMIN && acc.password === password
+    )
   }
 
   isValidAccount(email: string, password: string): boolean {
     return this.DEMO_ACCOUNTS.some(acc => acc.email === email && acc.password === password)
+  }
+
+  getUserRole(email: string, password: string): UserRole | null {
+    const account = this.DEMO_ACCOUNTS.find(acc => acc.email === email && acc.password === password)
+    return account ? account.role : null
+  }
+
+  getAccountByCredentials(email: string, password: string) {
+    return this.DEMO_ACCOUNTS.find(acc => acc.email === email && acc.password === password)
   }
 }

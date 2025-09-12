@@ -1,5 +1,14 @@
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
+
+export interface AuthUser {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  role?: string
+  department?: string
+  description?: string
+}
 
 export function useAuth() {
   const { data: session, status, update } = useSession()
@@ -16,12 +25,18 @@ export function useAuth() {
     }
   }
 
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" })
+  }
+
   return {
-    user: session?.user,
+    user: session?.user as AuthUser | undefined,
     isLoading: status === "loading",
     isAuthenticated: !!session,
-    isAdmin: session?.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL || session?.user?.role === "admin",
-    isITPrefect: session?.user?.department === "IT" || session?.user?.role === "admin",
+    isAdmin: session?.user?.role === "ADMIN",
+    isHelper: session?.user?.role === "HELPER",
+    isITPrefect: session?.user?.role === "IT_PREFECT",
+    signOut: handleSignOut,
     refreshUser
   }
 }
