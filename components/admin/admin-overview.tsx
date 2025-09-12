@@ -6,10 +6,10 @@ import { Badge } from "@/components/ui/badge"
 import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield } from "lucide-react"
 import NextLink from "next/link"
 
-import { useTrainingVideos } from "@/hooks/use-training-videos"
+import { useTraining } from "@/hooks/use-training"
 
 const useAdminStats = () => {
-  const { videos } = useTrainingVideos()
+  const { resources } = useTraining()
   
   return [
     {
@@ -37,11 +37,11 @@ const useAdminStats = () => {
       href: "/admin/users",
     },
     {
-      title: "Training Videos",
-      value: videos.length.toString(),
+      title: "Training Resources",
+      value: resources.length.toString(),
       description: "Available resources",
       icon: Calendar,
-      trend: videos.length > 0 ? `${videos.length} videos uploaded` : "No videos uploaded",
+      trend: resources.length > 0 ? `${resources.length} resources uploaded` : "No resources uploaded",
       href: "/dashboard/training",
     },
   ]
