@@ -60,7 +60,7 @@ model User {
   createdAnnouncements Announcement[]
   createdPublicEvents PublicEvent[]
   createdInternalEvents InternalEvent[]
-  createdTrainingVideos TrainingVideo[]
+  createdTrainingResources TrainingResource[]
   
   // Activity and Task relations
   createdActivities   Activity[] @relation("CreatedActivities")
@@ -194,18 +194,41 @@ model Task {
   creator     User?    @relation("CreatedTasks", fields: [createdBy], references: [id])
 }
 
-// Module 3.5: Training Video Library
-model TrainingVideo {
-  id          String   @id @default(cuid())
+// Module 3.5: Training Resource Library (expanded from videos only)
+model TrainingResource {
+  id          String      @id @default(cuid())
   title       String
   description String?
-  videoUrl    String
-  category    String
-  duration    Int?     // in minutes
-  isPublic    Boolean  @default(false) // visible to all students
-  createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  contentType ResourceContentType
   
-  creator     User?    @relation(fields: [createdBy], references: [id])
+  // Video content fields
+  videoUrl    String?
+  duration    Int?        // in minutes
+  
+  // Text content fields
+  textContent String?     // Rich text/markdown content
+  
+  // File content fields
+  fileName    String?
+  fileUrl     String?
+  fileSize    Int?        // in bytes
+  mimeType    String?
+  
+  category    String
+  difficulty  String?     // Beginner, Intermediate, Advanced
+  instructor  String?
+  views       Int         @default(0)
+  isPublic    Boolean     @default(false) // visible to all students
+  createdBy   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  creator     User?       @relation(fields: [createdBy], references: [id])
+}
+
+// Enum for different types of training content
+enum ResourceContentType {
+  VIDEO     // YouTube, Google Drive, or direct video links
+  TEXT      // Rich text articles, tutorials, notes
+  FILE      // Documents, presentations, PDFs, etc.
 }

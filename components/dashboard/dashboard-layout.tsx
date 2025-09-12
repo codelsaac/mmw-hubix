@@ -20,8 +20,6 @@ import {
   Settings,
   LinkIcon,
   FileText,
-  TrendingUp,
-  Filter,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -37,8 +35,6 @@ const adminNavigation = [
   { name: "Announcements", href: "/admin/announcements", icon: FileText },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Settings", href: "/admin/settings", icon: Settings },
-  { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
-  { name: "Logs", href: "/admin/logs", icon: Filter },
 ]
 
 interface DashboardLayoutProps {
@@ -99,7 +95,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       </Badge>
                     </div>
                   </div>
-                  <UserMenu user={user} />
+                  <UserMenu />
                 </div>
               )}
             </div>

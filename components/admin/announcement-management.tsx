@@ -68,11 +68,11 @@ export function AnnouncementManagement() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-serif font-bold text-foreground">Announcement Management</h2>
-            <p className="text-muted-foreground">Manage club announcements and events</p>
+            <h2 className="text-2xl font-serif font-bold text-foreground">Activity News Management</h2>
+            <p className="text-muted-foreground">Manage club activity news and events</p>
           </div>
         </div>
-        <div className="text-center py-8 text-muted-foreground">Loading announcements...</div>
+        <div className="text-center py-8 text-muted-foreground">Loading activity news...</div>
       </div>
     )
   }
@@ -81,8 +81,8 @@ export function AnnouncementManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-foreground">Announcement Management</h2>
-          <p className="text-muted-foreground">Manage club announcements and events</p>
+          <h2 className="text-2xl font-serif font-bold text-foreground">Activity News Management</h2>
+          <p className="text-muted-foreground">Manage club activity news and events</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -93,7 +93,7 @@ export function AnnouncementManagement() {
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Announcement
+              Add Activity News
             </Button>
           </DialogTrigger>
           <AnnouncementDialog
@@ -112,7 +112,7 @@ export function AnnouncementManagement() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search announcements..."
+            placeholder="Search activity news..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -135,7 +135,7 @@ export function AnnouncementManagement() {
       <div className="space-y-4">
         {filteredAnnouncements.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {searchQuery || selectedStatus !== "all" ? "No announcements match your filters." : "No announcements yet."}
+            {searchQuery || selectedStatus !== "all" ? "No activity news match your filters." : "No activity news yet."}
           </div>
         ) : (
           filteredAnnouncements.map((announcement) => (
@@ -275,9 +275,9 @@ function AnnouncementDialog({
   return (
     <DialogContent className="sm:max-w-2xl">
       <DialogHeader>
-        <DialogTitle>{announcement ? "Edit Announcement" : "Add New Announcement"}</DialogTitle>
+        <DialogTitle>{announcement ? "Edit Activity News" : "Add New Activity News"}</DialogTitle>
         <DialogDescription>
-          {announcement ? "Update the announcement details below." : "Create a new club announcement or event."}
+          {announcement ? "Update the activity news details below." : "Create a new club activity news or event."}
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -393,7 +393,7 @@ function AnnouncementDialog({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">{announcement ? "Update" : "Create"} Announcement</Button>
+          <Button type="submit">{announcement ? "Update" : "Create"} Activity News</Button>
         </DialogFooter>
       </form>
     </DialogContent>

@@ -14,6 +14,7 @@ import { CalendarIcon, Clock, MapPin, Users, Plus, ChevronLeft, ChevronRight, Ch
 import { useCalendar } from "@/hooks/use-calendar"
 import { useDashboard } from "@/hooks/use-dashboard"
 import { useAuth } from "@/hooks/use-auth"
+import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
 const eventTypes = {
   meeting: { color: "bg-blue-500", label: "Meeting" },
@@ -24,6 +25,8 @@ const eventTypes = {
 }
 
 export function InternalCalendar() {
+  const { user, isAdmin } = useAuth()
+  const canManageCalendar = user?.role && PermissionService.hasPermission(user.role as UserRole, Permission.MANAGE_CALENDAR)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
   const [isAddEventOpen, setIsAddEventOpen] = useState(false)
@@ -42,7 +45,6 @@ export function InternalCalendar() {
   
   const { events, loading, error, createInternalEvent, createPublicEvent } = useCalendar()
   const { addActivity } = useDashboard()
-  const { user, isAdmin } = useAuth()
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -194,148 +196,150 @@ export function InternalCalendar() {
           <h2 className="text-2xl font-serif font-bold text-foreground">Internal Calendar</h2>
           <p className="text-muted-foreground">Team meetings, training sessions, and important events</p>
         </div>
-        <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Event
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Add New Event</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="title">Event Title *</Label>
-                <Input
-                  id="title"
-                  value={newEvent.title}
-                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                  placeholder="Enter event title"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+        {canManageCalendar && (
+          <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Event
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Add New Event</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Label htmlFor="title">Event Title *</Label>
                   <Input
-                    id="startDate"
-                    type="date"
-                    value={newEvent.startDate}
-                    onChange={(e) => setNewEvent({ ...newEvent, startDate: e.target.value })}
+                    id="title"
+                    value={newEvent.title}
+                    onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                    placeholder="Enter event title"
                   />
                 </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="startDate">Start Date *</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={newEvent.startDate}
+                      onChange={(e) => setNewEvent({ ...newEvent, startDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="startTime">Start Time *</Label>
+                    <Input
+                      id="startTime"
+                      type="time"
+                      value={newEvent.startTime}
+                      onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="endDate">End Date (optional)</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={newEvent.endDate}
+                      onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })}
+                      placeholder="Same as start date if empty"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="endTime">End Time (optional)</Label>
+                    <Input
+                      id="endTime"
+                      type="time"
+                      value={newEvent.endTime}
+                      onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
+                      placeholder="1 hour duration if empty"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="eventType">Type</Label>
+                    <Select value={newEvent.eventType} onValueChange={(value) => setNewEvent({ ...newEvent, eventType: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="meeting">Meeting</SelectItem>
+                        <SelectItem value="training">Training</SelectItem>
+                        <SelectItem value="maintenance">Maintenance</SelectItem>
+                        <SelectItem value="orientation">Orientation</SelectItem>
+                        <SelectItem value="general">General</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={newEvent.location}
+                      onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                      placeholder="Enter location"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid gap-2">
-                  <Label htmlFor="startTime">Start Time *</Label>
-                  <Input
-                    id="startTime"
-                    type="time"
-                    value={newEvent.startTime}
-                    onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newEvent.description}
+                    onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                    placeholder="Enter event description"
+                    rows={3}
                   />
+                </div>
+
+                {/* Only show public event option for admins */}
+                {isAdmin && (
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="isPublic" 
+                      checked={isCreatePublic}
+                      onChange={(e) => setIsCreatePublic(e.target.checked)}
+                      className="rounded"
+                    />
+                    <label htmlFor="isPublic" className="text-sm font-medium flex items-center gap-2">
+                      <Globe className="w-4 h-4" />
+                      Make this a public event (visible to all students)
+                    </label>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsAddEventOpen(false)} disabled={isSubmitting}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddEvent} disabled={isSubmitting || !newEvent.title || !newEvent.startDate || !newEvent.startTime}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Event
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="endDate">End Date (optional)</Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={newEvent.endDate}
-                    onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })}
-                    placeholder="Same as start date if empty"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="endTime">End Time (optional)</Label>
-                  <Input
-                    id="endTime"
-                    type="time"
-                    value={newEvent.endTime}
-                    onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
-                    placeholder="1 hour duration if empty"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="eventType">Type</Label>
-                  <Select value={newEvent.eventType} onValueChange={(value) => setNewEvent({ ...newEvent, eventType: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="meeting">Meeting</SelectItem>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="orientation">Orientation</SelectItem>
-                      <SelectItem value="general">General</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={newEvent.location}
-                    onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                    placeholder="Enter location"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={newEvent.description}
-                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                  placeholder="Enter event description"
-                  rows={3}
-                />
-              </div>
-
-              {/* Only show public event option for admins */}
-              {isAdmin && (
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="isPublic" 
-                    checked={isCreatePublic}
-                    onChange={(e) => setIsCreatePublic(e.target.checked)}
-                    className="rounded"
-                  />
-                  <label htmlFor="isPublic" className="text-sm font-medium flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Make this a public event (visible to all students)
-                  </label>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsAddEventOpen(false)} disabled={isSubmitting}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddEvent} disabled={isSubmitting || !newEvent.title || !newEvent.startDate || !newEvent.startTime}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Event
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

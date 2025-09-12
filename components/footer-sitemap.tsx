@@ -25,7 +25,7 @@ const sitemapSections: SitemapSection[] = [
         description: "Access learning resources and materials"
       },
       {
-        title: "Announcements",
+        title: "Activity News",
         href: "/announcements",
         description: "Latest school news and updates"
       },
@@ -33,71 +33,6 @@ const sitemapSections: SitemapSection[] = [
         title: "Internal Dashboard",
         href: "/dashboard",
         description: "Staff and student portal"
-      }
-    ]
-  },
-  {
-    title: "Dashboard Features",
-    links: [
-      {
-        title: "Calendar",
-        href: "/dashboard/calendar",
-        description: "School events and schedules"
-      },
-      {
-        title: "Team Information",
-        href: "/dashboard/team",
-        description: "Staff directory and contacts"
-      },
-      {
-        title: "Training Resources",
-        href: "/dashboard/training",
-        description: "Professional development materials"
-      }
-    ]
-  },
-  {
-    title: "Administration",
-    links: [
-      {
-        title: "Admin Portal",
-        href: "/admin",
-        description: "Administrative dashboard"
-      },
-      {
-        title: "Analytics",
-        href: "/admin/analytics",
-        description: "Usage statistics and reports"
-      },
-      {
-        title: "User Management",
-        href: "/admin/users",
-        description: "Manage user accounts and permissions"
-      },
-      {
-        title: "System Settings",
-        href: "/admin/settings",
-        description: "Configure system preferences"
-      }
-    ]
-  },
-  {
-    title: "Resources & Support",
-    links: [
-      {
-        title: "Resource Management",
-        href: "/admin/resources",
-        description: "Manage educational resources"
-      },
-      {
-        title: "System Logs",
-        href: "/admin/logs",
-        description: "System activity and audit logs"
-      },
-      {
-        title: "School Website",
-        href: siteConfig.links.schoolSite,
-        description: "Visit the main school website"
       }
     ]
   }
@@ -162,7 +97,7 @@ export function FooterSitemap() {
               © {new Date().getFullYear()} C.C.C. Mong Man Wai College. All rights reserved.
             </p>
             <p className="mt-1" suppressHydrationWarning>
-              Built with ❤️ by the IT Perfect Team
+              Built with by the IT Perfect Team
             </p>
           </div>
           
@@ -176,15 +111,6 @@ export function FooterSitemap() {
               aria-label="GitHub Repository"
             >
               <Icons.gitHub className="h-5 w-5" />
-            </Link>
-            <Link
-              href={siteConfig.links.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm p-1"
-              aria-label="Twitter Profile"
-            >
-              <Icons.twitter className="h-5 w-5" />
             </Link>
             <Link
               href={siteConfig.links.schoolSite}

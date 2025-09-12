@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { LogIn, Shield, Users, Eye } from "lucide-react"
+import { LogIn, Shield, Users, Eye, UserCheck } from "lucide-react"
 import { UserRole } from "@/lib/permissions"
 
 interface UnifiedLoginDialogProps {
@@ -45,14 +45,14 @@ export function UnifiedLoginDialog({ children }: UnifiedLoginDialogProps) {
       })
 
       if (result?.error) {
-        setError("登入失敗，請檢查您的電子郵件和密碼")
+        setError("Login failed. Please check your email and password.")
       } else {
         setOpen(false)
         setEmail("")
         setPassword("")
       }
     } catch (error) {
-      setError("登入過程中發生錯誤，請稍後再試")
+      setError("An error occurred during login. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -70,42 +70,68 @@ export function UnifiedLoginDialog({ children }: UnifiedLoginDialogProps) {
       })
 
       if (result?.error) {
-        setError("快速登入失敗")
+        setError("Quick login failed")
       } else {
         setOpen(false)
       }
     } catch (error) {
-      setError("登入過程中發生錯誤")
+      setError("Login error occurred")
     } finally {
       setIsLoading(false)
     }
   }
 
-  const demoAccounts = [
+  const guestLogin = async () => {
+    setIsLoading(true)
+    setError("")
+
+    try {
+      const result = await signIn("credentials", {
+        email: "guest@cccmmw.edu.hk",
+        password: "guest123",
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Guest login failed")
+      } else {
+        setOpen(false)
+      }
+    } catch (error) {
+      setError("Guest login error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const adminAccounts = [
     {
       role: UserRole.ADMIN,
-      name: "系統管理員",
+      name: "System Administrator",
       email: "admin@cccmmw.edu.hk",
       password: "mmw2025",
-      description: "完整系統管理權限",
+      description: "Full website and system management",
       icon: Shield,
       variant: "destructive" as const
-    },
+    }
+  ]
+
+  const internalAccounts = [
     {
       role: UserRole.HELPER,
-      name: "IT助手",
+      name: "IT Assistant",
       email: "helper@cccmmw.edu.hk", 
       password: "helper123",
-      description: "IT系統管理權限",
+      description: "IT Perfect system management",
       icon: Users,
       variant: "default" as const
     },
     {
       role: UserRole.IT_PREFECT,
-      name: "IT學會成員",
+      name: "IT Prefect",
       email: "itprefect@cccmmw.edu.hk",
       password: "prefect123", 
-      description: "僅查看權限",
+      description: "View training videos and resources",
       icon: Eye,
       variant: "secondary" as const
     }
@@ -117,61 +143,64 @@ export function UnifiedLoginDialog({ children }: UnifiedLoginDialogProps) {
         {children || (
           <Button variant="outline" size="sm">
             <LogIn className="mr-2 h-4 w-4" />
-            登入
+            Login
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>MMW Hubix 登入</DialogTitle>
+          <DialogTitle>MMW Hubix Access</DialogTitle>
           <DialogDescription>
-            請選擇您的登入方式或使用測試帳戶
+            Choose your access type or login with your credentials
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">帳戶登入</TabsTrigger>
-            <TabsTrigger value="demo">測試帳戶</TabsTrigger>
+        <Tabs defaultValue="guest" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="guest">Guest</TabsTrigger>
+            <TabsTrigger value="internal">Internal System</TabsTrigger>
+            <TabsTrigger value="admin">Admin</TabsTrigger>
+            <TabsTrigger value="login">Manual Login</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="login" className="space-y-4">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">電子郵件</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@cccmmw.edu.hk"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">密碼</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "登入中..." : "登入"}
-              </Button>
-            </form>
+          {/* Guest Access */}
+          <TabsContent value="guest" className="space-y-4">
+            <Card className="text-center">
+              <CardHeader>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <UserCheck className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-lg">Guest Access</CardTitle>
+                </div>
+                <CardDescription>
+                  Browse public content and access training videos and learning materials without logging in.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={guestLogin}
+                  disabled={isLoading}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {isLoading ? "Accessing..." : "Continue as Guest"}
+                </Button>
+              </CardContent>
+            </Card>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
-          <TabsContent value="demo" className="space-y-4">
+          {/* Internal System (IT Perfect) */}
+          <TabsContent value="internal" className="space-y-4">
             <div className="space-y-3">
-              {demoAccounts.map((account) => {
+              <div className="text-center mb-4">
+                <h3 className="font-semibold text-lg">IT Perfect Internal System</h3>
+                <p className="text-sm text-muted-foreground">For IT team members and prefects</p>
+              </div>
+              {internalAccounts.map((account) => {
                 const IconComponent = account.icon
                 return (
                   <Card key={account.email} className="cursor-pointer hover:bg-muted/50 transition-colors">
@@ -197,7 +226,7 @@ export function UnifiedLoginDialog({ children }: UnifiedLoginDialogProps) {
                         onClick={() => quickLogin(account.email, account.password)}
                         disabled={isLoading}
                       >
-                        {isLoading ? "登入中..." : `以${account.name}身份登入`}
+                        {isLoading ? "Logging in..." : `Login as ${account.name}`}
                       </Button>
                     </CardContent>
                   </Card>
@@ -209,6 +238,88 @@ export function UnifiedLoginDialog({ children }: UnifiedLoginDialogProps) {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+          </TabsContent>
+
+          {/* Website Administration */}
+          <TabsContent value="admin" className="space-y-4">
+            <div className="space-y-3">
+              <div className="text-center mb-4">
+                <h3 className="font-semibold text-lg">Website Administration</h3>
+                <p className="text-sm text-muted-foreground">For system administrators only</p>
+              </div>
+              {adminAccounts.map((account) => {
+                const IconComponent = account.icon
+                return (
+                  <Card key={account.email} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <IconComponent className="h-4 w-4" />
+                          <CardTitle className="text-sm">{account.name}</CardTitle>
+                        </div>
+                        <Badge variant={account.variant} className="text-xs">
+                          {account.role}
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-xs">
+                        {account.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => quickLogin(account.email, account.password)}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Logging in..." : `Login as ${account.name}`}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </TabsContent>
+
+          {/* Manual Login */}
+          <TabsContent value="login" className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@cccmmw.edu.hk"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+            </form>
           </TabsContent>
         </Tabs>
       </DialogContent>

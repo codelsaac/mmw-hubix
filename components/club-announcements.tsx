@@ -16,13 +16,13 @@ export function ClubAnnouncements() {
       <section className="space-y-6" suppressHydrationWarning>
         <div className="flex items-center justify-between" suppressHydrationWarning>
           <div suppressHydrationWarning>
-            <h2 className="text-2xl font-serif font-bold text-foreground">Club Announcements</h2>
+            <h2 className="text-2xl font-serif font-bold text-foreground">Activity News</h2>
             <p className="text-muted-foreground">
               Stay updated with the latest events and activities from school clubs
             </p>
           </div>
         </div>
-        <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>Loading announcements...</div>
+        <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>Loading activity news...</div>
       </section>
     )
   }
@@ -31,7 +31,7 @@ export function ClubAnnouncements() {
     <section className="space-y-6" suppressHydrationWarning>
       <div className="flex items-center justify-between" suppressHydrationWarning>
         <div suppressHydrationWarning>
-          <h2 className="text-2xl font-serif font-bold text-foreground">Club Announcements</h2>
+          <h2 className="text-2xl font-serif font-bold text-foreground">Activity News</h2>
           <p className="text-muted-foreground">Stay updated with the latest events and activities from school clubs</p>
         </div>
         <Button variant="outline" size="sm">
@@ -42,7 +42,7 @@ export function ClubAnnouncements() {
 
       <div className="grid gap-4" suppressHydrationWarning>
         {activeAnnouncements.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>No active announcements at the moment.</div>
+          <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>No active activity news at the moment.</div>
         ) : (
           activeAnnouncements.map((announcement) => (
             <Card key={announcement.id} className="hover:shadow-md transition-shadow" suppressHydrationWarning>

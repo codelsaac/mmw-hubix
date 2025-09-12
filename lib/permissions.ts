@@ -1,7 +1,8 @@
 export enum UserRole {
   ADMIN = 'ADMIN',
   HELPER = 'HELPER', 
-  IT_PREFECT = 'IT_PREFECT'
+  IT_PREFECT = 'IT_PREFECT',
+  GUEST = 'GUEST'
 }
 
 export enum Permission {
@@ -70,6 +71,12 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_DASHBOARD,
     Permission.VIEW_CALENDAR,
     Permission.VIEW_TEAM_INFO
+  ],
+  [UserRole.GUEST]: [
+    // Public access with training materials
+    Permission.VIEW_TRAINING_VIDEOS,
+    Permission.VIEW_RESOURCES,
+    Permission.VIEW_DASHBOARD
   ]
 }
 
@@ -140,6 +147,8 @@ export class PermissionService {
         return 'IT Assistant'
       case UserRole.IT_PREFECT:
         return 'IT Prefect'
+      case UserRole.GUEST:
+        return 'Guest User'
       default:
         return 'Unknown Role'
     }
@@ -156,6 +165,8 @@ export class PermissionService {
         return 'Can manage IT Perfect system but cannot access website admin features'
       case UserRole.IT_PREFECT:
         return 'View-only access to training videos and resources'
+      case UserRole.GUEST:
+        return 'Public access to training videos and learning materials'
       default:
         return 'No permission description'
     }

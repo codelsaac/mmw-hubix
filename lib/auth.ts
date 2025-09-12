@@ -8,19 +8,22 @@ export class AuthService {
   
   // Enhanced user accounts with role-based access control
   private readonly DEMO_ACCOUNTS = [
+    // Guest account - Public access with training materials
+    { email: "guest@cccmmw.edu.hk", password: "guest123", role: UserRole.GUEST, name: "Guest User" },
+    
     // Admin accounts - Full system access
-    { email: "admin@cccmmw.edu.hk", password: "mmw2025", role: UserRole.ADMIN, name: "系統管理員" },
-    { email: "admin@cccmmw.edu.hk", password: "admin123", role: UserRole.ADMIN, name: "系統管理員" },
-    { email: "admin@cccmmw.edu.hk", password: "mmw-admin-2025", role: UserRole.ADMIN, name: "系統管理員" },
+    { email: "admin@cccmmw.edu.hk", password: "mmw2025", role: UserRole.ADMIN, name: "System Administrator" },
+    { email: "admin@cccmmw.edu.hk", password: "admin123", role: UserRole.ADMIN, name: "System Administrator" },
+    { email: "admin@cccmmw.edu.hk", password: "mmw-admin-2025", role: UserRole.ADMIN, name: "System Administrator" },
     
     // Helper accounts - IT Perfect system management only
-    { email: "helper@cccmmw.edu.hk", password: "helper123", role: UserRole.HELPER, name: "IT助手" },
-    { email: "ithelper@cccmmw.edu.hk", password: "ithelper2025", role: UserRole.HELPER, name: "IT系統助手" },
+    { email: "helper@cccmmw.edu.hk", password: "helper123", role: UserRole.HELPER, name: "IT Assistant" },
+    { email: "ithelper@cccmmw.edu.hk", password: "ithelper2025", role: UserRole.HELPER, name: "IT System Assistant" },
     
     // IT Prefect accounts - View only access
-    { email: "itprefect@cccmmw.edu.hk", password: "prefect123", role: UserRole.IT_PREFECT, name: "IT學會成員" },
-    { email: "student1@cccmmw.edu.hk", password: "student123", role: UserRole.IT_PREFECT, name: "張同學" },
-    { email: "student2@cccmmw.edu.hk", password: "student456", role: UserRole.IT_PREFECT, name: "李同學" }
+    { email: "itprefect@cccmmw.edu.hk", password: "prefect123", role: UserRole.IT_PREFECT, name: "IT Prefect" },
+    { email: "student1@cccmmw.edu.hk", password: "student123", role: UserRole.IT_PREFECT, name: "Student Zhang" },
+    { email: "student2@cccmmw.edu.hk", password: "student456", role: UserRole.IT_PREFECT, name: "Student Li" }
   ]
 
   private constructor() {}

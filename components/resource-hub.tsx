@@ -85,7 +85,7 @@ export function ResourceHub() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6" suppressHydrationWarning>
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-serif font-bold text-foreground">Resource Hub</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">

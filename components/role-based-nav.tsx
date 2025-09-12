@@ -24,7 +24,7 @@ const navigationItems: NavItem[] = [
     requiredPermissions: [Permission.VIEW_RESOURCES]
   },
   {
-    title: "Announcements", 
+    title: "Activity News", 
     href: "/announcements",
     description: "學校最新消息",
     requiredPermissions: [Permission.VIEW_RESOURCES]
@@ -66,9 +66,9 @@ export function RoleBasedNav({ className, showDescriptions = false }: RoleBasedN
   })
 
   return (
-    <nav className={cn("flex items-center gap-8 text-sm", className)}>
+    <nav className={cn("flex items-center gap-8 text-sm", className)} suppressHydrationWarning>
       {visibleItems.map((item) => (
-        <div key={item.href} className="relative">
+        <div key={item.href} className="relative" suppressHydrationWarning>
           <Link
             href={item.href}
             className={cn(

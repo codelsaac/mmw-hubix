@@ -4,6 +4,16 @@ import { UserRole } from "@/lib/permissions"
 
 // Enhanced user accounts with role-based access control
 const DEMO_ACCOUNTS = [
+  // Guest - Public access with training materials
+  { 
+    id: "0", 
+    email: "guest@cccmmw.edu.hk", 
+    password: "guest123", 
+    name: "Guest User", 
+    role: UserRole.GUEST, 
+    department: "Public",
+    description: "Public access to training videos and learning materials"
+  },
   // Admin - Full system access
   { 
     id: "1", 

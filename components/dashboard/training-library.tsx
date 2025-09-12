@@ -33,51 +33,89 @@ import {
   X,
   CheckCircle,
   Trash2,
+  FileText,
+  File,
+  Video,
+  Edit3,
+  Download,
 } from "lucide-react"
-import { useTrainingVideos } from "@/hooks/use-training-videos"
+import { useTraining } from "@/hooks/use-training"
+import { TrainingResource, TrainingService, ResourceContentType } from "@/lib/training"
 import { VideoPlayer } from "@/components/video-player"
+import { useAuth } from "@/hooks/use-auth"
+import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
 const categories = [
-  { id: "all", name: "All Videos", icon: BookOpen, count: 24 },
-  { id: "basics", name: "IT Basics", icon: Monitor, count: 8 },
-  { id: "security", name: "Security", icon: Shield, count: 6 },
-  { id: "troubleshooting", name: "Troubleshooting", icon: Wrench, count: 10 },
+  { id: "all", name: "All Resources", icon: BookOpen, count: 0 },
+  { id: "basics", name: "IT Basics", icon: Monitor, count: 0 },
+  { id: "security", name: "Security", icon: Shield, count: 0 },
+  { id: "troubleshooting", name: "Troubleshooting", icon: Wrench, count: 0 },
+]
+
+const contentTypes = [
+  { id: "VIDEO", name: "Video", icon: Video, description: "YouTube, Google Drive, or direct video links" },
+  { id: "TEXT", name: "Text Article", icon: FileText, description: "Rich text content, tutorials, and guides" },
+  { id: "FILE", name: "File Upload", icon: File, description: "Documents, presentations, PDFs, and more" },
 ]
 
 export function TrainingLibrary() {
-  const { videos, addVideo, updateViews, deleteVideo, clearAllVideos } = useTrainingVideos()
+  const { resources, addResource, updateViews, deleteResource, clearAllResources } = useTraining()
+  const { user } = useAuth()
+  const canManageResources = user?.role && PermissionService.hasPermission(user.role as UserRole, Permission.MANAGE_TRAINING_VIDEOS)
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedVideo, setSelectedVideo] = useState<any>(null)
+  const [selectedResource, setSelectedResource] = useState<TrainingResource | null>(null)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
-  const [watchedVideos, setWatchedVideos] = useState<Set<number>>(new Set())
+  const [selectedContentType, setSelectedContentType] = useState<ResourceContentType>("VIDEO")
+  const [watchedResources, setWatchedResources] = useState<Set<number>>(new Set())
+  const [isUploading, setIsUploading] = useState(false)
 
-  const filteredVideos = videos.filter((video) => {
-    const matchesCategory = selectedCategory === "all" || video.category === selectedCategory
+  const filteredResources = resources.filter((resource) => {
+    const matchesCategory = selectedCategory === "all" || resource.category === selectedCategory
     const matchesSearch =
-      video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      video.description.toLowerCase().includes(searchQuery.toLowerCase())
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.description.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
-  const handleWatchVideo = (video: any) => {
-    setSelectedVideo(video)
-    setWatchedVideos((prev) => new Set([...prev, video.id]))
-    updateViews(video.id)
+  const handleViewResource = (resource: TrainingResource) => {
+    setSelectedResource(resource)
+    setWatchedResources((prev) => new Set([...prev, resource.id]))
+    updateViews(resource.id)
   }
 
-  const handleUploadVideo = async (formData: FormData) => {
-    const title = formData.get("title") as string
-    const description = formData.get("description") as string
-    const category = formData.get("category") as string
-    const instructor = formData.get("instructor") as string
-    const difficulty = formData.get("difficulty") as string
-    const videoUrl = formData.get("videoUrl") as string
+  const handleUploadResource = async (formData: FormData) => {
+    setIsUploading(true)
+    
+    try {
+      const title = formData.get("title") as string
+      const description = formData.get("description") as string
+      const category = formData.get("category") as string
+      const difficulty = formData.get("difficulty") as string
+      const videoUrl = formData.get("videoUrl") as string
+      const textContent = formData.get("textContent") as string
+      const file = formData.get("file") as File
 
-    if (!title || !category || !difficulty || !videoUrl) {
-      alert("請填寫必填欄位：標題、類別、難度和影片連結")
-      return
-    }
+      if (!title || !category || !difficulty) {
+        alert("請填寫必填欄位：標題、類別和難度")
+        return
+      }
+
+      // Validate content type specific requirements
+      if (selectedContentType === 'VIDEO' && !videoUrl) {
+        alert("請提供影片連結")
+        return
+      }
+
+      if (selectedContentType === 'TEXT' && !textContent) {
+        alert("請提供文字內容")
+        return
+      }
+
+      if (selectedContentType === 'FILE' && (!file || file.size === 0)) {
+        alert("請選擇要上傳的檔案")
+        return
+      }
 
     const processVideoUrl = (url: string) => {
       // YouTube URL processing
@@ -118,26 +156,57 @@ export function TrainingLibrary() {
       return null
     }
 
-    const processedVideo = processVideoUrl(videoUrl)
-    
-    if (!processedVideo) {
-      alert("Please enter a valid video URL (YouTube, Google Drive, or direct video file)")
-      return
+      let resourceData: any = {
+        title,
+        description,
+        category,
+        difficulty: difficulty || "Beginner",
+        contentType: selectedContentType,
+      }
+
+      if (selectedContentType === 'VIDEO') {
+        const processedVideo = TrainingService.processVideoUrl(videoUrl)
+        if (!processedVideo) {
+          alert("Please enter a valid video URL (YouTube, Google Drive, or direct video file)")
+          return
+        }
+        resourceData.videoUrl = processedVideo.url
+        resourceData.duration = "-- min"
+      } else if (selectedContentType === 'TEXT') {
+        resourceData.textContent = textContent
+      } else if (selectedContentType === 'FILE') {
+        // Upload file first
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', file)
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        })
+        
+        const uploadResult = await response.json()
+        
+        if (!uploadResult.success) {
+          alert(`File upload failed: ${uploadResult.error}`)
+          return
+        }
+        
+        resourceData.fileName = uploadResult.originalName
+        resourceData.fileUrl = uploadResult.url
+        resourceData.fileSize = uploadResult.size
+        resourceData.mimeType = uploadResult.type
+      }
+
+      const newResource = addResource(resourceData)
+
+      console.log(`[v0] ${selectedContentType} resource added to library:`, newResource)
+      setShowUploadDialog(false)
+    } catch (error) {
+      console.error('Error uploading resource:', error)
+      alert('Failed to upload resource. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
-
-    const newVideo = addVideo({
-      title,
-      description,
-      category,
-      instructor: instructor || "IT Prefect",
-      difficulty: difficulty || "Beginner",
-      duration: "-- min",
-      thumbnail: processedVideo.thumbnail,
-      videoUrl: processedVideo.embedUrl,
-    })
-
-    console.log(`[v0] ${processedVideo.type} video added to library:`, newVideo)
-    setShowUploadDialog(false)
   }
 
   const getVideoDuration = (file: File): Promise<number | null> => {
@@ -158,17 +227,17 @@ export function TrainingLibrary() {
     })
   }
 
-  const handleDeleteVideo = (videoId: number, e: React.MouseEvent) => {
+  const handleDeleteResource = (resourceId: number, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (confirm("Are you sure you want to delete this video?")) {
-      deleteVideo(videoId)
+    if (confirm("Are you sure you want to delete this resource?")) {
+      deleteResource(resourceId)
     }
   }
 
-  const handleClearAllVideos = () => {
-    if (confirm("Are you sure you want to delete all videos? This action cannot be undone.")) {
-      clearAllVideos()
-      setWatchedVideos(new Set())
+  const handleClearAllResources = () => {
+    if (confirm("Are you sure you want to delete all resources? This action cannot be undone.")) {
+      clearAllResources()
+      setWatchedResources(new Set())
     }
   }
 
@@ -179,38 +248,61 @@ export function TrainingLibrary() {
           <h2 className="text-2xl font-serif font-bold text-foreground">Training Library</h2>
           <p className="text-muted-foreground">Comprehensive training resources for IT Prefects</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="destructive" onClick={handleClearAllVideos}>
-            <Trash2 className="w-4 h-4 mr-2" />
-            Clear All
-          </Button>
-          <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Video
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
+        {canManageResources && (
+          <div className="flex gap-2">
+            <Button variant="destructive" onClick={handleClearAllResources}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear All
+            </Button>
+            <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Add Resource
+                </Button>
+              </DialogTrigger>
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Upload Training Video</DialogTitle>
-                <DialogDescription>Add a new training video to the library</DialogDescription>
+                <DialogTitle>Add Training Resource</DialogTitle>
+                <DialogDescription>Add a new training resource to the library</DialogDescription>
               </DialogHeader>
+              
+              {/* Content Type Selection */}
+              <Tabs value={selectedContentType} onValueChange={(value) => setSelectedContentType(value as ResourceContentType)}>
+                <TabsList className="grid w-full grid-cols-3">
+                  {contentTypes.map((type) => {
+                    const IconComponent = type.icon
+                    return (
+                      <TabsTrigger key={type.id} value={type.id} className="flex items-center gap-2">
+                        <IconComponent className="w-4 h-4" />
+                        {type.name}
+                      </TabsTrigger>
+                    )
+                  })}
+                </TabsList>
+                
+                {contentTypes.map((type) => (
+                  <TabsContent key={type.id} value={type.id} className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-4">{type.description}</p>
+                  </TabsContent>
+                ))}
+              </Tabs>
+              
               <form
                 onSubmit={async (e) => {
                   e.preventDefault()
                   const formData = new FormData(e.currentTarget)
-                  await handleUploadVideo(formData)
+                  await handleUploadResource(formData)
                 }}
                 className="space-y-4"
               >
                 <div>
-                  <Label htmlFor="title">Video Title</Label>
-                  <Input id="title" name="title" placeholder="Enter video title" required />
+                  <Label htmlFor="title">Resource Title</Label>
+                  <Input id="title" name="title" placeholder="Enter resource title" required />
                 </div>
                 <div>
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" placeholder="Describe the video content" />
+                  <Textarea id="description" name="description" placeholder="Describe the resource content" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -240,32 +332,64 @@ export function TrainingLibrary() {
                     </Select>
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="instructor">Instructor (Optional)</Label>
-                  <Input id="instructor" name="instructor" placeholder="Enter instructor name" />
-                </div>
                 
-                <div>
-                  <Label htmlFor="videoUrl">Video URL</Label>
-                  <Input
-                    id="videoUrl"
-                    name="videoUrl"
-                    type="url"
-                    placeholder="YouTube, Google Drive, or direct video URL..."
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Supports YouTube, Google Drive, and direct video file links
-                  </p>
-                </div>
+                {/* Content Type Specific Fields */}
+                {selectedContentType === 'VIDEO' && (
+                  <div>
+                    <Label htmlFor="videoUrl">Video URL</Label>
+                    <Input
+                      id="videoUrl"
+                      name="videoUrl"
+                      type="url"
+                      placeholder="YouTube, Google Drive, or direct video URL..."
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Supports YouTube, Google Drive, and direct video file links
+                    </p>
+                  </div>
+                )}
+                
+                {selectedContentType === 'TEXT' && (
+                  <div>
+                    <Label htmlFor="textContent">Text Content</Label>
+                    <Textarea
+                      id="textContent"
+                      name="textContent"
+                      placeholder="Enter your article content here..."
+                      className="min-h-[200px]"
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      You can use markdown formatting
+                    </p>
+                  </div>
+                )}
+                
+                {selectedContentType === 'FILE' && (
+                  <div>
+                    <Label htmlFor="file">Upload File</Label>
+                    <Input
+                      id="file"
+                      name="file"
+                      type="file"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z"
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Supported: PDF, Word, Excel, PowerPoint, Text, Archives (Max 50MB)
+                    </p>
+                  </div>
+                )}
                 
                 <div className="flex gap-2">
                   <Button 
                     type="submit" 
                     className="flex-1"
+                    disabled={isUploading}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Add Video
+                    {isUploading ? 'Adding...' : `Add ${contentTypes.find(t => t.id === selectedContentType)?.name}`}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setShowUploadDialog(false)}>
                     Cancel
@@ -274,7 +398,8 @@ export function TrainingLibrary() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -310,7 +435,7 @@ export function TrainingLibrary() {
                   <category.icon className="w-4 h-4 mr-3" />
                   <span className="flex-1 text-left">{category.name}</span>
                   <Badge variant="secondary" className="text-xs">
-                    {category.id === "all" ? videos.length : videos.filter((v) => v.category === category.id).length}
+                    {category.id === "all" ? resources.length : resources.filter((r) => r.category === category.id).length}
                   </Badge>
                 </Button>
               ))}
@@ -323,17 +448,17 @@ export function TrainingLibrary() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Videos</span>
-                <span className="font-medium">{videos.length}</span>
+                <span className="text-muted-foreground">Total Resources</span>
+                <span className="font-medium">{resources.length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Uploaded Videos</span>
-                <span className="font-medium">{videos.filter((v) => v.isUploaded).length}</span>
+                <span className="text-muted-foreground">Uploaded Resources</span>
+                <span className="font-medium">{resources.filter((r) => r.isUploaded).length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">This Month</span>
                 <span className="font-medium">
-                  {videos.filter((v) => new Date(v.dateAdded).getMonth() === new Date().getMonth()).length} new
+                  {resources.filter((r) => new Date(r.dateAdded).getMonth() === new Date().getMonth()).length} new
                 </span>
               </div>
             </CardContent>
@@ -342,43 +467,59 @@ export function TrainingLibrary() {
 
         <div className="lg:col-span-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredVideos.map((video) => (
-              <Card key={video.id} className="hover:shadow-md transition-shadow cursor-pointer group">
+            {filteredResources.map((resource) => (
+              <Card key={resource.id} className="hover:shadow-md transition-shadow cursor-pointer group">
                 <div className="relative">
-                  <img
-                    src={
-                      video.thumbnail ||
-                      `/placeholder.svg?height=128&width=320&query=${encodeURIComponent(video.title) || "/placeholder.svg"}`
-                    }
-                    alt={video.title}
-                    className="w-full h-32 object-cover rounded-t-lg"
-                  />
+                  {resource.contentType === 'VIDEO' ? (
+                    <img
+                      src={
+                        resource.thumbnail ||
+                        `/placeholder.svg?height=128&width=320&query=${encodeURIComponent(resource.title) || "/placeholder.svg"}`
+                      }
+                      alt={resource.title}
+                      className="w-full h-32 object-cover rounded-t-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-32 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-t-lg flex items-center justify-center">
+                      {resource.contentType === 'TEXT' ? (
+                        <FileText className="w-12 h-12 text-blue-600" />
+                      ) : (
+                        <File className="w-12 h-12 text-green-600" />
+                      )}
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-lg flex items-center justify-center">
-                    <PlayCircle className="w-12 h-12 text-white" />
+                    {resource.contentType === 'VIDEO' ? (
+                      <PlayCircle className="w-12 h-12 text-white" />
+                    ) : resource.contentType === 'TEXT' ? (
+                      <Edit3 className="w-12 h-12 text-white" />
+                    ) : (
+                      <Download className="w-12 h-12 text-white" />
+                    )}
                   </div>
                   <div className="absolute top-2 right-2 flex gap-2">
                     <Badge variant="secondary" className="text-xs">
-                      {video.duration}
+                      {resource.contentType === 'VIDEO' ? resource.duration : resource.contentType}
                     </Badge>
-                    {video.isUploaded && (
+                    {resource.isUploaded && (
                       <Badge variant="default" className="text-xs bg-blue-600">
                         Uploaded
                       </Badge>
                     )}
-                    {watchedVideos.has(video.id) && (
+                    {watchedResources.has(resource.id) && (
                       <Badge variant="default" className="text-xs bg-green-600">
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Watched
+                        Viewed
                       </Badge>
                     )}
                   </div>
-                  {video.isUploaded && (
+                  {resource.isUploaded && (
                     <div className="absolute top-2 left-2">
                       <Button
                         variant="destructive"
                         size="sm"
                         className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => handleDeleteVideo(video.id, e)}
+                        onClick={(e) => handleDeleteResource(resource.id, e)}
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -388,43 +529,48 @@ export function TrainingLibrary() {
 
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold line-clamp-2">{video.title}</CardTitle>
+                    <CardTitle className="text-sm font-semibold line-clamp-2">{resource.title}</CardTitle>
                     <div className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs text-muted-foreground">{video.rating}</span>
+                      <span className="text-xs text-muted-foreground">{resource.rating}</span>
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent className="space-y-3">
-                  <CardDescription className="text-xs line-clamp-2">{video.description}</CardDescription>
+                  <CardDescription className="text-xs line-clamp-2">{resource.description}</CardDescription>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">{video.instructor}</span>
-                  </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      <span>{video.views} views</span>
+                      <span>{resource.views} views</span>
                     </div>
-                    <span>{new Date(video.dateAdded).toLocaleDateString()}</span>
+                    <span>{new Date(resource.dateAdded).toLocaleDateString()}</span>
                   </div>
 
-                  <Button size="sm" className="w-full" onClick={() => handleWatchVideo(video)}>
-                    <PlayCircle className="w-3 h-3 mr-2" />
-                    {watchedVideos.has(video.id) ? "Watch Again" : "Watch Now"}
+                  <Button size="sm" className="w-full" onClick={() => handleViewResource(resource)}>
+                    {resource.contentType === 'VIDEO' ? (
+                      <PlayCircle className="w-3 h-3 mr-2" />
+                    ) : resource.contentType === 'TEXT' ? (
+                      <Edit3 className="w-3 h-3 mr-2" />
+                    ) : (
+                      <Download className="w-3 h-3 mr-2" />
+                    )}
+                    {watchedResources.has(resource.id) ? "View Again" : 
+                     resource.contentType === 'VIDEO' ? "Watch Now" :
+                     resource.contentType === 'TEXT' ? "Read Now" : "Download"}
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {filteredVideos.length === 0 && (
+          {filteredResources.length === 0 && (
             <Card>
               <CardContent className="text-center py-12">
-                <PlayCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium mb-2">No videos found</h3>
+                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-medium mb-2">No resources found</h3>
                 <p className="text-sm text-muted-foreground">Try adjusting your search or category filter</p>
               </CardContent>
             </Card>
@@ -432,33 +578,60 @@ export function TrainingLibrary() {
         </div>
       </div>
 
-      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+      <Dialog open={!!selectedResource} onOpenChange={() => setSelectedResource(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <div className="flex items-start justify-between">
               <div>
-                <DialogTitle>{selectedVideo?.title}</DialogTitle>
-                <DialogDescription className="mt-2">{selectedVideo?.description}</DialogDescription>
+                <DialogTitle>{selectedResource?.title}</DialogTitle>
+                <DialogDescription className="mt-2">{selectedResource?.description}</DialogDescription>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedVideo(null)}>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedResource(null)}>
                 <X className="w-4 h-4" />
               </Button>
             </div>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="aspect-video bg-black rounded-lg">
-              <VideoPlayer 
-                videoUrl={selectedVideo?.videoUrl}
-                title={selectedVideo?.title}
-                className="w-full h-full"
-              />
-            </div>
+            {selectedResource?.contentType === 'VIDEO' && (
+              <div className="aspect-video bg-black rounded-lg">
+                <VideoPlayer 
+                  videoUrl={selectedResource?.videoUrl}
+                  title={selectedResource?.title}
+                  className="w-full h-full"
+                />
+              </div>
+            )}
+            
+            {selectedResource?.contentType === 'TEXT' && (
+              <div className="bg-gray-50 rounded-lg p-6 max-h-96 overflow-y-auto">
+                <div className="prose prose-sm max-w-none">
+                  <pre className="whitespace-pre-wrap font-sans">{selectedResource?.textContent}</pre>
+                </div>
+              </div>
+            )}
+            
+            {selectedResource?.contentType === 'FILE' && (
+              <div className="bg-gray-50 rounded-lg p-6 text-center">
+                <File className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="font-medium mb-2">{selectedResource?.fileName}</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {selectedResource?.fileSize && `Size: ${(selectedResource.fileSize / 1024 / 1024).toFixed(2)} MB`}
+                </p>
+                <Button asChild>
+                  <a href={selectedResource?.fileUrl} download target="_blank" rel="noopener noreferrer">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download File
+                  </a>
+                </Button>
+              </div>
+            )}
+            
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users className="w-3 h-3" />
-                <span>{selectedVideo?.views} views</span>
+                <span>{selectedResource?.views} views</span>
               </div>
-              <span>{new Date(selectedVideo?.dateAdded).toLocaleDateString()}</span>
+              <span>{selectedResource && new Date(selectedResource.dateAdded).toLocaleDateString()}</span>
             </div>
           </div>
         </DialogContent>
