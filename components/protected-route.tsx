@@ -1,11 +1,12 @@
 "use client"
 
 import type React from "react"
+import Link from "next/link"
 
 import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Shield, LogIn } from "lucide-react"
+import { Shield, Home } from "lucide-react"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -35,9 +36,11 @@ export function ProtectedRoute({ children, requiredRole = "prefect" }: Protected
             <CardDescription>You need to sign in with your IT Prefect account to access this area.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full">
-              <LogIn className="w-4 h-4 mr-2" />
-              Sign In to Continue
+            <Button asChild className="w-full">
+              <Link href="/">
+                <Home className="w-4 h-4 mr-2" />
+                Back to Main Page
+              </Link>
             </Button>
           </CardContent>
         </Card>

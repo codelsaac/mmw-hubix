@@ -20,10 +20,10 @@ export class AuthService {
     { email: "helper@cccmmw.edu.hk", password: "helper123", role: UserRole.HELPER, name: "IT Assistant" },
     { email: "ithelper@cccmmw.edu.hk", password: "ithelper2025", role: UserRole.HELPER, name: "IT System Assistant" },
     
-    // IT Prefect accounts - View only access
-    { email: "itprefect@cccmmw.edu.hk", password: "prefect123", role: UserRole.IT_PREFECT, name: "IT Prefect" },
-    { email: "student1@cccmmw.edu.hk", password: "student123", role: UserRole.IT_PREFECT, name: "Student Zhang" },
-    { email: "student2@cccmmw.edu.hk", password: "student456", role: UserRole.IT_PREFECT, name: "Student Li" }
+    // Guest accounts - View only access
+    { email: "guest1@cccmmw.edu.hk", password: "guest123", role: UserRole.GUEST, name: "Guest User" },
+    { email: "student1@cccmmw.edu.hk", password: "student123", role: UserRole.GUEST, name: "Student Zhang" },
+    { email: "student2@cccmmw.edu.hk", password: "student456", role: UserRole.GUEST, name: "Student Li" }
   ]
 
   private constructor() {}

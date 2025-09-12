@@ -105,9 +105,10 @@ mmw-hubix/
 ### 預設帳戶
 
 | 角色 | 電子郵件 | 密碼 | 權限 |
-|------|----------|------|------|
-| 管理員 | `admin@cccmmw.edu.hk` | `mmw2025` | 完整後台管理權限 |
-| IT 管理員 | `itprefect@cccmmw.edu.hk` | `prefect123` | IT 儀表板權限 |
+|---|---|---|---|
+| **管理員 (Admin)** | `admin@cccmmw.edu.hk` | `mmw2025` | 完整後台管理權限 |
+| **IT 助手 (Helper)** | `helper@cccmmw.edu.hk` | `helper123` | IT 儀表板權限 |
+| **訪客 (Guest)** | `guest1@cccmmw.edu.hk` | `guest123` | 唯讀存取權限 |
 
 ### 管理員快速登入密碼
 - `admin123`

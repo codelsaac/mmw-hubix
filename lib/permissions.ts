@@ -1,7 +1,6 @@
 export enum UserRole {
   ADMIN = 'ADMIN',
-  HELPER = 'HELPER', 
-  IT_PREFECT = 'IT_PREFECT',
+  HELPER = 'HELPER',
   GUEST = 'GUEST'
 }
 
@@ -64,19 +63,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_CALENDAR,
     Permission.VIEW_TEAM_INFO
   ],
-  [UserRole.IT_PREFECT]: [
-    // View only access
+  [UserRole.GUEST]: [
+    // Public access with training materials
     Permission.VIEW_TRAINING_VIDEOS,
     Permission.VIEW_RESOURCES,
     Permission.VIEW_DASHBOARD,
     Permission.VIEW_CALENDAR,
     Permission.VIEW_TEAM_INFO
-  ],
-  [UserRole.GUEST]: [
-    // Public access with training materials
-    Permission.VIEW_TRAINING_VIDEOS,
-    Permission.VIEW_RESOURCES,
-    Permission.VIEW_DASHBOARD
   ]
 }
 
@@ -133,7 +126,7 @@ export class PermissionService {
    * Check if user has read-only access
    */
   static isReadOnly(userRole: UserRole): boolean {
-    return userRole === UserRole.IT_PREFECT
+    return userRole === UserRole.GUEST
   }
 
   /**
@@ -145,8 +138,6 @@ export class PermissionService {
         return 'System Administrator'
       case UserRole.HELPER:
         return 'IT Assistant'
-      case UserRole.IT_PREFECT:
-        return 'IT Prefect'
       case UserRole.GUEST:
         return 'Guest User'
       default:
@@ -163,8 +154,6 @@ export class PermissionService {
         return 'Can manage entire website and IT Perfect system features'
       case UserRole.HELPER:
         return 'Can manage IT Perfect system but cannot access website admin features'
-      case UserRole.IT_PREFECT:
-        return 'View-only access to training videos and resources'
       case UserRole.GUEST:
         return 'Public access to training videos and learning materials'
       default:

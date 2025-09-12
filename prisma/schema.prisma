@@ -47,7 +47,7 @@ model User {
   email               String?   @unique
   emailVerified       DateTime?
   image               String?
-  role                UserRole  @default(IT_PREFECT) // ADMIN, HELPER, IT_PREFECT
+  role                UserRole  @default(GUEST) // ADMIN, HELPER, GUEST
   department          String?   // IT, Admin, Student, etc.
   permissions         String?   // JSON string of specific permissions
   isActive            Boolean   @default(true)
@@ -82,7 +82,7 @@ model VerificationToken {
 enum UserRole {
   ADMIN      // Full system access - can manage entire website and IT Perfect system
   HELPER     // IT Perfect system management only - can manage IT Perfect system but not website admin
-  IT_PREFECT // View only - can only view training videos and resources
+  GUEST      // View only - can only view training videos and resources
 }
 
 // ------------------
