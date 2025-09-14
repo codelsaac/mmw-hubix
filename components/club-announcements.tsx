@@ -13,7 +13,7 @@ export function ClubAnnouncements() {
 
   if (loading) {
     return (
-      <section className="space-y-6" suppressHydrationWarning>
+      <section id="activity-news" className="space-y-6 scroll-mt-24 md:scroll-mt-28" suppressHydrationWarning>
         <div className="flex items-center justify-between" suppressHydrationWarning>
           <div suppressHydrationWarning>
             <h2 className="text-2xl font-serif font-bold text-foreground">Activity News</h2>
@@ -28,7 +28,7 @@ export function ClubAnnouncements() {
   }
 
   return (
-    <section className="space-y-6" suppressHydrationWarning>
+    <section id="activity-news" className="space-y-6 scroll-mt-24 md:scroll-mt-28" suppressHydrationWarning>
       <div className="flex items-center justify-between" suppressHydrationWarning>
         <div suppressHydrationWarning>
           <h2 className="text-2xl font-serif font-bold text-foreground">Activity News</h2>

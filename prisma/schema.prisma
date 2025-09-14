@@ -124,6 +124,8 @@ model Announcement {
   updatedAt      DateTime @updatedAt
   
   creator        User?    @relation(fields: [createdBy], references: [id])
+  
+  @@unique([title, club], name: "title_club")
 }
 
 // Module 3.1: Public Calendar Events (Admin managed, student visible)

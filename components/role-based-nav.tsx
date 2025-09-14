@@ -25,7 +25,7 @@ const navigationItems: NavItem[] = [
   },
   {
     title: "Activity News", 
-    href: "/announcements",
+    href: "/#activity-news",
     description: "學校最新消息",
     requiredPermissions: [Permission.VIEW_RESOURCES]
   },
@@ -66,30 +66,37 @@ export function RoleBasedNav({ className, showDescriptions = false }: RoleBasedN
   })
 
   return (
-    <nav className={cn("flex items-center gap-8 text-sm", className)} suppressHydrationWarning>
-      {visibleItems.map((item) => (
-        <div key={item.href} className="relative" suppressHydrationWarning>
-          <Link
-            href={item.href}
-            className={cn(
-              "transition-colors hover:text-foreground/80 flex items-center gap-2",
-              pathname === item.href ? "text-foreground" : "text-foreground/60"
+    <nav className={cn("flex items-center gap-8 md:gap-10 text-sm", className)} suppressHydrationWarning>
+      {visibleItems.map((item) => {
+        // Build href; special handling for Activity News to scroll to section on home page
+        const isActivity = item.title === "Activity News"
+        const computedHref = isActivity ? (pathname === "/" ? "#activity-news" : "/#activity-news") : item.href
+
+        return (
+          <div key={item.href} className="relative" suppressHydrationWarning>
+            <Link
+              href={computedHref}
+              className={cn(
+                "transition-colors hover:text-foreground/80 flex items-center gap-3 md:gap-4",
+                // Active color: treat Activity News active when hash target on home
+                (pathname === item.href || (isActivity && pathname === "/")) ? "text-foreground" : "text-foreground/60"
+              )}
+            >
+              <span>{item.title}</span>
+              {item.badge && (
+                <Badge variant="secondary" className="text-xs">
+                  {item.badge}
+                </Badge>
+              )}
+            </Link>
+            {showDescriptions && item.description && (
+              <div className="absolute top-full left-0 mt-1 text-xs text-muted-foreground whitespace-nowrap">
+                {item.description}
+              </div>
             )}
-          >
-            <span>{item.title}</span>
-            {item.badge && (
-              <Badge variant="secondary" className="text-xs">
-                {item.badge}
-              </Badge>
-            )}
-          </Link>
-          {showDescriptions && item.description && (
-            <div className="absolute top-full left-0 mt-1 text-xs text-muted-foreground whitespace-nowrap">
-              {item.description}
-            </div>
-          )}
-        </div>
-      ))}
+          </div>
+        )
+      })}
     </nav>
   )
 }

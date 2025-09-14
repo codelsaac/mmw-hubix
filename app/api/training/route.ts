@@ -6,7 +6,7 @@ import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
 export async function GET() {
   try {
-    const resources = await prisma.trainingVideo.findMany({
+    const resources = await prisma.trainingResource.findMany({
       include: {
         creator: {
           select: {
@@ -109,14 +109,21 @@ export async function POST(request: NextRequest) {
     }
 
     // For now, store everything as a training video until migration is complete
-    const resource = await prisma.trainingVideo.create({
+    const resource = await prisma.trainingResource.create({
       data: {
         title,
         description: description || `${contentType} content: ${title}`,
-        videoUrl: videoUrl || fileUrl || '#',
+        contentType,
         category,
+        difficulty,
+        videoUrl,
+        textContent,
+        fileName,
+        fileUrl,
+        fileSize,
+        mimeType,
         isPublic: isPublic || false,
-        createdBy: user.id
+        createdBy: user.id,
       },
       include: {
         creator: {

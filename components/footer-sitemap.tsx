@@ -5,6 +5,7 @@ import Link from "next/link"
 import { siteConfig } from "@/config/site"
 import { Icons } from "@/components/icons"
 import { Separator } from "@/components/ui/separator"
+import { ClientOnly } from "@/components/ui/client-only"
 
 interface SitemapSection {
   title: string
@@ -92,11 +93,11 @@ export function FooterSitemap() {
 
         {/* Footer Bottom */}
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0" suppressHydrationWarning>
-          <div className="text-center text-sm text-muted-foreground md:text-left" suppressHydrationWarning>
-            <p suppressHydrationWarning>
-              © {new Date().getFullYear()} C.C.C. Mong Man Wai College. All rights reserved.
+          <div className="text-center text-sm text-muted-foreground md:text-left">
+            <p>
+              © <ClientOnly fallback="2025">{new Date().getFullYear()}</ClientOnly> C.C.C. Mong Man Wai College. All rights reserved.
             </p>
-            <p className="mt-1" suppressHydrationWarning>
+            <p className="mt-1">
               Built with by the IT Perfect Team
             </p>
           </div>

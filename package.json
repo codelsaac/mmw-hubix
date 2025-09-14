@@ -7,7 +7,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset && npm run db:seed"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -73,6 +75,7 @@
     "postcss": "^8.5",
     "prisma": "^6.14.0",
     "tailwindcss": "^4.1.9",
+    "tsx": "^4.20.5",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
   },

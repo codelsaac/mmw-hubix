@@ -19,7 +19,18 @@ import { UserRoleDisplay } from "@/components/user-role-display"
 import Link from "next/link"
 
 export function UserMenu() {
-  const { user, signOut } = useAuth()
+  const { user, isLoading, signOut } = useAuth()
+
+  // Show loading state to prevent hydration mismatch
+  if (isLoading) {
+    return (
+      <Button variant="ghost" className="relative h-8 w-8 rounded-full" disabled>
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>...</AvatarFallback>
+        </Avatar>
+      </Button>
+    )
+  }
 
   if (!user) {
     return <UnifiedLoginDialog />

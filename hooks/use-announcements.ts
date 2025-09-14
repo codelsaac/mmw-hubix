@@ -7,9 +7,10 @@ export function useAnnouncements() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
 
-  const loadAnnouncements = () => {
+  const loadAnnouncements = async () => {
     try {
-      const data = announcementService.getAnnouncements()
+      setLoading(true)
+      const data = await announcementService.getAnnouncements()
       setAnnouncements(data)
     } catch (error) {
       console.error("Error loading announcements:", error)
@@ -20,40 +21,37 @@ export function useAnnouncements() {
 
   useEffect(() => {
     loadAnnouncements()
-
-    // Listen for real-time updates
-    const handleAnnouncementsUpdate = (event: CustomEvent) => {
-      setAnnouncements(event.detail)
-    }
-
-    window.addEventListener("announcementsUpdated", handleAnnouncementsUpdate as EventListener)
-
-    return () => {
-      window.removeEventListener("announcementsUpdated", handleAnnouncementsUpdate as EventListener)
-    }
   }, [])
 
-  const addAnnouncement = (announcement: Omit<Announcement, "id" | "createdAt" | "updatedAt">) => {
-    const newAnnouncement = announcementService.addAnnouncement(announcement)
-    loadAnnouncements()
+  const addAnnouncement = async (announcement: Omit<Announcement, "id" | "createdAt" | "updatedAt" | "creator" | "createdBy">) => {
+    const newAnnouncement = await announcementService.addAnnouncement(announcement)
+    if (newAnnouncement) {
+      await loadAnnouncements()
+    }
     return newAnnouncement
   }
 
-  const updateAnnouncement = (id: number, updates: Partial<Announcement>) => {
-    const updated = announcementService.updateAnnouncement(id, updates)
-    if (updated) loadAnnouncements()
+  const updateAnnouncement = async (id: string, updates: Partial<Announcement>) => {
+    const updated = await announcementService.updateAnnouncement(id, updates)
+    if (updated) {
+      await loadAnnouncements()
+    }
     return updated
   }
 
-  const deleteAnnouncement = (id: number) => {
-    const success = announcementService.deleteAnnouncement(id)
-    if (success) loadAnnouncements()
+  const deleteAnnouncement = async (id: string) => {
+    const success = await announcementService.deleteAnnouncement(id)
+    if (success) {
+      await loadAnnouncements()
+    }
     return success
   }
 
-  const joinEvent = (id: number) => {
-    const success = announcementService.joinEvent(id)
-    if (success) loadAnnouncements()
+  const joinEvent = async (id: string) => {
+    const success = await announcementService.joinEvent(id)
+    if (success) {
+      await loadAnnouncements()
+    }
     return success
   }
 

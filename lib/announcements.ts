@@ -1,8 +1,8 @@
 export interface Announcement {
-  id: number
+  id: string
   title: string
   club: string
-  date: string
+  date: Date | string
   time: string
   location: string
   description: string
@@ -10,139 +10,97 @@ export interface Announcement {
   maxAttendees: number
   type: string
   status: "active" | "cancelled" | "completed"
-  createdAt: string
-  updatedAt: string
+  isPublic: boolean
+  createdBy?: string | null
+  createdAt: Date | string
+  updatedAt: Date | string
+  creator?: {
+    id: string
+    name: string | null
+    email: string | null
+  } | null
 }
 
-const defaultAnnouncements: Announcement[] = [
-  {
-    id: 1,
-    title: "Computer Club Workshop: Web Development Basics",
-    club: "Computer Club",
-    date: "2024-01-15",
-    time: "3:30 PM",
-    location: "Computer Lab A",
-    description:
-      "Learn the fundamentals of HTML, CSS, and JavaScript in this hands-on workshop. Perfect for beginners!",
-    attendees: 25,
-    maxAttendees: 30,
-    type: "Workshop",
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    title: "Science Fair Project Presentations",
-    club: "Science Society",
-    date: "2024-01-18",
-    time: "2:00 PM",
-    location: "Main Auditorium",
-    description:
-      "Students will present their innovative science projects. Come support your peers and learn about cutting-edge research.",
-    attendees: 150,
-    maxAttendees: 200,
-    type: "Event",
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    title: "Debate Competition: Technology and Society",
-    club: "Debate Club",
-    date: "2024-01-20",
-    time: "4:00 PM",
-    location: "Conference Room B",
-    description:
-      "Join us for an engaging debate on the impact of technology on modern society. All students welcome to participate or observe.",
-    attendees: 18,
-    maxAttendees: 20,
-    type: "Competition",
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-]
-
 class AnnouncementService {
-  private storageKey = "mmw-hubix-announcements"
-
-  getAnnouncements(): Announcement[] {
-    if (typeof window === "undefined") return defaultAnnouncements
-
+  async getAnnouncements(): Promise<Announcement[]> {
     try {
-      const stored = localStorage.getItem(this.storageKey)
-      if (stored) {
-        return JSON.parse(stored)
+      const response = await fetch('/api/announcements')
+      if (!response.ok) {
+        throw new Error('Failed to fetch announcements')
       }
+      return await response.json()
     } catch (error) {
       console.error("Error loading announcements:", error)
+      return []
     }
-
-    // Initialize with default data
-    this.saveAnnouncements(defaultAnnouncements)
-    return defaultAnnouncements
   }
 
-  saveAnnouncements(announcements: Announcement[]): void {
-    if (typeof window === "undefined") return
-
+  async addAnnouncement(announcement: Omit<Announcement, "id" | "createdAt" | "updatedAt" | "creator" | "createdBy">): Promise<Announcement | null> {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(announcements))
-      // Dispatch custom event for real-time updates
-      window.dispatchEvent(new CustomEvent("announcementsUpdated", { detail: announcements }))
+      const response = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(announcement),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create announcement')
+      }
+
+      return await response.json()
     } catch (error) {
-      console.error("Error saving announcements:", error)
+      console.error("Error creating announcement:", error)
+      return null
     }
   }
 
-  addAnnouncement(announcement: Omit<Announcement, "id" | "createdAt" | "updatedAt">): Announcement {
-    const announcements = this.getAnnouncements()
-    const newAnnouncement: Announcement = {
-      ...announcement,
-      id: Math.max(0, ...announcements.map((a) => a.id)) + 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  async updateAnnouncement(id: string, updates: Partial<Announcement>): Promise<Announcement | null> {
+    try {
+      const response = await fetch(`/api/announcements/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update announcement')
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error("Error updating announcement:", error)
+      return null
     }
-
-    const updatedAnnouncements = [...announcements, newAnnouncement]
-    this.saveAnnouncements(updatedAnnouncements)
-    return newAnnouncement
   }
 
-  updateAnnouncement(id: number, updates: Partial<Announcement>): Announcement | null {
-    const announcements = this.getAnnouncements()
-    const index = announcements.findIndex((a) => a.id === id)
+  async deleteAnnouncement(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/announcements/${id}`, {
+        method: 'DELETE',
+      })
 
-    if (index === -1) return null
-
-    const updatedAnnouncement = {
-      ...announcements[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
+      return response.ok
+    } catch (error) {
+      console.error("Error deleting announcement:", error)
+      return false
     }
-
-    announcements[index] = updatedAnnouncement
-    this.saveAnnouncements(announcements)
-    return updatedAnnouncement
   }
 
-  deleteAnnouncement(id: number): boolean {
-    const announcements = this.getAnnouncements()
-    const filteredAnnouncements = announcements.filter((a) => a.id !== id)
+  async joinEvent(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/announcements/${id}/join`, {
+        method: 'POST',
+      })
 
-    if (filteredAnnouncements.length === announcements.length) return false
-
-    this.saveAnnouncements(filteredAnnouncements)
-    return true
-  }
-
-  joinEvent(id: number): boolean {
-    const announcement = this.getAnnouncements().find((a) => a.id === id)
-    if (!announcement || announcement.attendees >= announcement.maxAttendees) return false
-
-    return !!this.updateAnnouncement(id, { attendees: announcement.attendees + 1 })
+      return response.ok
+    } catch (error) {
+      console.error("Error joining event:", error)
+      return false
+    }
   }
 }
 
