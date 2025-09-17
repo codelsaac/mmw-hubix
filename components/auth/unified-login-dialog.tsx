@@ -127,7 +127,7 @@ export function UnifiedLoginDialog({ children }: UnifiedLoginDialogProps) {
       variant: "default" as const
     },
     {
-      role: UserRole.IT_PREFECT,
+      role: UserRole.GUEST,
       name: "IT Prefect",
       email: "itprefect@cccmmw.edu.hk",
       password: "prefect123", 

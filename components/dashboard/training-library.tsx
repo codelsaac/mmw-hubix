@@ -453,7 +453,7 @@ export function TrainingLibrary() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Uploaded Resources</span>
-                <span className="font-medium">{resources.filter((r) => r.isUploaded).length}</span>
+                <span className="font-medium">{resources.filter((r) => r.isPublic).length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">This Month</span>
@@ -501,7 +501,7 @@ export function TrainingLibrary() {
                     <Badge variant="secondary" className="text-xs">
                       {resource.contentType === 'VIDEO' ? resource.duration : resource.contentType}
                     </Badge>
-                    {resource.isUploaded && (
+                    {resource.isPublic && (
                       <Badge variant="default" className="text-xs bg-blue-600">
                         Uploaded
                       </Badge>
@@ -513,7 +513,7 @@ export function TrainingLibrary() {
                       </Badge>
                     )}
                   </div>
-                  {resource.isUploaded && (
+                  {resource.isPublic && (
                     <div className="absolute top-2 left-2">
                       <Button
                         variant="destructive"

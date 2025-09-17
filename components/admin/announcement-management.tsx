@@ -55,11 +55,11 @@ export function AnnouncementManagement() {
     setIsDialogOpen(false)
   }
 
-  const handleDeleteAnnouncement = (id: number) => {
+  const handleDeleteAnnouncement = (id: string) => {
     deleteAnnouncement(id)
   }
 
-  const handleStatusChange = (id: number, status: string) => {
+  const handleStatusChange = (id: string, status: "active" | "cancelled" | "completed") => {
     updateAnnouncement(id, { status })
   }
 
@@ -255,16 +255,26 @@ function AnnouncementDialog({
   onSave: (data: any) => void
   onCancel: () => void
 }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string
+    club: string
+    date: string
+    time: string
+    location: string
+    description: string
+    type: string
+    maxAttendees: number
+    status: "active" | "cancelled" | "completed"
+  }>({
     title: announcement?.title || "",
     club: announcement?.club || "",
-    date: announcement?.date || "",
+    date: announcement?.date ? (typeof announcement.date === 'string' ? announcement.date : announcement.date.toISOString().split('T')[0]) : "",
     time: announcement?.time || "",
     location: announcement?.location || "",
     description: announcement?.description || "",
     type: announcement?.type || "Event",
     maxAttendees: announcement?.maxAttendees || 50,
-    status: announcement?.status || "active",
+    status: (announcement?.status as "active" | "cancelled" | "completed") || "active",
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -378,7 +388,7 @@ function AnnouncementDialog({
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+          <Select value={formData.status} onValueChange={(value: "active" | "cancelled" | "completed") => setFormData({ ...formData, status: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

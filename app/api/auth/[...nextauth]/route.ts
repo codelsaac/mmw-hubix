@@ -68,7 +68,7 @@ const DEMO_ACCOUNTS = [
     email: "itprefect@cccmmw.edu.hk", 
     password: "prefect123", 
     name: "IT Prefect Member", 
-    role: UserRole.IT_PREFECT, 
+    role: UserRole.GUEST, 
     department: "IT",
     description: "View-only access to training videos and resources"
   },
@@ -77,7 +77,7 @@ const DEMO_ACCOUNTS = [
     email: "student1@cccmmw.edu.hk", 
     password: "student123", 
     name: "Student Zhang", 
-    role: UserRole.IT_PREFECT, 
+    role: UserRole.GUEST, 
     department: "IT",
     description: "View-only access to training videos and resources"
   },
@@ -86,7 +86,7 @@ const DEMO_ACCOUNTS = [
     email: "student2@cccmmw.edu.hk", 
     password: "student456", 
     name: "Student Li", 
-    role: UserRole.IT_PREFECT, 
+    role: UserRole.GUEST, 
     department: "IT",
     description: "View-only access to training videos and resources"
   }
