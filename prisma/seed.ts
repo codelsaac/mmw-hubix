@@ -3,7 +3,8 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create default admin user if not exists
+  // Create default admin user
+  const adminEmail = 'admin@cccmmw.edu.hk'
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@cccmmw.edu.hk' },
     update: {},

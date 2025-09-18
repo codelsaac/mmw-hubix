@@ -17,7 +17,7 @@
 
 - **Node.js** 18.0 或更高版本
 - **npm** 或 **pnpm**（推薦）
-- **SQLite**（用於開發環境）
+- **MySQL 8.0+**（開發與生產均使用）
 
 ### 安裝步驟
 
@@ -38,7 +38,7 @@
 
 3. **設置資料庫**
    ```bash
-   # 運行資料庫遷移
+   # 建立資料表與索引（MySQL）
    npm run db:migrate
 
    # 或使用 pnpm
@@ -78,7 +78,7 @@ mmw-hubix/
 ├── hooks/                # 自定義 React Hooks
 ├── lib/                  # 工具庫和數據處理
 ├── prisma/              # 資料庫配置和遷移
-│   ├── schema.prisma    # 資料庫模型
+│   ├── schema.prisma    # 資料庫模型（MySQL）
 │   └── migrations/      # 資料庫遷移文件
 ├── public/              # 靜態資源
 └── styles/              # 樣式文件
@@ -140,7 +140,7 @@ mmw-hubix/
 - **Next.js API Routes** - 伺服器端 API
 - **NextAuth.js** - 認證系統
 - **Prisma** - 資料庫 ORM
-- **SQLite** - 開發環境資料庫
+- **MySQL** - 主要資料庫（開發與生產）
 
 ### 開發工具
 - **ESLint** - 程式碼檢查
@@ -156,7 +156,7 @@ npm run build        # 建置生產版本
 npm run start        # 啟動生產伺服器
 npm run lint         # 執行程式碼檢查
 
-# 資料庫
+# 資料庫（MySQL）
 npm run db:migrate   # 執行資料庫遷移
 ```
 
@@ -181,8 +181,9 @@ npm run db:migrate   # 執行資料庫遷移
 創建 `.env.local` 文件：
 
 ```env
-# 資料庫
-DATABASE_URL="file:./dev.db"
+# 資料庫（MySQL）
+# 例：mysql://USER:PASSWORD@HOST:PORT/DBNAME?connection_limit=5
+DATABASE_URL="mysql://user:password@localhost:3306/mmw_hubix"
 
 # NextAuth.js
 NEXTAUTH_URL="http://localhost:3000"
@@ -191,6 +192,23 @@ NEXTAUTH_SECRET="your-secret-key"
 # 其他配置
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
+
+### 結構與型別調整說明（MySQL 最佳化）
+- 長文字欄位使用 MySQL 對應型別：
+  - `description`、`textContent` 等 → `@db.Text` 或 `@db.LongText`
+- URL/影像路徑等字串上限：
+  - `image`、`url`、`videoUrl`、`fileUrl` → `@db.VarChar(2048)`
+  - `fileName` → `@db.VarChar(255)`
+- JSON 字串欄位
+  - `permissions`、`attendees` → `@db.Text`
+- 其他注意事項：
+  - 主鍵 `id` 保持 `cuid()`，跨庫相容
+  - 複合唯一鍵如 `@@unique([title, club], name: "title_club")` 保留不變
+  - 外鍵刪除策略與 Prisma 定義一致（如 NextAuth 關聯 onDelete: Cascade）
+
+### 驗證
+- 啟動本地伺服器並檢查各模組資料是否完整（公告、資源、活動、任務、訓練資源等）
+- 新增/更新/刪除動作是否正常（透過後台頁面）
 
 ### 網站配置
 編輯 `config/site.ts` 來自定義網站基本資訊：

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,19 +11,18 @@ datasource db {
 //  AUTHENTICATION
 // ------------------
 
-// Required by NextAuth.js
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
-  scope             String?
-  id_token          String?
+  scope             String? @db.Text
+  id_token          String? @db.Text
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -31,7 +30,6 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-// Required by NextAuth.js
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -40,36 +38,33 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// User model for IT Prefects with enhanced role system
 model User {
-  id                  String    @id @default(cuid())
-  name                String?
-  email               String?   @unique
-  emailVerified       DateTime?
-  image               String?
-  role                UserRole  @default(GUEST) // ADMIN, HELPER, GUEST
-  department          String?   // IT, Admin, Student, etc.
-  permissions         String?   // JSON string of specific permissions
-  isActive            Boolean   @default(true)
-  lastLoginAt         DateTime?
-  accounts            Account[]
-  sessions            Session[]
-  
-  // Content creation relations
-  createdResources    Resource[]
-  createdAnnouncements Announcement[]
-  createdPublicEvents PublicEvent[]
-  createdInternalEvents InternalEvent[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?   @db.VarChar(2048)
+  role          UserRole  @default(GUEST)
+  department    String?
+  permissions   String?   @db.Text
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+
+  accounts      Account[]
+  sessions      Session[]
+
+  createdResources         Resource[]
+  createdAnnouncements     Announcement[]
+  createdPublicEvents      PublicEvent[]
+  createdInternalEvents    InternalEvent[]
   createdTrainingResources TrainingResource[]
-  
-  // Activity and Task relations
-  createdActivities   Activity[] @relation("CreatedActivities")
-  assignedActivities  Activity[] @relation("AssignedActivities")
-  createdTasks        Task[]     @relation("CreatedTasks")
-  assignedTasks       Task[]     @relation("AssignedTasks")
+
+  createdActivities Activity[] @relation("CreatedActivities")
+  assignedActivities Activity[] @relation("AssignedActivities")
+  createdTasks      Task[]     @relation("CreatedTasks")
+  assignedTasks     Task[]     @relation("AssignedTasks")
 }
 
-// Required by NextAuth.js
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -78,34 +73,31 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Enum for user roles
 enum UserRole {
-  ADMIN      // Full system access - can manage entire website and IT Perfect system
-  HELPER     // IT Perfect system management only - can manage IT Perfect system but not website admin
-  GUEST      // View only - can only view training videos and resources
+  ADMIN
+  HELPER
+  GUEST
 }
 
 // ------------------
 //  APP CONTENT
 // ------------------
 
-// Module 1.1: Homepage / Resource Hub
 model Resource {
   id          String   @id @default(cuid())
   name        String
-  url         String
-  description String
+  url         String   @db.VarChar(2048)
+  description String   @db.Text
   category    String
-  status      String   @default("active") // active, maintenance, inactive
+  status      String   @default("active")
   clicks      Int      @default(0)
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   creator     User?    @relation(fields: [createdBy], references: [id])
 }
 
-// Module 1.2: Club Announcements Section (Enhanced for admin management)
 model Announcement {
   id             String   @id @default(cuid())
   title          String
@@ -113,124 +105,113 @@ model Announcement {
   date           DateTime
   time           String
   location       String
-  description    String
+  description    String   @db.Text
   attendees      Int      @default(0)
   maxAttendees   Int
-  type           String // Workshop, Event, Competition
-  status         String   @default("active") // active, cancelled, completed
-  isPublic       Boolean  @default(true) // visible to all students
+  type           String
+  status         String   @default("active")
+  isPublic       Boolean  @default(true)
   createdBy      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
+
   creator        User?    @relation(fields: [createdBy], references: [id])
-  
+
   @@unique([title, club], name: "title_club")
 }
 
-// Module 3.1: Public Calendar Events (Admin managed, student visible)
 model PublicEvent {
   id          String   @id @default(cuid())
   title       String
-  description String?
+  description String?  @db.Text
   startTime   DateTime
   endTime     DateTime
   location    String?
-  eventType   String   @default("general") // general, academic, sports, cultural
+  eventType   String   @default("general")
   isVisible   Boolean  @default(true)
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   creator     User?    @relation(fields: [createdBy], references: [id])
 }
 
-// Module 3.2: Internal IT Prefect Events
 model InternalEvent {
   id          String   @id @default(cuid())
   title       String
-  description String?
+  description String?  @db.Text
   startTime   DateTime
   endTime     DateTime
   location    String?
-  eventType   String   @default("meeting") // meeting, training, maintenance
-  attendees   String?  // JSON string of user IDs
+  eventType   String   @default("meeting")
+  attendees   String?  @db.Text
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   creator     User?    @relation(fields: [createdBy], references: [id])
 }
 
-// Module 3.3: IT Prefect Activities (for dashboard)
 model Activity {
   id          String   @id @default(cuid())
-  type        String   // meeting, training, system, announcement
+  type        String
   title       String
-  description String
-  status      String   @default("new") // completed, new, in-progress
-  priority    String   @default("medium") // high, medium, low
+  description String   @db.Text
+  status      String   @default("new")
+  priority    String   @default("medium")
   assignedTo  String?
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   assignee    User?    @relation("AssignedActivities", fields: [assignedTo], references: [id])
   creator     User?    @relation("CreatedActivities", fields: [createdBy], references: [id])
 }
 
-// Module 3.4: IT Prefect Tasks
 model Task {
   id          String   @id @default(cuid())
   title       String
-  description String?
+  description String?  @db.Text
   dueDate     DateTime
-  priority    String   @default("medium") // high, medium, low
-  status      String   @default("pending") // pending, in-progress, completed
+  priority    String   @default("medium")
+  status      String   @default("pending")
   assignedTo  String?
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   assignee    User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
   creator     User?    @relation("CreatedTasks", fields: [createdBy], references: [id])
 }
 
-// Module 3.5: Training Resource Library (expanded from videos only)
 model TrainingResource {
   id          String      @id @default(cuid())
   title       String
-  description String?
+  description String?     @db.Text
   contentType ResourceContentType
-  
-  // Video content fields
-  videoUrl    String?
-  duration    Int?        // in minutes
-  
-  // Text content fields
-  textContent String?     // Rich text/markdown content
-  
-  // File content fields
-  fileName    String?
-  fileUrl     String?
-  fileSize    Int?        // in bytes
+
+  videoUrl    String?     @db.VarChar(2048)
+  duration    Int?
+  textContent String?     @db.LongText
+  fileName    String?     @db.VarChar(255)
+  fileUrl     String?     @db.VarChar(2048)
+  fileSize    Int?
   mimeType    String?
-  
+
   category    String
-  difficulty  String?     // Beginner, Intermediate, Advanced
+  difficulty  String?
   instructor  String?
   views       Int         @default(0)
-  isPublic    Boolean     @default(false) // visible to all students
+  isPublic    Boolean     @default(false)
   createdBy   String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  
+
   creator     User?       @relation(fields: [createdBy], references: [id])
 }
 
-// Enum for different types of training content
 enum ResourceContentType {
-  VIDEO     // YouTube, Google Drive, or direct video links
-  TEXT      // Rich text articles, tutorials, notes
-  FILE      // Documents, presentations, PDFs, etc.
+  VIDEO
+  TEXT
+  FILE
 }

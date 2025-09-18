@@ -1,26 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-// Initialize Prisma Client with error handling
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-let prisma: PrismaClient
-
-try {
-  prisma = globalForPrisma.prisma ?? new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  })
-  
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = prisma
-  }
-} catch (error) {
-  console.error('Failed to initialize Prisma Client:', error)
-  throw new Error('Database connection failed. Please ensure DATABASE_URL is set correctly.')
-}
-
-export { prisma }
+import { prisma } from './prisma';
 
 // ==========================================
 // ANNOUNCEMENT MANAGEMENT
