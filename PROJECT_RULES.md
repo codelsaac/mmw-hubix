@@ -36,6 +36,17 @@
 - **Authentication**: Always validate user permissions
 - **Input Validation**: Sanitize all user inputs
 
+## 🚀 Project Progress & Tasks
+
+### User Management UI (Admin)
+- **Completed**: Basic data grid with mock data
+- **Completed**: Implement bulk DELETE API endpoint
+- **Completed**: Implement bulk update/delete in UI
+- **Completed**: Add column sorting and filtering
+- **Completed**: Implement copy/paste for grid cells
+- **Completed**: Add undo/redo for grid edits
+- **Completed**: Update documentation (`README.md`)
+
 ## 📁 File Organization Rules
 
 ### Directory Structure
@@ -95,7 +106,6 @@ config/               # Configuration files
 ## 📝 Documentation Rules
 
 ### Code Documentation
-- **Functions**: Document complex functions with JSDoc
 - **Components**: Document component props and usage
 - **API Routes**: Document request/response schemas
 - **Database Models**: Document relationships and constraints

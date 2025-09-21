@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./prisma/dev.db"
 }
 
 // ------------------
@@ -17,12 +17,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
-  scope             String? @db.Text
-  id_token          String? @db.Text
+  scope             String?
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -43,10 +43,10 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified DateTime?
-  image         String?   @db.VarChar(2048)
+  image         String?
   role          UserRole  @default(GUEST)
   department    String?
-  permissions   String?   @db.Text
+  permissions   String?
   isActive      Boolean   @default(true)
   lastLoginAt   DateTime?
 
@@ -85,8 +85,8 @@ enum UserRole {
 model Resource {
   id          String   @id @default(cuid())
   name        String
-  url         String   @db.VarChar(2048)
-  description String   @db.Text
+  url         String
+  description String
   category    String
   status      String   @default("active")
   clicks      Int      @default(0)
@@ -101,7 +101,7 @@ model Resource {
 model PublicEvent {
   id          String   @id @default(cuid())
   title       String
-  description String?  @db.Text
+  description String?
   startTime   DateTime
   endTime     DateTime
   location    String?
@@ -117,12 +117,12 @@ model PublicEvent {
 model InternalEvent {
   id          String   @id @default(cuid())
   title       String
-  description String?  @db.Text
+  description String?
   startTime   DateTime
   endTime     DateTime
   location    String?
   eventType   String   @default("meeting")
-  attendees   String?  @db.Text
+  attendees   String?
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -134,7 +134,7 @@ model Activity {
   id          String   @id @default(cuid())
   type        String
   title       String
-  description String   @db.Text
+  description String
   status      String   @default("new")
   priority    String   @default("medium")
   assignedTo  String?
@@ -149,7 +149,7 @@ model Activity {
 model Task {
   id          String   @id @default(cuid())
   title       String
-  description String?  @db.Text
+  description String?
   dueDate     DateTime
   priority    String   @default("medium")
   status      String   @default("pending")
@@ -165,14 +165,14 @@ model Task {
 model TrainingResource {
   id          String      @id @default(cuid())
   title       String
-  description String?     @db.Text
+  description String?
   contentType ResourceContentType
 
-  videoUrl    String?     @db.VarChar(2048)
+  videoUrl    String?
   duration    Int?
-  textContent String?     @db.LongText
-  fileName    String?     @db.VarChar(255)
-  fileUrl     String?     @db.VarChar(2048)
+  textContent String?
+  fileName    String?
+  fileUrl     String?
   fileSize    Int?
   mimeType    String?
 

@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { User, LogOut, Settings } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
-import { UnifiedLoginDialog } from "./unified-login-dialog"
+import { SimpleLoginDialog } from './simple-login-dialog'
 import { UserRoleDisplay } from "@/components/user-role-display"
 import Link from "next/link"
 
@@ -33,7 +33,7 @@ export function UserMenu() {
   }
 
   if (!user) {
-    return <UnifiedLoginDialog />
+    return <SimpleLoginDialog />
   }
 
   const getRoleColor = (role: string) => {

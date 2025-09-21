@@ -35,7 +35,7 @@ export function useAuth() {
     isAuthenticated: !!session,
     isAdmin: session?.user?.role === "ADMIN",
     isHelper: session?.user?.role === "HELPER",
-    isITPrefect: session?.user?.role === "IT_PREFECT",
+    isITPrefect: session?.user?.role === "GUEST",
     signOut: handleSignOut,
     refreshUser
   }

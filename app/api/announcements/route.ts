@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 
 // GET /api/announcements - Get all announcements
 export async function GET() {
+  const session = await getServerSession(authOptions)
+
   try {
+    // If the user is not authenticated, only return public announcements
+    const whereClause = session?.user?.email ? {} : { isPublic: true };
+
     const announcements = await prisma.announcement.findMany({
+      where: whereClause,
       include: {
         creator: {
           select: {

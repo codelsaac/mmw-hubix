@@ -1,38 +1,29 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/database";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
-import { z } from "zod";
+import { NextResponse, type NextRequest } from "next/server"
+import { teamMembers } from "@/lib/team-data"
+import { getServerSession } from "next-auth"
+import { authOptions } from "../../auth/[...nextauth]/route"
+import { UserRole } from "@/lib/permissions"
+import { z } from "zod"
 
-const userUpdateSchema = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  email: z.string().email().optional(),
-  role: z.enum(["user", "admin"]).optional(),
+// In-memory store for demonstration purposes
+let users = [...teamMembers];
+
+const userSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  role: z.enum(["ADMIN", "HELPER", "GUEST"]),
+  department: z.string(),
+  isActive: z.boolean(),
 });
+
+const userUpdateSchema = userSchema.partial().extend({ id: z.string() });
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-
-    if (session?.user?.role !== 'admin') {
+    if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-
-    const users = await db.user.findMany({
-      // Select all fields except password
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        emailVerified: true,
-        image: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
     return NextResponse.json(users);
   } catch (error) {
     console.error("[ADMIN_USERS_GET]", error);
@@ -40,40 +31,90 @@ export async function GET() {
   }
 }
 
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== UserRole.ADMIN) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    const body = await req.json();
+    const newUserData = userSchema.parse(body);
+
+    const newUser = {
+      ...newUserData,
+      id: String(users.length + 1),
+      lastLoginAt: new Date().toISOString(),
+      avatar: "/abstract-profile.png",
+      phone: "",
+      specialties: [],
+      status: newUserData.role,
+    };
+
+    users.push(newUser);
+    return NextResponse.json(newUser, { status: 201 });
+
+  } catch (error) {
+    console.error("[ADMIN_USERS_POST]", error);
+    if (error instanceof z.ZodError) {
+      return new NextResponse(JSON.stringify(error.issues), { status: 400 });
+    }
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (session?.user?.role !== 'admin') {
+    if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
     const body = await req.json();
     const usersToUpdate = z.array(userUpdateSchema).parse(body);
 
-    const updatedUsers = await db.$transaction(
-      usersToUpdate.map((user) =>
-        db.user.update({
-          where: { id: user.id },
-          data: {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            updatedAt: true,
-          },
-        })
-      )
-    );
+    usersToUpdate.forEach(update => {
+      const index = users.findIndex(u => u.id === update.id);
+      if (index !== -1) {
+        const existingUser = users[index];
+        users[index] = { ...existingUser, ...update };
+      }
+    });
 
-    return NextResponse.json(updatedUsers);
+    return NextResponse.json(usersToUpdate);
+
   } catch (error) {
     console.error("[ADMIN_USERS_PATCH]", error);
+    if (error instanceof z.ZodError) {
+      return new NextResponse(JSON.stringify(error.issues), { status: 400 });
+    }
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== UserRole.ADMIN) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    const body = await req.json();
+    const idsSchema = z.object({ ids: z.array(z.string().min(1)) });
+    const { ids } = idsSchema.parse(body);
+
+    if (!ids.length) {
+      return new NextResponse("No user IDs provided", { status: 400 });
+    }
+
+    const initialLength = users.length;
+    users = users.filter(u => !ids.includes(u.id));
+    const deletedCount = initialLength - users.length;
+
+    return NextResponse.json({ deletedCount });
+
+  } catch (error) {
+    console.error("[ADMIN_USERS_DELETE]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }

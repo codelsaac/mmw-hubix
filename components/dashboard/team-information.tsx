@@ -2,59 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Users, Target, Award, Shield, Mail, Phone } from "lucide-react"
-
-const teamMembers = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    role: "Head IT Prefect",
-    email: "sarah.chen@school.edu",
-    phone: "ext. 1234",
-    avatar: "/professional-woman-diverse.png",
-    status: "admin",
-    specialties: ["Network Management", "Security"],
-  },
-  {
-    id: 2,
-    name: "Marcus Johnson",
-    role: "Deputy Head",
-    email: "marcus.johnson@school.edu",
-    phone: "ext. 1235",
-    avatar: "/professional-man.png",
-    status: "admin",
-    specialties: ["Hardware Support", "Training"],
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    role: "Senior Prefect",
-    email: "emily.rodriguez@school.edu",
-    phone: "ext. 1236",
-    avatar: "/professional-woman-tech.png",
-    status: "prefect",
-    specialties: ["Software Support", "Documentation"],
-  },
-  {
-    id: 4,
-    name: "David Kim",
-    role: "Senior Prefect",
-    email: "david.kim@school.edu",
-    phone: "ext. 1237",
-    avatar: "/professional-man-tech.png",
-    status: "prefect",
-    specialties: ["Database Management", "Web Development"],
-  },
-  {
-    id: 5,
-    name: "Alex Thompson",
-    role: "Junior Prefect",
-    email: "alex.thompson@school.edu",
-    phone: "ext. 1238",
-    avatar: "/young-professional.png",
-    status: "prefect",
-    specialties: ["User Support", "Mobile Devices"],
-  },
-]
+import { teamMembers } from "@/lib/team-data"
 
 const organizationStructure = [
   {

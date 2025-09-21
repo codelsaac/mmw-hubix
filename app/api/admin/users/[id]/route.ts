@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
-
-const prisma = new PrismaClient();
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+import { UserRole } from '@/lib/permissions';
 
 export async function PATCH(
   request: Request,
@@ -11,21 +11,34 @@ export async function PATCH(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (session?.user?.role !== 'admin') {
-    return new NextResponse('Unauthorized', { status: 401 });
+  if (session?.user?.role !== UserRole.ADMIN) {
+    return new NextResponse('Unauthorized', { status: 403 });
   }
 
   const userId = params.id;
-  const body = await request.json();
+
+  const schema = z.object({
+    name: z.string().min(1).optional(),
+    email: z.string().email().optional(),
+    role: z.enum(['ADMIN', 'HELPER', 'GUEST']).optional(),
+    department: z.string().optional(),
+    isActive: z.boolean().optional()
+  });
 
   try {
+    const body = await request.json();
+    const data = schema.parse(body);
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: body,
+      data
     });
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error('[USER_PATCH]', error);
+    if (error instanceof z.ZodError) {
+      return new NextResponse(JSON.stringify(error.issues), { status: 400 });
+    }
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

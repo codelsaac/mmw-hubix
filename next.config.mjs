@@ -13,7 +13,18 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    domains: [
+      'localhost',
+      'youtube.com',
+      'www.youtube.com',
+      'youtu.be',
+      'drive.google.com',
+      'i.ytimg.com',
+      'img.youtube.com'
+    ],
+    formats: ['image/webp', 'image/avif'],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   outputFileTracingRoot: __dirname,
 }

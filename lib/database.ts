@@ -440,57 +440,6 @@ export const ResourceDB = {
 }
 
 // ==========================================
-// TRAINING VIDEO MANAGEMENT
-// ==========================================
-
-export const TrainingVideoDB = {
-  // Get public training videos (visible to students)
-  async getPublicVideos() {
-    return await prisma.trainingVideo.findMany({
-      where: { isPublic: true },
-      include: {
-        creator: {
-          select: { name: true, email: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-  },
-
-  // Get all training videos (IT Prefect access)
-  async getAllVideos() {
-    return await prisma.trainingVideo.findMany({
-      include: {
-        creator: {
-          select: { name: true, email: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-  },
-
-  // Create training video
-  async createTrainingVideo(data: {
-    title: string
-    description?: string
-    videoUrl: string
-    category: string
-    duration?: number
-    isPublic?: boolean
-    createdBy?: string
-  }) {
-    return await prisma.trainingVideo.create({
-      data,
-      include: {
-        creator: {
-          select: { name: true, email: true }
-        }
-      }
-    })
-  }
-}
-
-// ==========================================
 // USER MANAGEMENT
 // ==========================================
 
@@ -504,7 +453,7 @@ export const UserDB = {
         email: true,
         role: true,
         department: true,
-        createdAt: true
+        // User model does not have createdAt in schema
       },
       orderBy: { name: 'asc' }
     })
@@ -515,7 +464,7 @@ export const UserDB = {
     return await prisma.user.findMany({
       where: {
         OR: [
-          { role: 'admin' },
+          { role: 'ADMIN' },
           { department: 'IT' }
         ]
       },
@@ -531,7 +480,7 @@ export const UserDB = {
   },
 
   // Update user role/department
-  async updateUser(id: string, data: { role?: string, department?: string }) {
+  async updateUser(id: string, data: { role?: 'ADMIN' | 'HELPER' | 'GUEST', department?: string }) {
     return await prisma.user.update({
       where: { id },
       data

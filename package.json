@@ -10,7 +10,11 @@
     "start": "next start",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset && npm run db:seed"
+    "db:reset": "prisma migrate reset && npm run db:seed",
+    "db:push:sqlite": "prisma db push --schema prisma/schema.sqlite.prisma",
+    "db:generate:sqlite": "prisma generate --schema prisma/schema.sqlite.prisma",
+    "db:seed:sqlite": "set DATABASE_URL=file:./prisma/dev.db && tsx prisma/seed.ts",
+    "dev:sqlite": "npm run db:push:sqlite && npm run db:generate:sqlite && next dev"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

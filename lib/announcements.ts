@@ -24,7 +24,7 @@ export interface Announcement {
 class AnnouncementService {
   async getAnnouncements(): Promise<Announcement[]> {
     try {
-      const response = await fetch('/api/announcements')
+      const response = await fetch('/api/announcements', { credentials: 'include' })
       if (!response.ok) {
         throw new Error('Failed to fetch announcements')
       }

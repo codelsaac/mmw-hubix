@@ -1,262 +1,399 @@
-# MMW Hubix - 學校資訊門戶網站
+Here’s the English translation of your document.
 
-> 為中華基督教會蒙民偉書院打造的現代化學校資訊門戶網站
+# MMW Hubix - School Information Portal
+> A modern school information portal website built for C.C.C. Mong Man Wai College
 
-## 📖 專案簡介
+## 📖 Project Overview
+MMW Hubix is a full-featured school information portal designed to provide a unified resource platform for students, teachers, and IT administrators. The platform integrates:
 
-**MMW Hubix** 是一個全功能的學校資訊門戶網站，旨在為學生、教師和 IT 管理員提供統一的資源平台。該平台整合了：
+- Public Resource Center: A curated collection of quick-access links to school resources
+- AI Assistant: A chatbot that answers campus-related questions
+- IT Admin Console: An internal management system including event management, task tracking, training video library, and more
 
-- **公開資源中心**：為學生和教職員工提供快速存取學校資源的連結集合
-- **活動消息**：社團活動和事件的消息系統
-- **AI 智慧助手**：回答校園相關問題的聊天機器人
-- **IT 管理後台**：內部管理系統，包含活動管理、任務追蹤、訓練影片庫等
+## 🚀 Getting Started
 
-## 🚀 快速開始
+### Requirements
+- Node.js 18.0 or higher
+- npm or pnpm (recommended)
+- MySQL 8.0+ (for production); SQLite can be used locally for development (no MySQL installation required)
 
-### 環境要求
+### Installation
 
-- **Node.js** 18.0 或更高版本
-- **npm** 或 **pnpm**（推薦）
-- **MySQL 8.0+**（開發與生產均使用）
-
-### 安裝步驟
-
-1. **克隆專案**
-   ```bash
-   git clone https://github.com/codelsaac/mmw-hubix.git
-   cd mmw-hubix
-   ```
-
-2. **安裝依賴**
-   ```bash
-   # 使用 npm
-   npm install
-
-   # 或使用 pnpm (推薦)
-   pnpm install
-   ```
-
-3. **設置資料庫**
-   ```bash
-   # 建立資料表與索引（MySQL）
-   npm run db:migrate
-
-   # 或使用 pnpm
-   pnpm db:migrate
-   ```
-
-4. **啟動開發伺服器**
-   ```bash
-   # 使用 npm
-   npm run dev
-
-   # 或使用 pnpm
-   pnpm dev
-   ```
-
-5. **打開瀏覽器**
-   
-   訪問 [http://localhost:3000](http://localhost:3000) 查看網站
-
-## 📁 專案結構
-
+1. Clone the repository
+```bash
+git clone https://github.com/codelsaac/mmw-hubix.git
+cd mmw-hubix
 ```
+
+2. Install dependencies
+```bash
+# using npm
+npm install
+# or using pnpm (recommended)
+pnpm install
+```
+
+3. Set up the database
+```bash
+# Create tables and indexes (MySQL)
+npm run db:migrate
+
+# or with pnpm
+pnpm db:migrate
+```
+
+4. Start the development server
+```bash
+# using npm
+npm run dev
+# or using pnpm
+pnpm dev
+```
+
+5. Open the browser
+Visit http://localhost:3000 to view the site.
+
+### Local Development (No MySQL? Use SQLite)
+If you don’t have MySQL installed on your computer, you can use SQLite for local development and switch back to MySQL when deploying to the server.
+
+1) Configure SQLite in .env.local:
+```env
+DATABASE_URL="file:./prisma/dev.db"
+```
+
+2) Push the schema and start the dev server (using the SQLite schema):
+```bash
+npm run dev:sqlite
+```
+
+3) Production (server) environment:
+- Set DATABASE_URL back to the MySQL connection string
+- Run npm run db:migrate to create tables
+
+## 📁 Project Structure
+```text
 mmw-hubix/
-├── app/                    # Next.js App Router 頁面
-│   ├── admin/             # 管理員後台頁面
-│   ├── api/               # API 路由
-│   ├── dashboard/         # IT 管理員儀表板
-│   ├── globals.css        # 全局樣式
-│   ├── layout.tsx         # 根佈局
-│   └── page.tsx          # 首頁
-├── components/            # React 元件
-│   ├── admin/            # 管理員相關元件
-│   ├── auth/             # 認證相關元件
-│   ├── dashboard/        # 儀表板元件
-│   └── ui/               # 基礎 UI 元件 (shadcn/ui)
-├── config/               # 配置文件
-├── hooks/                # 自定義 React Hooks
-├── lib/                  # 工具庫和數據處理
-├── prisma/              # 資料庫配置和遷移
-│   ├── schema.prisma    # 資料庫模型（MySQL）
-│   └── migrations/      # 資料庫遷移文件
-├── public/              # 靜態資源
-└── styles/              # 樣式文件
+├── app/                      # Next.js App Router pages
+│   ├── admin/                # Admin console pages
+│   ├── api/                  # API routes
+│   ├── dashboard/            # IT admin dashboard
+│   ├── globals.css           # Global styles
+│   ├── layout.tsx            # Root layout
+│   └── page.tsx              # Home page
+├── components/               # React components
+│   ├── admin/                # Admin-related components
+│   ├── auth/                 # Authentication components
+│   ├── dashboard/            # Dashboard components
+│   └── ui/                   # Base UI (shadcn/ui)
+├── config/                   # Configuration files
+├── hooks/                    # Custom React hooks
+├── lib/                      # Utilities and data logic
+├── prisma/                   # Database configuration and migrations
+│   ├── schema.prisma         # Database models (MySQL)
+│   └── migrations/           # Migration files
+├── public/                   # Static assets
+└── styles/                   # Stylesheets
 ```
 
-## 🔐 認證系統
+## 🔐 Authentication
+This project uses NextAuth.js for authentication and supports demo accounts.
 
-該專案使用 NextAuth.js 進行認證管理，支援演示帳戶登入：
-
-### 預設帳戶
-
-| 角色 | 電子郵件 | 密碼 | 權限 |
+### Default Accounts
+| Role | Email | Password | Permissions |
 |---|---|---|---|
-| **管理員 (Admin)** | `admin@cccmmw.edu.hk` | `mmw2025` | 完整後台管理權限 |
-| **IT 助手 (Helper)** | `helper@cccmmw.edu.hk` | `helper123` | IT 儀表板權限 |
-| **訪客 (Guest)** | `guest1@cccmmw.edu.hk` | `guest123` | 唯讀存取權限 |
+| Admin | `admin@cccmmw.edu.hk` | `mmw2025` | Full admin console access |
+| IT Helper | `helper@cccmmw.edu.hk` | `helper123` | IT dashboard access |
+| Guest | `guest1@cccmmw.edu.hk` | `guest123` | Read-only access |
 
-### 管理員快速登入密碼
+### Admin Quick-Login Passwords
 - `admin123`
 - `mmw-admin-2025`
 
-## ✨ 主要功能
+## ✨ Key Features
 
-### 🏠 公開首頁
-- **資源中心**：分類整理的學校資源連結
-- **活動消息**：最新活動和事件消息
-- **搜尋功能**：快速查找所需資源
-- **響應式設計**：支援所有裝置
+### 🏠 Public Homepage
+- Resource Center: Categorized school resource links
+- Search: Quickly find needed resources
+- Responsive Design: Works on all devices
 
-### 🤖 AI 智慧助手
-- 校園導航協助
-- 學校政策查詢
-- IT 技術支援
-- 課程表和重要日期查詢
-- 以「右下角浮動圓形按鈕」開啟聊天視窗。
+### 🤖 AI Assistant
+- Campus navigation help
+- School policy queries
+- IT troubleshooting
+- Timetables and key dates
+- Open the chat window using the floating circular button at the bottom-right.
 
-### 📊 IT 管理儀表板
-- **活動管理**：建立和追蹤 IT 相關活動
-- **任務系統**：分配和管理團隊任務
-- **內部行事曆**：團隊會議和訓練安排
-- **訓練影片庫**：IT 技能培訓資源
+### 📊 IT Admin Dashboard
+- Event Management: Create and track IT-related events
+- Task System: Assign and manage team tasks
+- Internal Calendar: Team meetings and training schedules
+- Training Video Library: IT skills training resources
 
-### ⚙️ 管理員後台
-- **使用者管理**：帳戶權限控制
-- **內容管理**：活動消息、資源、事件管理
-- **系統設定**：網站配置和維護
-- **分析報告**：使用統計和系統監控
+### ⚙️ Admin Console
+- User Management: Account permissions control
+- Content Management: Manage resources and events
+- System Settings: Site configuration and maintenance
+- Analytics: Usage statistics and system monitoring
 
-## 🛠 技術棧
+#### User Management (/admin/users)
+- Data grid (react-data-grid) for all users
+- Permission guard: only ADMIN can access
+- Inline editing: edit name, email, role, department, and isActive
+- Multi-select & batch actions:
+  - After selecting rows, you can “Batch change role” and “Batch delete”
+- Sorting & filtering:
+  - Sort by columns; filter by name, email, role, etc.
+- Undo/Redo:
+  - Basic undo/redo buttons; supports rolling back edits and batch operations
 
-### 前端
-- **Next.js 15** - React 全端框架
-- **TypeScript** - 類型安全
-- **Tailwind CSS** - 樣式框架
-- **shadcn/ui** - UI 元件庫
-- **Lucide React** - 圖示庫
+API:
+```http
+GET /api/admin/users
+```
+- Fetch the user list (requires ADMIN)
 
-### 後端
-- **Next.js API Routes** - 伺服器端 API
-- **NextAuth.js** - 認證系統
-- **Prisma** - 資料庫 ORM
-- **MySQL** - 主要資料庫（開發與生產）
+```http
+PATCH /api/admin/users
+Content-Type: application/json
 
-### 開發工具
-- **ESLint** - 程式碼檢查
-- **PostCSS** - CSS 處理
-- **TypeScript** - 靜態類型檢查
+[
+  {
+    "id": "user_id",
+    "name": "New Name",
+    "email": "user@example.com",
+    "role": "ADMIN" | "HELPER" | "GUEST",
+    "department": "IT",
+    "isActive": true
+  }
+]
+```
+- Batch update user fields (requires ADMIN)
 
-## 📋 可用指令
+```http
+DELETE /api/admin/users
+Content-Type: application/json
 
+{
+  "ids": ["id1", "id2", "id3"]
+}
+```
+- Batch delete users (requires ADMIN)
+
+## 🛠 Tech Stack
+
+### Frontend
+- Next.js 15 — Full-stack React framework
+- TypeScript — Type safety
+- Tailwind CSS — Utility-first styling
+- shadcn/ui — UI component library
+- Lucide React — Icon set
+
+### Backend
+- Next.js API Routes — Server-side APIs
+- NextAuth.js — Authentication
+- Prisma — ORM
+- MySQL — Primary production database (SQLite for local development)
+
+Note: Local SQLite uses prisma/schema.sqlite.prisma with file:./prisma/dev.db hard-coded, so it does not depend on DATABASE_URL in .env.
+
+### Dev Tools
+- ESLint — Linting
+- PostCSS — CSS processing
+- TypeScript — Static typing
+
+## 📋 Available Scripts
 ```bash
-# 開發
-npm run dev          # 啟動開發伺服器
-npm run build        # 建置生產版本
-npm run start        # 啟動生產伺服器
-npm run lint         # 執行程式碼檢查
+# Development
+npm run dev            # start dev server
+npm run build          # build for production
+npm run start          # start production server
+npm run lint           # run linter
 
-# 資料庫（MySQL）
-npm run db:migrate   # 執行資料庫遷移
+# Database (MySQL)
+npm run db:migrate     # run database migrations
+
+# Local (SQLite)
+npm run dev:sqlite           # push SQLite schema and start dev server
+npm run db:push:sqlite       # only push SQLite schema (create/update prisma/dev.db)
+npm run db:generate:sqlite   # generate Prisma Client for SQLite
+npm run db:seed:sqlite       # seed SQLite (creates admin account only)
+
+# Equivalent Prisma commands (for reference)
+# npx prisma db push --schema prisma/schema.sqlite.prisma
+# npx prisma generate --schema prisma/schema.sqlite.prisma
 ```
 
-## 🌐 部署
+## 🌐 Deployment
 
-### Vercel 部署（推薦）
-1. 推送程式碼到 GitHub
-2. 連接 Vercel 帳戶
-3. 導入專案
-4. 設置環境變數
-5. 部署
+### Deploy to Vercel (Recommended)
+1. Push code to GitHub
+2. Connect your Vercel account
+3. Import the project
+4. Set environment variables
+5. Deploy
 
-### 手動部署
-1. 建置專案：`npm run build`
-2. 上傳 `.next/` 資料夾到伺服器
-3. 設置 Node.js 環境
-4. 啟動：`npm start`
+### Manual Deployment
+1. Build: npm run build
+2. Upload the .next/ folder to your server
+3. Configure Node.js environment
+4. Start: npm start
 
-## 🔧 配置
+## 🔧 Configuration
 
-### 環境變數
-創建 `.env.local` 文件：
-
+### Environment Variables
+Create a .env.local file:
 ```env
-# 資料庫（MySQL）
-# 例：mysql://USER:PASSWORD@HOST:PORT/DBNAME?connection_limit=5
+# Database (MySQL)
+# Example: mysql://USER:PASSWORD@HOST:PORT/DBNAME?connection_limit=5
 DATABASE_URL="mysql://user:password@localhost:3306/mmw_hubix"
+
+# If you don't have MySQL locally, temporarily use SQLite:
+# DATABASE_URL="file:./prisma/dev.db"
 
 # NextAuth.js
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key"
 
-# 其他配置
+# Others
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-### 結構與型別調整說明（MySQL 最佳化）
-- 長文字欄位使用 MySQL 對應型別：
-  - `description`、`textContent` 等 → `@db.Text` 或 `@db.LongText`
-- URL/影像路徑等字串上限：
-  - `image`、`url`、`videoUrl`、`fileUrl` → `@db.VarChar(2048)`
-  - `fileName` → `@db.VarChar(255)`
-- JSON 字串欄位
-  - `permissions`、`attendees` → `@db.Text`
-- 其他注意事項：
-  - 主鍵 `id` 保持 `cuid()`，跨庫相容
-  - 複合唯一鍵如 `@@unique([title, club], name: "title_club")` 保留不變
-  - 外鍵刪除策略與 Prisma 定義一致（如 NextAuth 關聯 onDelete: Cascade）
+### Structure and Type Adjustments (MySQL Optimization)
+- Long text fields use appropriate MySQL types:
+  - description, textContent → @db.Text or @db.LongText
+- Max lengths for URLs/image paths:
+  - image, url, videoUrl, fileUrl → @db.VarChar(2048)
+  - fileName → @db.VarChar(255)
+- JSON string fields:
+  - permissions, attendees → @db.Text
+- Other notes:
+  - Keep primary key id as cuid() for cross-database compatibility
+  - Remove composite unique keys if unnecessary
+  - Align FK delete strategies with Prisma definitions (e.g., NextAuth relations onDelete: Cascade)
 
-### 驗證
-- 啟動本地伺服器並檢查各模組資料是否完整（公告、資源、活動、任務、訓練資源等）
-- 新增/更新/刪除動作是否正常（透過後台頁面）
+### Verification
+- Start the local server and check data completeness for each module (resources, events, tasks, training resources, etc.)
+- Verify create/update/delete actions via the admin pages
 
-### 網站配置
-編輯 `config/site.ts` 來自定義網站基本資訊：
-
+### Site Config
+Edit config/site.ts to customize site basics:
 ```typescript
 export const siteConfig = {
   name: "MMW Hubix",
   description: "School Information Portal for C.C.C. Mong Man Wai College",
   url: "https://mmw-hubix.vercel.app",
-  // ... 其他設定
+  // ... other settings
 }
 ```
 
-## 📝 開發指南
+## 📝 Development Guide
 
-### 添加新頁面
-1. 在 `app/` 目錄下創建新文件夾
-2. 添加 `page.tsx` 文件
-3. 使用 App Router 約定
+### Add a New Page
+1. Create a new folder under app/
+2. Add a page.tsx file
+3. Follow the App Router conventions
 
-### 創建新元件
-1. 在 `components/` 目錄下創建元件文件
-2. 使用 TypeScript 和 React
-3. 遵循命名約定
+### Create a New Component
+1. Add a file under components/
+2. Use TypeScript and React
+3. Follow naming conventions
 
-### 資料庫修改
-1. 編輯 `prisma/schema.prisma`
-2. 運行 `npm run db:migrate`
-3. 更新相關的 API 和元件
+### Database Changes
+1. Edit prisma/schema.prisma
+2. Run npm run db:migrate
+3. Update related APIs and components
 
-## 🤝 貢獻指南
+## 🤝 Contribution Guide
+1. Fork the repo
+2. Create a feature branch: git checkout -b feature/new-feature
+3. Commit changes: git commit -am 'Add new feature'
+4. Push the branch: git push origin feature/new-feature
+5. Open a Pull Request
 
-1. Fork 專案
-2. 創建功能分支：`git checkout -b feature/new-feature`
-3. 提交更改：`git commit -am 'Add new feature'`
-4. 推送分支：`git push origin feature/new-feature`
-5. 提交 Pull Request
+## 📄 License
+This project is licensed under the MIT License — see the LICENSE file for details.
 
-## 📄 授權
-
-本專案採用 MIT 授權條款 - 查看 [LICENSE](LICENSE) 文件了解詳情。
-
-## 🙏 致謝
-
-- 中華基督教會蒙民偉書院
-- IT Prefect 團隊
-- 所有貢獻者
+## 🙏 Acknowledgements
+- C.C.C. Mong Man Wai College
+- IT Prefect Team
+- All contributors
 
 ---
 
-**Made with ❤️ for C.C.C. Mong Man Wai College**
+## Deploying on Windows (Using MySQL)
+The following describes how to set up and run a production build connected to a MySQL database on Windows.
+
+### Step 1: Set Environment Variables
+You need to set DATABASE_URL so Prisma can connect to your MySQL database. Choose one of the methods below:
+
+#### Method A: Use a .env file (Recommended)
+This is the simplest method because it keeps your production settings within the project.
+
+1. In your project root (c:\Users\user\Documents\IT perfect\mmw-hubix), create a file named .env
+2. Put your MySQL connection string and other production env variables in it. Replace placeholders with your actual DB credentials.
+```dotenv
+# Production environment variables
+
+# 1. Database (MySQL)
+# Replace USER, PASSWORD, HOST, and DBNAME with your MySQL details.
+DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DBNAME?connection_limit=5"
+
+# 2. NextAuth.js
+# If you have a production domain, use it; otherwise localhost works for local prod testing.
+NEXTAUTH_URL="http://localhost:3000"
+
+# Generate a strong secret for production.
+# You can run `openssl rand -base64 32` in Git Bash or use an online generator.
+NEXTAUTH_SECRET="your-super-strong-random-secret-for-production"
+```
+
+Example:
+If your MySQL server runs on the same machine, your DATABASE_URL might look like:
+DATABASE_URL="mysql://root:my-secret-password@127.0.0.1:3306/mmw_hubix_prod?connection_limit=5"
+
+Important:
+Remember to URL-encode any special characters in the password (e.g., @ becomes %40, ! becomes %21).
+
+#### Method B: Set system variables via PowerShell
+This method sets variables directly in your Windows environment.
+
+- Current session only (lost when you close the terminal):
+```powershell
+$env:DATABASE_URL = "mysql://USER:PASSWORD@HOST:3306/DBNAME?connection_limit=5"
+$env:NEXTAUTH_URL = "http://localhost:3000"
+$env:NEXTAUTH_SECRET = "your-super-strong-random-secret-for-production"
+```
+
+- Persist for your user account:
+```powershell
+setx DATABASE_URL "mysql://USER:PASSWORD@HOST:3306/DBNAME?connection_limit=5"
+setx NEXTAUTH_URL "http://localhost:3000"
+setx NEXTAUTH_SECRET "your-super-strong-random-secret-for-production"
+```
+After running setx, you must close and reopen your PowerShell terminal for changes to take effect.
+
+### Step 2: Run the Application
+After setting the environment variables using one of the methods above, run the following commands from your project directory to start the production server connected to MySQL:
+
+1. Migrate the database:
+This creates tables in your MySQL database.
+```powershell
+npm run db:migrate
+```
+Prisma will prompt you to name the migration. You can call it initial-migration or drop-announcements-model.
+
+2. Build for production:
+```powershell
+npm run build
+```
+
+3. Start the production server:
+```powershell
+npm start
+```
+
+Your application will now run at http://localhost:3000 and be connected to your MySQL database.
+
+---
+
+Made with ❤️ for C.C.C. Mong Man Wai College

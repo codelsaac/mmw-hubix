@@ -1,18 +1,23 @@
 // Consolidated Training Hook
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { TrainingResource, TrainingService, CreateResourceRequest } from '@/lib/training'
 
 export function useTraining() {
   const [resources, setResources] = useState<TrainingResource[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Load resources on mount
+  // Load resources on mount with lazy initialization
   useEffect(() => {
-    loadResources()
-  }, [])
+    // Only load if not already initialized
+    if (!isInitialized) {
+      loadResources()
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
 
-  const loadResources = async () => {
+  const loadResources = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -24,7 +29,7 @@ export function useTraining() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const addResource = async (data: CreateResourceRequest): Promise<TrainingResource | null> => {
     try {
@@ -59,8 +64,8 @@ export function useTraining() {
   const updateViews = async (id: number) => {
     try {
       await TrainingService.updateViews(id)
-      setResources(prev => 
-        prev.map(r => 
+      setResources(prev =>
+        prev.map(r =>
           r.id === id ? { ...r, views: r.views + 1 } : r
         )
       )
