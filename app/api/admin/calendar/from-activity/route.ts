@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../auth/[...nextauth]/route'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/auth"
 import { PublicCalendarDB, ActivityDB } from '@/lib/database'
 
 // POST /api/admin/calendar/from-activity - Create calendar event from activity

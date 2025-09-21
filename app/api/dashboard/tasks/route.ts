@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
-import { TaskDB, prisma } from '@/lib/database'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/auth"
+import { TaskDB } from '@/lib/database'
+import { prisma } from '@/lib/prisma'
 
 // GET /api/dashboard/tasks - Get all tasks or user-specific tasks
 export async function GET(request: NextRequest) {

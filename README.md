@@ -97,6 +97,7 @@ mmw-hubix/
 
 ## 🔐 Authentication
 This project uses NextAuth.js for authentication and supports demo accounts.
+Default behavior: Users are logged out by default; there is no auto-login.
 
 ### Default Accounts
 | Role | Email | Password | Permissions |
@@ -104,10 +105,6 @@ This project uses NextAuth.js for authentication and supports demo accounts.
 | Admin | `admin@cccmmw.edu.hk` | `mmw2025` | Full admin console access |
 | IT Helper | `helper@cccmmw.edu.hk` | `helper123` | IT dashboard access |
 | Guest | `guest1@cccmmw.edu.hk` | `guest123` | Read-only access |
-
-### Admin Quick-Login Passwords
-- `admin123`
-- `mmw-admin-2025`
 
 ## ✨ Key Features
 
@@ -127,7 +124,7 @@ This project uses NextAuth.js for authentication and supports demo accounts.
 - Event Management: Create and track IT-related events
 - Task System: Assign and manage team tasks
 - Internal Calendar: Team meetings and training schedules
-- Training Video Library: IT skills training resources
+- Training Resources: Video, text, and file content (multi-content library)
 
 ### ⚙️ Admin Console
 - User Management: Account permissions control

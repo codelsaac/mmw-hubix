@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/auth"
 import { AnnouncementDB, PublicCalendarDB, ActivityDB, TrainingVideoDB } from '@/lib/database'
 
 // POST /api/test/storage - Test various storage functions

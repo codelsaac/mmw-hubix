@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { teamMembers } from "@/lib/team-data"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../auth/[...nextauth]/route"
+import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
 

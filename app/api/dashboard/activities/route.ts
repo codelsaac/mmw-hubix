@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
-import { ActivityDB, prisma } from '@/lib/database'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/auth"
+import { ActivityDB } from '@/lib/database'
+import { prisma } from '@/lib/prisma'
 
 // GET /api/dashboard/activities - Get recent IT Prefect activities
 export async function GET() {

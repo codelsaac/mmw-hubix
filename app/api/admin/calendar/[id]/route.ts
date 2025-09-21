@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../auth/[...nextauth]/route'
+import { authOptions } from '@/auth'
 import { PublicCalendarDB } from '@/lib/database'
 
 // PUT /api/admin/calendar/[id] - Update calendar event

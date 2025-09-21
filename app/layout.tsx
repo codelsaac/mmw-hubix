@@ -4,11 +4,11 @@ import { Source_Sans_3, Playfair_Display } from "next/font/google"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/auth";
 import { cn } from "@/lib/utils"
 import { Header } from "@/components/header";
 import { FooterSitemap } from "@/components/footer-sitemap";
 import { SessionProvider } from "@/components/auth/session-provider";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],

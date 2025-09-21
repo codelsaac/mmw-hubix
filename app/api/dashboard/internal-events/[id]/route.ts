@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../auth/[...nextauth]/route'
+import { authOptions } from '@/auth'
 import { InternalEventDB } from '@/lib/database'
 
 // PUT /api/dashboard/internal-events/[id] - Update internal event

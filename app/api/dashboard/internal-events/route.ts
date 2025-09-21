@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
-import { InternalEventDB, prisma } from '@/lib/database'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/auth"
+import { InternalEventDB } from '@/lib/database'
+import { prisma } from '@/lib/prisma'
 
 // GET /api/dashboard/internal-events - Get internal events for current user
 export async function GET() {
