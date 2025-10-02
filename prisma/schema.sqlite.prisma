@@ -62,6 +62,7 @@ model User {
   assignedActivities Activity[] @relation("AssignedActivities")
   createdTasks      Task[]     @relation("CreatedTasks")
   assignedTasks     Task[]     @relation("AssignedTasks")
+  createdAnnouncements Announcement[]
 }
 
 model VerificationToken {
@@ -192,4 +193,24 @@ enum ResourceContentType {
   VIDEO
   TEXT
   FILE
+}
+
+model Announcement {
+  id           String   @id @default(cuid())
+  title        String
+  club         String
+  date         DateTime
+  time         String
+  location     String?
+  description  String?
+  maxAttendees Int?
+  attendees    Int      @default(0)
+  type         String   @default("general")
+  status       String   @default("active")
+  isPublic     Boolean  @default(true)
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  creator      User?    @relation(fields: [createdBy], references: [id])
 }

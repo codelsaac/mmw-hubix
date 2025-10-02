@@ -3,10 +3,10 @@
 import type React from "react"
 
 import { useState, useEffect, useMemo } from "react"
-import { DataGrid, type Column, SelectColumn, type SortColumn, textEditor } from 'react-data-grid';
+import DataGrid, { Column, SelectColumn, SortColumn, textEditor } from 'react-data-grid';
 // Use any for editor props to avoid version-specific type issues
 
-import 'react-data-grid/lib/styles.css';
+// CSS is included in the component, no separate import needed for v6
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

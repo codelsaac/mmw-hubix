@@ -99,12 +99,18 @@ mmw-hubix/
 This project uses NextAuth.js for authentication and supports demo accounts.
 Default behavior: Users are logged out by default; there is no auto-login.
 
+**Note:** The system now uses **username-based** authentication instead of email.
+
 ### Default Accounts
-| Role | Email | Password | Permissions |
+| Role | Username | Password | Permissions |
 |---|---|---|---|
-| Admin | `admin@cccmmw.edu.hk` | `mmw2025` | Full admin console access |
-| IT Helper | `helper@cccmmw.edu.hk` | `helper123` | IT dashboard access |
-| Guest | `guest1@cccmmw.edu.hk` | `guest123` | Read-only access |
+| Admin | `admin` | `mmw2025` | Full admin console access |
+| IT Helper | `helper` | `helper123` | IT dashboard access |
+| IT Helper | `ithelper` | `ithelper2025` | IT dashboard access |
+| Guest | `guest` | `guest123` | Read-only access |
+| Guest | `itprefect` | `prefect123` | Read-only access |
+| Guest | `student1` | `student123` | Read-only access |
+| Guest | `student2` | `student456` | Read-only access |
 
 ## ✨ Key Features
 

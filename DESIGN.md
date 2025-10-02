@@ -2,7 +2,7 @@
 
 #### *1. Project Title & Vision*
 
-*   *Project Title:* MMW Hubix (Temporary Name)
+*   *Project Title:* MMW Hubix
 *   *Vision:* To create a modern, centralized, and user-friendly web portal that consolidates all essential school-related information, resources, and tools for students and staff, while also serving as a private management hub for the IT Prefect team. The goal is to replace the outdated IT Prefect sites with a superior, all-in-one solution.
 *   *Project Status:* Approved by FKW. Initial planning phase complete.
 

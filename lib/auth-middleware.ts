@@ -14,7 +14,7 @@ export interface AuthenticatedUser {
 }
 
 // Cache authentication checks to reduce database calls
-const cachedAuth = cache(auth)
+const cachedAuth = cache(() => getServerSession(authOptions))
 
 /**
  * Server-side authentication check with caching

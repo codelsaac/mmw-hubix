@@ -16,7 +16,7 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -29,9 +29,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
     try {
       const authService = AuthService.getInstance()
-      await authService.signInWithEmail(email, password)
+      await authService.signInWithUsername(username, password)
       onOpenChange(false)
-      setEmail("")
+      setUsername("")
       setPassword("")
       router.push("/dashboard")
     } catch (error) {
@@ -56,15 +56,15 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="email"
-                type="email"
-                placeholder="your-email@cccmmw.edu.hk"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="pl-10"
                 required
               />
@@ -92,8 +92,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           <div className="bg-muted/50 p-4 rounded-lg">
             <h4 className="font-medium text-sm mb-2">Demo Accounts:</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Admin: admin@cccmmw.edu.hk / mmw2025</li>
-              <li>• IT Prefect: itprefect@cccmmw.edu.hk / prefect123</li>
+              <li>• Admin: admin / mmw2025</li>
+              <li>• IT Prefect: itprefect / prefect123</li>
             </ul>
           </div>
 

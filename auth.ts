@@ -7,7 +7,7 @@ const DEMO_ACCOUNTS = [
   // Guest - Public access with training materials
   { 
     id: "0", 
-    email: "guest@cccmmw.edu.hk", 
+    username: "guest", 
     password: "guest123", 
     name: "Guest User", 
     role: UserRole.GUEST, 
@@ -17,7 +17,7 @@ const DEMO_ACCOUNTS = [
   // Admin - Full system access
   { 
     id: "1", 
-    email: "admin@cccmmw.edu.hk", 
+    username: "admin", 
     password: "mmw2025", 
     name: "System Administrator", 
     role: UserRole.ADMIN, 
@@ -27,7 +27,7 @@ const DEMO_ACCOUNTS = [
   // Alternative admin login passwords
   { 
     id: "1", 
-    email: "admin@cccmmw.edu.hk", 
+    username: "admin", 
     password: "admin123", 
     name: "System Administrator", 
     role: UserRole.ADMIN, 
@@ -36,7 +36,7 @@ const DEMO_ACCOUNTS = [
   },
   { 
     id: "1", 
-    email: "admin@cccmmw.edu.hk", 
+    username: "admin", 
     password: "mmw-admin-2025", 
     name: "System Administrator", 
     role: UserRole.ADMIN, 
@@ -46,7 +46,7 @@ const DEMO_ACCOUNTS = [
   // Helper - IT Perfect system management only
   { 
     id: "2", 
-    email: "helper@cccmmw.edu.hk", 
+    username: "helper", 
     password: "helper123", 
     name: "IT Assistant", 
     role: UserRole.HELPER, 
@@ -55,7 +55,7 @@ const DEMO_ACCOUNTS = [
   },
   { 
     id: "3", 
-    email: "ithelper@cccmmw.edu.hk", 
+    username: "ithelper", 
     password: "ithelper2025", 
     name: "IT System Assistant", 
     role: UserRole.HELPER, 
@@ -65,7 +65,7 @@ const DEMO_ACCOUNTS = [
   // IT Prefect - View only access
   { 
     id: "4", 
-    email: "itprefect@cccmmw.edu.hk", 
+    username: "itprefect", 
     password: "prefect123", 
     name: "IT Prefect Member", 
     role: UserRole.GUEST, 
@@ -74,7 +74,7 @@ const DEMO_ACCOUNTS = [
   },
   { 
     id: "5", 
-    email: "student1@cccmmw.edu.hk", 
+    username: "student1", 
     password: "student123", 
     name: "Student Zhang", 
     role: UserRole.GUEST, 
@@ -83,7 +83,7 @@ const DEMO_ACCOUNTS = [
   },
   { 
     id: "6", 
-    email: "student2@cccmmw.edu.hk", 
+    username: "student2", 
     password: "student456", 
     name: "Student Li", 
     role: UserRole.GUEST, 
@@ -97,21 +97,21 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        if (!credentials?.username || !credentials?.password) return null
         
         // Check demo accounts
         const user = DEMO_ACCOUNTS.find(
-          account => account.email === credentials.email && account.password === credentials.password
+          account => account.username === credentials.username && account.password === credentials.password
         )
         
         if (user) {
           return {
             id: user.id,
-            email: user.email,
+            username: user.username,
             name: user.name,
             role: user.role,
             department: user.department,

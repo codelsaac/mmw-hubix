@@ -82,14 +82,16 @@ export const AnnouncementDB = {
       where: { id }
     })
     
-    if (!announcement || announcement.attendees >= announcement.maxAttendees) {
+    if (!announcement || (announcement.maxAttendees && announcement.attendees >= announcement.maxAttendees)) {
       return null
     }
 
     return await prisma.announcement.update({
       where: { id },
       data: {
-        attendees: announcement.attendees + 1
+        attendees: {
+          increment: 1
+        }
       }
     })
   }

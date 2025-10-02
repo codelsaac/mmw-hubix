@@ -32,8 +32,8 @@ This document outlines the steps to perform a quick smoke test to ensure the app
     -   **Login:**
         -   Navigate to the login page.
         -   Log in with the default admin credentials:
-            -   **Email:** `admin@cccmmw.edu.hk`
-            -   **Password:** (The default password you have set)
+            -   **Username:** `admin`
+            -   **Password:** `mmw2025`
         -   Verify that you are redirected to the admin dashboard.
     -   **Announcements:**
         -   Navigate to the announcements page.
