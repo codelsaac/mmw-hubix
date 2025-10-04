@@ -3,20 +3,41 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create default admin user
-  const adminEmail = 'admin@cccmmw.edu.hk'
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@cccmmw.edu.hk' },
-    update: {},
-    create: {
-      email: 'admin@cccmmw.edu.hk',
-      name: 'Admin User',
+  // Demo accounts matching auth.ts configuration
+  const demoUsers = [
+    {
+      username: 'guest',
+      name: 'Guest User',
+      role: 'GUEST',
+      department: 'Public',
+      isActive: true,
+    },
+    {
+      username: 'admin',
+      name: 'System Administrator',
       role: 'ADMIN',
+      department: 'Admin',
+      isActive: true,
+    },
+    {
+      username: 'helper',
+      name: 'IT Assistant',
+      role: 'HELPER',
       department: 'IT',
       isActive: true,
     },
-  })
-  console.log('Admin user seeded successfully!')
+  ]
+
+  for (const user of demoUsers) {
+    await prisma.user.upsert({
+      where: { username: user.username },
+      update: {},
+      create: user,
+    })
+    console.log(`✓ ${user.name} (${user.username}) seeded`)
+  }
+
+  console.log('\n✅ All demo users seeded successfully!')
 }
 
 main()

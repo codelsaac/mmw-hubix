@@ -1,14 +1,31 @@
-Here’s the English translation of your document.
-
 # MMW Hubix - School Information Portal
-> A modern school information portal website built for C.C.C. Mong Man Wai College
+> A modern, centralized web portal consolidating essential school information, resources, and tools for students, teachers, and IT administrators at C.C.C. Mong Man Wai College
 
-## 📖 Project Overview
-MMW Hubix is a full-featured school information portal designed to provide a unified resource platform for students, teachers, and IT administrators. The platform integrates:
+## 📖 Project Overview & Vision
+MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform that serves both public and internal needs. The portal provides:
 
-- Public Resource Center: A curated collection of quick-access links to school resources
-- AI Assistant: A chatbot that answers campus-related questions
-- IT Admin Console: An internal management system including event management, task tracking, training video library, and more
+**Public Features:**
+- **Resource Hub**: Curated links to school resources organized by category (Academics, Student Life, Resources)
+- **AI Assistant**: Conversational chatbot for campus navigation, schedules, policies, and IT support
+- **Club Announcements**: Public posting system for school club events and activities
+
+**Internal IT Prefect System:**
+- **Team Dashboard**: Mission statement, organizational structure, and internal communications
+- **Event Calendar**: Internal meetings, duties, and training session management
+- **Training Library**: Categorized repository of training videos and materials
+- **Admin CMS**: Content management system for updating all website content
+
+**User Roles:**
+- **Public Users**: Students, teachers, staff (no login required)
+- **IT Prefects**: Team members with dashboard access via school Google accounts
+- **IT Prefect Admins**: Full administrative rights for content and user management
+
+## 🎨 Design & UX Guidelines
+- **Modern & Clean**: Professional aesthetic avoiding clutter
+- **School Branding**: Incorporate school colors and logo appropriately
+- **Responsive Design**: Fully functional on desktop, tablet, and mobile
+- **Intuitive Navigation**: Quick access with minimal clicks required
+- **Accessibility**: Consider users with different abilities and devices
 
 ## 🚀 Getting Started
 
@@ -96,47 +113,41 @@ mmw-hubix/
 ```
 
 ## 🔐 Authentication
-This project uses NextAuth.js for authentication and supports demo accounts.
-Default behavior: Users are logged out by default; there is no auto-login.
+This project uses NextAuth.js with **username-based** authentication (not email). Default behavior: Users are logged out by default; there is no auto-login.
 
-**Note:** The system now uses **username-based** authentication instead of email.
-
-### Default Accounts
-| Role | Username | Password | Permissions |
+### Default Demo Accounts
+| Role | Username | Password | Access Level |
 |---|---|---|---|
-| Admin | `admin` | `mmw2025` | Full admin console access |
-| IT Helper | `helper` | `helper123` | IT dashboard access |
-| IT Helper | `ithelper` | `ithelper2025` | IT dashboard access |
-| Guest | `guest` | `guest123` | Read-only access |
-| Guest | `itprefect` | `prefect123` | Read-only access |
-| Guest | `student1` | `student123` | Read-only access |
-| Guest | `student2` | `student456` | Read-only access |
+| **IT Prefect Admin** | `admin` | `mmw2025` | Full admin console access |
+| **IT Prefect** | `helper` | `helper123` | IT dashboard access |
+| **IT Prefect** | `ithelper` | `ithelper2025` | IT dashboard access |
+| **Public User** | `guest` | `guest123` | Read-only access |
+| **Public User** | `itprefect` | `prefect123` | Read-only access |
+| **Public User** | `student1` | `student123` | Read-only access |
+| **Public User** | `student2` | `student456` | Read-only access |
+
+**Note:** Production deployment uses Google OAuth with school accounts for IT Prefect authentication.
 
 ## ✨ Key Features
 
-### 🏠 Public Homepage
-- Resource Center: Categorized school resource links
-- Search: Quickly find needed resources
-- Responsive Design: Works on all devices
+### 🏠 Public Website (No Login Required)
+- **Resource Hub**: Curated collection of school resources organized by category (Academics, Student Life, Resources) with search functionality
+- **Club Announcements**: Public posting system for school club events with details, dates, and descriptions
+- **AI Assistant**: Conversational chatbot accessible via floating button for campus navigation, schedules, policies, and IT support
+- **Responsive Design**: Fully functional on desktop, tablet, and mobile devices
 
-### 🤖 AI Assistant
-- Campus navigation help
-- School policy queries
-- IT troubleshooting
-- Timetables and key dates
-- Open the chat window using the floating circular button at the bottom-right.
+### 🔐 IT Prefect System (Authenticated)
+- **Team Dashboard**: Mission statement, organizational structure, and internal communications
+- **Internal Calendar**: Manage team meetings, duties, and training sessions (viewable by all prefects, editable by admins)
+- **Training Library**: Categorized repository of training videos and materials with search functionality
+- **Event Management**: Create and track IT-related events and activities
+- **Task System**: Assign and manage team tasks and responsibilities
 
-### 📊 IT Admin Dashboard
-- Event Management: Create and track IT-related events
-- Task System: Assign and manage team tasks
-- Internal Calendar: Team meetings and training schedules
-- Training Resources: Video, text, and file content (multi-content library)
-
-### ⚙️ Admin Console
-- User Management: Account permissions control
-- Content Management: Manage resources and events
-- System Settings: Site configuration and maintenance
-- Analytics: Usage statistics and system monitoring
+### ⚙️ Admin Console (Admin Only)
+- **User Management**: Account permissions, role assignment, and access control
+- **Content Management**: Update homepage links, club announcements, and internal pages
+- **System Settings**: Site configuration, maintenance, and customization
+- **Analytics**: Usage statistics and system monitoring
 
 #### User Management (/admin/users)
 - Data grid (react-data-grid) for all users

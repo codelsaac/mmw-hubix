@@ -32,3 +32,6 @@ prisma/*.db
 *.sqlite
 *.db
 *.db-journal
+
+# IDE
+.cursor/
