@@ -4,6 +4,7 @@ import path from 'path'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 
+import { logger } from "@/lib/logger"
 const ALLOWED_FILE_TYPES = {
   // Documents
   'application/pdf': 'documents',
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Upload error:', error)
+    logger.error('Upload error:', error)
     return NextResponse.json({ success: false, error: 'Upload failed' })
   }
 }

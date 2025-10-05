@@ -24,6 +24,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
 
+import { logger } from "@/lib/logger"
 const addUserSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -66,7 +67,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       toast({ title: "User created successfully!" });
       onSuccess(newUser);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast({ title: "Error creating user", description: "Please try again.", variant: "destructive" });
     }
   }

@@ -45,6 +45,7 @@ import { VideoPlayer } from "@/components/video-player"
 import { useAuth } from "@/hooks/use-auth"
 import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
+import { logger } from "@/lib/logger"
 const categories = [
   { id: "all", name: "All Resources", icon: BookOpen, count: 0 },
   { id: "basics", name: "IT Basics", icon: Monitor, count: 0 },
@@ -199,10 +200,10 @@ export function TrainingLibrary() {
 
       const newResource = addResource(resourceData)
 
-      console.log(`[v0] ${selectedContentType} resource added to library:`, newResource)
+      logger.log(`[v0] ${selectedContentType} resource added to library:`, newResource)
       setShowUploadDialog(false)
     } catch (error) {
-      console.error('Error uploading resource:', error)
+      logger.error('Error uploading resource:', error)
       alert('Failed to upload resource. Please try again.')
     } finally {
       setIsUploading(false)

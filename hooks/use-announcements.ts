@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { announcementService, type Announcement } from "@/lib/announcements"
 
+import { logger } from "@/lib/logger"
 export function useAnnouncements() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
@@ -13,7 +14,7 @@ export function useAnnouncements() {
       const data = await announcementService.getAnnouncements()
       setAnnouncements(data)
     } catch (error) {
-      console.error("Error loading announcements:", error)
+      logger.error("Error loading announcements:", error)
     } finally {
       setLoading(false)
     }

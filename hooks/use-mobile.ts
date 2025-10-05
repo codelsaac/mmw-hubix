@@ -21,8 +21,13 @@ export function useIsMobile() {
     // Set initial value
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     
+    // Use modern event listener API with proper cleanup
     mql.addEventListener("change", onChange)
-    return () => mql.removeEventListener("change", onChange)
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      mql.removeEventListener("change", onChange)
+    }
   }, [])
 
   // Return false during SSR to prevent hydration mismatch

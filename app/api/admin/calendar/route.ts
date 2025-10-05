@@ -4,6 +4,7 @@ import { authOptions } from "@/auth"
 import { PublicCalendarDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 
+import { logger } from "@/lib/logger"
 // GET /api/admin/calendar - Get all public calendar events for admin management
 export async function GET() {
   try {
@@ -17,7 +18,7 @@ export async function GET() {
     const events = await PublicCalendarDB.getAllPublicEvents()
     return NextResponse.json(events)
   } catch (error) {
-    console.error('Error fetching calendar events:', error)
+    logger.error('Error fetching calendar events:', error)
     return NextResponse.json({ error: 'Failed to fetch calendar events' }, { status: 500 })
   }
 }
@@ -25,9 +26,9 @@ export async function GET() {
 // POST /api/admin/calendar - Create new public calendar event
 export async function POST(request: NextRequest) {
   try {
-    console.log('POST /api/admin/calendar - Starting request')
+    logger.log('POST /api/admin/calendar - Starting request')
     const session = await getServerSession(authOptions)
-    console.log('Session:', { 
+    logger.log('Session:', { 
       user: session?.user ? { 
         id: session.user.id, 
         email: session.user.email, 
@@ -37,14 +38,14 @@ export async function POST(request: NextRequest) {
     })
     
     const data = await request.json()
-    console.log('Request data:', data)
+    logger.log('Request data:', data)
 
     // Check if this is a public event (isVisible: true)
     const isPublicEvent = data.isVisible === true
 
     // Only admins can create public events
     if (isPublicEvent && (!session?.user || session.user.role !== 'admin')) {
-      console.log('Authorization failed - only admins can create public events:', {
+      logger.log('Authorization failed - only admins can create public events:', {
         hasUser: !!session?.user,
         role: session?.user?.role,
         department: session?.user?.department,
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Allow admins and IT department users to create internal calendar events
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
-      console.log('Authorization failed - not admin or IT department:', {
+      logger.log('Authorization failed - not admin or IT department:', {
         hasUser: !!session?.user,
         role: session?.user?.role,
         department: session?.user?.department
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure the user exists in the database first
-    console.log('Ensuring user exists:', session.user.id)
+    logger.log('Ensuring user exists:', session.user.id)
     await prisma.user.upsert({
       where: { id: session.user.id },
       update: {
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         department: session.user.department || 'Admin',
       }
     })
-    console.log('User ensured in database')
+    logger.log('User ensured in database')
     
     const event = await PublicCalendarDB.createPublicEvent({
       title: data.title,
@@ -94,10 +95,10 @@ export async function POST(request: NextRequest) {
       createdBy: session.user.id
     })
 
-    console.log('Event created successfully:', event.id)
+    logger.log('Event created successfully:', event.id)
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
-    console.error('Error creating calendar event:', error)
+    logger.error('Error creating calendar event:', error)
     return NextResponse.json({ error: `Failed to create calendar event: ${error.message}` }, { status: 500 })
   }
 }

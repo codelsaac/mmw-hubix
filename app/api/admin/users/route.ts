@@ -5,6 +5,8 @@ import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
 import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation"
+import { logger } from "@/lib/logger"
+import { withDatabaseLock } from "@/lib/database-lock"
 
 // In-memory store for demonstration purposes
 let users = [...teamMembers];
@@ -27,7 +29,7 @@ export async function GET() {
     }
     return NextResponse.json(users);
   } catch (error) {
-    console.error("[ADMIN_USERS_GET]", error);
+    logger.error("[ADMIN_USERS_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -46,21 +48,26 @@ export async function POST(req: Request) {
     }
     const newUserData = validation.data;
 
-    const newUser = {
-      ...newUserData,
-      id: String(users.length + 1),
-      lastLoginAt: new Date().toISOString(),
-      avatar: "/abstract-profile.png",
-      phone: "",
-      specialties: [],
-      status: newUserData.role,
-    };
+    // Use database lock to prevent race conditions
+    const result = await withDatabaseLock('users', async () => {
+      const newUser = {
+        ...newUserData,
+        id: String(users.length + 1),
+        lastLoginAt: new Date().toISOString(),
+        avatar: "/abstract-profile.png",
+        phone: "",
+        specialties: [],
+        status: newUserData.role,
+      };
 
-    users.push(newUser);
-    return NextResponse.json(newUser, { status: 201 });
+      users.push(newUser);
+      return newUser;
+    });
+
+    return NextResponse.json(result, { status: 201 });
 
   } catch (error) {
-    console.error("[ADMIN_USERS_POST]", error);
+    logger.error("[ADMIN_USERS_POST]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }
@@ -89,7 +96,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json(usersToUpdate);
 
   } catch (error) {
-    console.error("[ADMIN_USERS_PATCH]", error);
+    logger.error("[ADMIN_USERS_PATCH]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }
@@ -119,7 +126,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ deletedCount });
 
   } catch (error) {
-    console.error("[ADMIN_USERS_DELETE]", error);
+    logger.error("[ADMIN_USERS_DELETE]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }

@@ -4,6 +4,7 @@ import { authOptions } from "@/auth"
 import { ActivityDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 
+import { logger } from "@/lib/logger"
 // GET /api/dashboard/activities - Get recent IT Prefect activities
 export async function GET() {
   try {
@@ -16,7 +17,7 @@ export async function GET() {
     const activities = await ActivityDB.getRecentActivities(10)
     return NextResponse.json(activities)
   } catch (error) {
-    console.error('Error fetching activities:', error)
+    logger.error('Error fetching activities:', error)
     return NextResponse.json({ error: 'Failed to fetch activities' }, { status: 500 })
   }
 }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(activity, { status: 201 })
   } catch (error) {
-    console.error('Error creating activity:', error)
+    logger.error('Error creating activity:', error)
     return NextResponse.json({ error: 'Failed to create activity' }, { status: 500 })
   }
 }

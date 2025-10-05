@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { InternalEventDB } from '@/lib/database'
 
+import { logger } from "@/lib/logger"
 // PUT /api/dashboard/internal-events/[id] - Update internal event
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -27,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(event)
   } catch (error) {
-    console.error('Error updating internal event:', error)
+    logger.error('Error updating internal event:', error)
     return NextResponse.json({ error: 'Failed to update internal event' }, { status: 500 })
   }
 }
@@ -52,7 +53,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       message: 'Internal event deleted successfully' 
     })
   } catch (error) {
-    console.error('Error deleting internal event:', error)
+    logger.error('Error deleting internal event:', error)
     return NextResponse.json({ error: 'Failed to delete internal event' }, { status: 500 })
   }
 }

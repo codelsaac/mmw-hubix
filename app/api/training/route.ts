@@ -4,6 +4,7 @@ import { authOptions } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
+import { logger } from "@/lib/logger"
 export async function GET() {
   try {
     const resources = await prisma.trainingResource.findMany({
@@ -23,7 +24,7 @@ export async function GET() {
 
     return NextResponse.json(resources)
   } catch (error) {
-    console.error('Error fetching training resources:', error)
+    logger.error('Error fetching training resources:', error)
     return NextResponse.json(
       { error: 'Failed to fetch training resources' },
       { status: 500 }
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(resource, { status: 201 })
   } catch (error) {
-    console.error('Error creating training resource:', error)
+    logger.error('Error creating training resource:', error)
     return NextResponse.json(
       { error: 'Failed to create training resource' },
       { status: 500 }

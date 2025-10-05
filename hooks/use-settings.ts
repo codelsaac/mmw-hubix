@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
+import { logger } from "@/lib/logger"
 interface Settings {
   isMaintenanceMode: boolean
 }
@@ -23,7 +24,7 @@ export function useSettings() {
           const parsed = JSON.parse(savedSettings)
           setSettings(parsed)
         } catch (error) {
-          console.error('Failed to parse saved settings:', error)
+          logger.error('Failed to parse saved settings:', error)
         }
       }
     }

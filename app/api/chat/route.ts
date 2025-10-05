@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+import { logger } from "@/lib/logger"
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json()
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`OpenRouter API error: ${response.status} - ${errorText}`)
+      logger.error(`OpenRouter API error: ${response.status} - ${errorText}`)
       throw new Error(`OpenRouter API error: ${response.status}`)
     }
 
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: assistantMessage })
   } catch (error) {
-    console.error("Chat API error:", error)
+    logger.error("Chat API error:", error)
     return NextResponse.json({ error: "Failed to get AI response" }, { status: 500 })
   }
 }

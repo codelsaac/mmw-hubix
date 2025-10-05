@@ -16,6 +16,7 @@ import { useDashboard } from "@/hooks/use-dashboard"
 import { useAuth } from "@/hooks/use-auth"
 import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
+import { logger } from "@/lib/logger"
 const eventTypes = {
   meeting: { color: "bg-blue-500", label: "Meeting" },
   training: { color: "bg-green-500", label: "Training" },
@@ -104,7 +105,7 @@ export function InternalCalendar() {
       }
 
       // Create either internal or public event based on toggle
-      console.log('Creating event:', { isCreatePublic, eventData, isAdmin })
+      logger.log('Creating event:', { isCreatePublic, eventData, isAdmin })
       
       // Only allow admins to create public events
       if (isCreatePublic && !isAdmin) {
@@ -112,7 +113,7 @@ export function InternalCalendar() {
       }
       
       if (isCreatePublic && isAdmin) {
-        console.log('Creating public event with data:', { ...eventData, isVisible: true })
+        logger.log('Creating public event with data:', { ...eventData, isVisible: true })
         await createPublicEvent({
           ...eventData,
           isVisible: true
@@ -125,7 +126,7 @@ export function InternalCalendar() {
           status: "new",
         })
       } else {
-        console.log('Creating internal event with data:', { ...eventData, attendees: [] })
+        logger.log('Creating internal event with data:', { ...eventData, attendees: [] })
         await createInternalEvent({
           ...eventData,
           attendees: []
@@ -153,7 +154,7 @@ export function InternalCalendar() {
       setIsAddEventOpen(false)
       setIsCreatePublic(false)
     } catch (err) {
-      console.error('Error creating event:', err)
+      logger.error('Error creating event:', err)
       // You could add toast notification here
     } finally {
       setIsSubmitting(false)

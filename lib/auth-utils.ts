@@ -3,6 +3,7 @@ import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { createErrorResponse } from "./validation"
 
+import { logger } from "@/lib/logger"
 export interface AuthenticatedUser {
   id: string
   email?: string
@@ -20,7 +21,7 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
     }
     return session.user as AuthenticatedUser
   } catch (error) {
-    console.error("Error getting authenticated user:", error)
+    logger.error("Error getting authenticated user:", error)
     return null
   }
 }
