@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { TaskDB } from '@/lib/database'
 
+import { logger } from "@/lib/logger"
 // PUT /api/dashboard/tasks/[id] - Update task
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -25,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(task)
   } catch (error) {
-    console.error('Error updating task:', error)
+    logger.error('Error updating task:', error)
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
   }
 }
@@ -42,7 +43,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const task = await TaskDB.completeTask(params.id)
     return NextResponse.json(task)
   } catch (error) {
-    console.error('Error completing task:', error)
+    logger.error('Error completing task:', error)
     return NextResponse.json({ error: 'Failed to complete task' }, { status: 500 })
   }
 }

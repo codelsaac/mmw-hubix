@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger"
 export interface VideoFile {
   id: string
   originalName: string
@@ -32,7 +33,7 @@ class VideoStorageService {
         this.videoFiles = new Map(videoFilesArray.map((vf: VideoFile) => [vf.id, vf]))
       }
     } catch (error) {
-      console.warn('Failed to load video files from localStorage:', error)
+      logger.warn('Failed to load video files from localStorage:', error)
     }
   }
 
@@ -43,7 +44,7 @@ class VideoStorageService {
       const videoFilesArray = Array.from(this.videoFiles.values())
       localStorage.setItem("mmw-video-files", JSON.stringify(videoFilesArray))
     } catch (error) {
-      console.warn('Failed to save video files to localStorage:', error)
+      logger.warn('Failed to save video files to localStorage:', error)
     }
   }
 
@@ -127,7 +128,7 @@ class VideoStorageService {
       }
       return null
     } catch (error) {
-      console.error('Failed to get video URL:', error)
+      logger.error('Failed to get video URL:', error)
       return null
     }
   }

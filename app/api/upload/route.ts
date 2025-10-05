@@ -3,7 +3,9 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 
+import { logger } from "@/lib/logger"
 const ALLOWED_FILE_TYPES = {
   // Documents
   'application/pdf': 'documents',
@@ -39,8 +41,40 @@ const ALLOWED_FILE_TYPES = {
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
+// File signature validation for security
+const FILE_SIGNATURES: Record<string, string[]> = {
+  'image/jpeg': ['FF D8 FF'],
+  'image/png': ['89 50 4E 47'],
+  'image/gif': ['47 49 46 38'],
+  'application/pdf': ['25 50 44 46'],
+  'application/zip': ['50 4B 03 04', '50 4B 05 06', '50 4B 07 08'],
+  'video/mp4': ['00 00 00 18 66 74 79 70', '00 00 00 20 66 74 79 70'],
+}
+
+async function getFileSignature(buffer: Buffer): Promise<string> {
+  const firstBytes = buffer.slice(0, 16)
+  return Array.from(firstBytes)
+    .map(byte => byte.toString(16).padStart(2, '0').toUpperCase())
+    .join(' ')
+}
+
+function isValidFileSignature(mimeType: string, signature: string): boolean {
+  const expectedSignatures = FILE_SIGNATURES[mimeType]
+  if (!expectedSignatures) return true // Allow unknown types to pass through
+  
+  return expectedSignatures.some(expected => 
+    signature.startsWith(expected)
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResponse = await rateLimit(request, RATE_LIMITS.UPLOAD)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
@@ -68,6 +102,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         success: false, 
         error: 'File type not allowed. Supported: PDF, Word, Excel, PowerPoint, images, videos, and archives' 
+      })
+    }
+
+    // Additional security: Check file signature (magic numbers)
+    const fileSignature = await getFileSignature(buffer)
+    if (!isValidFileSignature(file.type, fileSignature)) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'File content does not match declared type. Possible security threat.' 
       })
     }
 
@@ -102,7 +145,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Upload error:', error)
+    logger.error('Upload error:', error)
     return NextResponse.json({ success: false, error: 'Upload failed' })
   }
 }

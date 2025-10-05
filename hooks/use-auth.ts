@@ -1,6 +1,7 @@
 import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
+import { logger } from "@/lib/logger"
 export interface AuthUser {
   name?: string | null
   email?: string | null
@@ -21,7 +22,7 @@ export function useAuth() {
       // Force a router refresh to ensure latest data
       router.refresh()
     } catch (error) {
-      console.error("Failed to refresh user:", error)
+      logger.error("Failed to refresh user:", error)
     }
   }
 

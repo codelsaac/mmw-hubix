@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+import { logger } from "@/lib/logger"
 // POST /api/announcements/[id]/join - Join an event
 export async function POST(
   request: NextRequest,
@@ -45,7 +46,7 @@ export async function POST(
 
     return NextResponse.json(updatedAnnouncement)
   } catch (error) {
-    console.error("Error joining event:", error)
+    logger.error("Error joining event:", error)
     return NextResponse.json(
       { error: "Failed to join event" },
       { status: 500 }

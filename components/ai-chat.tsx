@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, Bot, User, Loader2 } from "lucide-react"
 
+import { logger } from "@/lib/logger"
 interface Message {
   role: "user" | "assistant"
   content: string
@@ -73,7 +74,7 @@ export function AIChat() {
 
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      console.error("Chat error:", error)
+      logger.error("Chat error:", error)
       const errorMessage: Message = {
         role: "assistant",
         content: "Sorry, I'm having trouble connecting right now. Please try again in a moment.",

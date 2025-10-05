@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Header } from "@/components/header";
 import { FooterSitemap } from "@/components/footer-sitemap";
 import { SessionProvider } from "@/components/auth/session-provider";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -59,11 +60,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         suppressHydrationWarning={true}
       >
         <SessionProvider session={session}>
-          <div className="relative flex min-h-screen flex-col bg-background">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <FooterSitemap />
-          </div>
+          <ErrorBoundary>
+            <div className="relative flex min-h-screen flex-col bg-background">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <FooterSitemap />
+            </div>
+          </ErrorBoundary>
         </SessionProvider>
       </body>
     </html>

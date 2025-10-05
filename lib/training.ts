@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger"
 // Consolidated Training Module
 // This file contains all training-related types, services, and utilities
 
@@ -90,7 +91,7 @@ export class TrainingService {
       if (!response.ok) throw new Error('Failed to fetch resources')
       return await response.json()
     } catch (error) {
-      console.error('Error fetching resources:', error)
+      logger.error('Error fetching resources:', error)
       return []
     }
   }
@@ -106,7 +107,7 @@ export class TrainingService {
       if (!response.ok) throw new Error('Failed to create resource')
       return await response.json()
     } catch (error) {
-      console.error('Error creating resource:', error)
+      logger.error('Error creating resource:', error)
       return null
     }
   }
@@ -118,7 +119,7 @@ export class TrainingService {
       })
       return response.ok
     } catch (error) {
-      console.error('Error deleting resource:', error)
+      logger.error('Error deleting resource:', error)
       return false
     }
   }
@@ -129,7 +130,7 @@ export class TrainingService {
         method: 'PATCH'
       })
     } catch (error) {
-      console.error('Error updating views:', error)
+      logger.error('Error updating views:', error)
     }
   }
 

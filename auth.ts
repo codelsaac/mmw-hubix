@@ -7,8 +7,8 @@ const DEMO_ACCOUNTS = [
   // Guest - Public access with training materials
   { 
     id: "0", 
-    username: "guest", 
-    password: "guest123", 
+    username: process.env.DEMO_GUEST_USERNAME || "guest", 
+    password: process.env.DEMO_GUEST_PASSWORD || "guest123", 
     name: "Guest User", 
     role: UserRole.GUEST, 
     department: "Public",
@@ -17,27 +17,8 @@ const DEMO_ACCOUNTS = [
   // Admin - Full system access
   { 
     id: "1", 
-    username: "admin", 
-    password: "mmw2025", 
-    name: "System Administrator", 
-    role: UserRole.ADMIN, 
-    department: "Admin",
-    description: "Can manage entire website and IT Perfect system features"
-  },
-  // Alternative admin login passwords
-  { 
-    id: "1", 
-    username: "admin", 
-    password: "admin123", 
-    name: "System Administrator", 
-    role: UserRole.ADMIN, 
-    department: "Admin",
-    description: "Can manage entire website and IT Perfect system features"
-  },
-  { 
-    id: "1", 
-    username: "admin", 
-    password: "mmw-admin-2025", 
+    username: process.env.DEMO_ADMIN_USERNAME || "admin", 
+    password: process.env.DEMO_ADMIN_PASSWORD || "admin123", 
     name: "System Administrator", 
     role: UserRole.ADMIN, 
     department: "Admin",
@@ -47,7 +28,7 @@ const DEMO_ACCOUNTS = [
   { 
     id: "2", 
     username: "helper", 
-    password: "helper123", 
+    password: process.env.DEMO_HELPER_PASSWORD || "helper123", 
     name: "IT Assistant", 
     role: UserRole.HELPER, 
     department: "IT",
@@ -56,7 +37,7 @@ const DEMO_ACCOUNTS = [
   { 
     id: "3", 
     username: "ithelper", 
-    password: "ithelper2025", 
+    password: process.env.DEMO_ITHELPER_PASSWORD || "ithelper123", 
     name: "IT System Assistant", 
     role: UserRole.HELPER, 
     department: "IT",
@@ -66,7 +47,7 @@ const DEMO_ACCOUNTS = [
   { 
     id: "4", 
     username: "itprefect", 
-    password: "prefect123", 
+    password: process.env.DEMO_ITPREFECT_PASSWORD || "prefect123", 
     name: "IT Prefect Member", 
     role: UserRole.GUEST, 
     department: "IT",
@@ -75,7 +56,7 @@ const DEMO_ACCOUNTS = [
   { 
     id: "5", 
     username: "student1", 
-    password: "student123", 
+    password: process.env.DEMO_STUDENT1_PASSWORD || "student123", 
     name: "Student Zhang", 
     role: UserRole.GUEST, 
     department: "IT",
@@ -84,7 +65,7 @@ const DEMO_ACCOUNTS = [
   { 
     id: "6", 
     username: "student2", 
-    password: "student456", 
+    password: process.env.DEMO_STUDENT2_PASSWORD || "student456", 
     name: "Student Li", 
     role: UserRole.GUEST, 
     department: "IT",

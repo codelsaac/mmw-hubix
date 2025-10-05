@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { TrainingResource, TrainingService, CreateResourceRequest } from '@/lib/training'
 
+import { logger } from "@/lib/logger"
 export function useTraining() {
   const [resources, setResources] = useState<TrainingResource[]>([])
   const [loading, setLoading] = useState(true)
@@ -25,7 +26,7 @@ export function useTraining() {
       setResources(data)
     } catch (err) {
       setError('Failed to load training resources')
-      console.error('Error loading resources:', err)
+      logger.error('Error loading resources:', err)
     } finally {
       setLoading(false)
     }
@@ -41,7 +42,7 @@ export function useTraining() {
       return null
     } catch (err) {
       setError('Failed to create resource')
-      console.error('Error creating resource:', err)
+      logger.error('Error creating resource:', err)
       return null
     }
   }
@@ -56,7 +57,7 @@ export function useTraining() {
       return false
     } catch (err) {
       setError('Failed to delete resource')
-      console.error('Error deleting resource:', err)
+      logger.error('Error deleting resource:', err)
       return false
     }
   }
@@ -70,7 +71,7 @@ export function useTraining() {
         )
       )
     } catch (err) {
-      console.error('Error updating views:', err)
+      logger.error('Error updating views:', err)
     }
   }
 

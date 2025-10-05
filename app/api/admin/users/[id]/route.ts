@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { UserRole } from '@/lib/permissions';
 
+import { logger } from "@/lib/logger"
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
@@ -35,7 +36,7 @@ export async function PATCH(
     });
     return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error('[USER_PATCH]', error);
+    logger.error('[USER_PATCH]', error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }

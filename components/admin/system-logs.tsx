@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Download, Filter, AlertTriangle, Info, CheckCircle, XCircle } from "lucide-react"
 
+import { logger } from "@/lib/logger"
 const mockLogs = [
   {
     id: 1,
@@ -104,7 +105,7 @@ export function SystemLogs() {
   }
 
   const handleExportLogs = () => {
-    console.log("[v0] Exporting system logs")
+    logger.log("[v0] Exporting system logs")
     // Export functionality
   }
 

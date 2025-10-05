@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "./use-auth"
 
+import { logger } from "@/lib/logger"
 export interface CalendarEvent {
   id: string
   title: string
@@ -78,7 +79,7 @@ export function useCalendar() {
 
       setEvents([...internalEvents, ...publicEvents])
     } catch (err) {
-      console.error('Error loading calendar events:', err)
+      logger.error('Error loading calendar events:', err)
       setError('Failed to load calendar events')
     } finally {
       setLoading(false)
@@ -111,7 +112,7 @@ export function useCalendar() {
 
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('Internal Event API Error:', response.status, errorData)
+        logger.error('Internal Event API Error:', response.status, errorData)
         throw new Error(`Failed to create internal event: ${response.status} - ${errorData}`)
       }
 
@@ -129,7 +130,7 @@ export function useCalendar() {
       setEvents(prev => [...prev, formattedEvent])
       return formattedEvent
     } catch (err) {
-      console.error('Error creating internal event:', err)
+      logger.error('Error creating internal event:', err)
       throw err
     }
   }
@@ -160,7 +161,7 @@ export function useCalendar() {
 
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('API Error:', response.status, errorData)
+        logger.error('API Error:', response.status, errorData)
         throw new Error(`Failed to create public event: ${response.status} - ${errorData}`)
       }
 
@@ -177,7 +178,7 @@ export function useCalendar() {
       setEvents(prev => [...prev, formattedEvent])
       return formattedEvent
     } catch (err) {
-      console.error('Error creating public event:', err)
+      logger.error('Error creating public event:', err)
       throw err
     }
   }
@@ -221,7 +222,7 @@ export function useCalendar() {
 
       return updatedEvent
     } catch (err) {
-      console.error('Error updating event:', err)
+      logger.error('Error updating event:', err)
       throw err
     }
   }
@@ -248,7 +249,7 @@ export function useCalendar() {
       setEvents(prev => prev.filter(e => e.id !== eventId))
       return true
     } catch (err) {
-      console.error('Error deleting event:', err)
+      logger.error('Error deleting event:', err)
       throw err
     }
   }

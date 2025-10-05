@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 
+import { logger } from "@/lib/logger"
 // GET /api/announcements/[id] - Get single announcement
 export async function GET(
   request: NextRequest,
@@ -31,7 +32,7 @@ export async function GET(
 
     return NextResponse.json(announcement)
   } catch (error) {
-    console.error("Error fetching announcement:", error)
+    logger.error("Error fetching announcement:", error)
     return NextResponse.json(
       { error: "Failed to fetch announcement" },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function PUT(
 
     return NextResponse.json(announcement)
   } catch (error) {
-    console.error("Error updating announcement:", error)
+    logger.error("Error updating announcement:", error)
     return NextResponse.json(
       { error: "Failed to update announcement" },
       { status: 500 }
@@ -146,7 +147,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error deleting announcement:", error)
+    logger.error("Error deleting announcement:", error)
     return NextResponse.json(
       { error: "Failed to delete announcement" },
       { status: 500 }
