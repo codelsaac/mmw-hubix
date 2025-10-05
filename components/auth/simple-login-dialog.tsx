@@ -35,7 +35,7 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        username: email, // Fix: Use username field as expected by auth.ts
         password,
         redirect: false,
       })
@@ -60,7 +60,7 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
 
     try {
       const result = await signIn("credentials", {
-        email: "guest@cccmmw.edu.hk",
+        username: "guest", // Fix: Use username field as expected by auth.ts
         password: "guest123",
         redirect: false,
       })

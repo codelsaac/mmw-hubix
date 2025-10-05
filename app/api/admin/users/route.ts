@@ -4,15 +4,16 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
+import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation"
 
 // In-memory store for demonstration purposes
 let users = [...teamMembers];
 
 const userSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
+  name: z.string().min(2).max(100).transform(sanitizeString),
+  email: z.string().email().max(255),
   role: z.enum(["ADMIN", "HELPER", "GUEST"]),
-  department: z.string(),
+  department: z.string().min(1).max(100).transform(sanitizeString),
   isActive: z.boolean(),
 });
 
@@ -35,11 +36,15 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return createErrorResponse("Unauthorized", 403);
     }
 
     const body = await req.json();
-    const newUserData = userSchema.parse(body);
+    const validation = validateInput(userSchema, body);
+    if (!validation.success) {
+      return createErrorResponse(validation.error, 400);
+    }
+    const newUserData = validation.data;
 
     const newUser = {
       ...newUserData,
