@@ -3,10 +3,8 @@
 import type React from "react"
 
 import { useState, useEffect, useMemo } from "react"
-import DataGrid, { Column, SelectColumn, SortColumn, textEditor } from 'react-data-grid';
-// Use any for editor props to avoid version-specific type issues
-
-// CSS is included in the component, no separate import needed for v6
+import DataGrid, { Column, SortColumn, textEditor } from 'react-data-grid';
+// CSS is included in the component, no separate import needed
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,14 +48,13 @@ function RoleEditor({ row, onRowChange, onClose }: any) {
 }
 
 const columns: Column<UserForGrid>[] = [
-  SelectColumn,
   { key: 'id', name: 'ID', width: 120, frozen: true, sortable: true },
-  { key: 'name', name: 'Name', renderEditCell: textEditor as any, editable: true, sortable: true },
-  { key: 'email', name: 'Email', renderEditCell: textEditor as any, editable: true, sortable: true },
-  { key: 'role', name: 'Role', renderEditCell: RoleEditor as any, editable: true, sortable: true },
-  { key: 'department', name: 'Department', renderEditCell: textEditor as any, editable: true, sortable: true },
-  { key: 'isActive', name: 'Active', sortable: true },
-  { key: 'lastLoginAt', name: 'Last Login', sortable: true }
+  { key: 'name', name: 'Name', width: 200, renderEditCell: textEditor as any, editable: true, sortable: true },
+  { key: 'email', name: 'Email', width: 250, renderEditCell: textEditor as any, editable: true, sortable: true },
+  { key: 'role', name: 'Role', width: 120, renderEditCell: RoleEditor as any, editable: true, sortable: true },
+  { key: 'department', name: 'Department', width: 150, renderEditCell: textEditor as any, editable: true, sortable: true },
+  { key: 'isActive', name: 'Active', width: 100, sortable: true },
+  { key: 'lastLoginAt', name: 'Last Login', width: 180, sortable: true }
 ];
 
 
@@ -65,7 +62,7 @@ export function UserManagement() {
   const [users, setUsers] = useState<UserForGrid[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(new Set());
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
   const [history, setHistory] = useState<UserForGrid[][]>([]);
   const [redoStack, setRedoStack] = useState<UserForGrid[][]>([]);
@@ -372,8 +369,6 @@ export function UserManagement() {
                 columns={columns}
                 rows={sortedUsers}
                 rowKeyGetter={(row: UserForGrid) => row.id}
-                selectedRows={selectedRows}
-                onSelectedRowsChange={setSelectedRows}
                 sortColumns={sortColumns}
                 onSortColumnsChange={setSortColumns}
                 className="rdg-light"

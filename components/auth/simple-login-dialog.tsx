@@ -25,7 +25,7 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -35,16 +35,16 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        username,
         password,
         redirect: false,
       })
 
       if (result?.error) {
-        setError("Login failed. Please check your email and password.")
+        setError("Login failed. Please check your username and password.")
       } else {
         setOpen(false)
-        setEmail("")
+        setUsername("")
         setPassword("")
       }
     } catch (error) {
@@ -60,7 +60,7 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
 
     try {
       const result = await signIn("credentials", {
-        email: "guest@cccmmw.edu.hk",
+        username: "guest",
         password: "guest123",
         redirect: false,
       })
@@ -127,13 +127,13 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
           {/* Manual Login Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="your.email@cccmmw.edu.hk"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { AIChat } from "@/components/ai-chat"
 
 export default function HomePage() {
-  const { isMaintenanceMode, isHydrated } = useSettings()
+  const { settings, isHydrated } = useSettings()
   const [aiChatOpen, setAiChatOpen] = useState(false)
 
   // Don't render anything until hydration is complete to avoid mismatch
@@ -29,7 +29,7 @@ export default function HomePage() {
   }
 
   // Show maintenance page if maintenance mode is enabled
-  if (isMaintenanceMode) {
+  if (settings.maintenanceMode) {
     return <MaintenancePage />
   }
 

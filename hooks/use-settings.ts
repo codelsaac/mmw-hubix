@@ -2,14 +2,50 @@
 
 import { useState, useEffect } from 'react'
 
-interface Settings {
-  isMaintenanceMode: boolean
+export interface Settings {
+  // General Settings
+  siteName: string
+  siteDescription: string
+  maxFileSize: string
+  allowedFileTypes: string
+  maintenanceMode: boolean
+  registrationEnabled: boolean
+  
+  // Security Settings
+  sessionTimeout: string
+  maxLoginAttempts: string
+  
+  // Notification Settings
+  emailNotifications: boolean
+  
+  // Backup Settings
+  autoBackup: boolean
+  backupFrequency: string
+  
+  // Appearance Settings
+  colorTheme: string
+  
+  // Legacy
+  isMaintenanceMode?: boolean
+}
+
+const defaultSettings: Settings = {
+  siteName: "MMW Hubix",
+  siteDescription: "School Information Portal for C.C.C. Mong Man Wai College",
+  maxFileSize: "10",
+  allowedFileTypes: "pdf,doc,docx,jpg,png,mp4",
+  maintenanceMode: false,
+  registrationEnabled: false,
+  sessionTimeout: "30",
+  maxLoginAttempts: "5",
+  emailNotifications: true,
+  autoBackup: true,
+  backupFrequency: "weekly",
+  colorTheme: "school-blue-yellow",
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>({
-    isMaintenanceMode: false
-  })
+  const [settings, setSettings] = useState<Settings>(defaultSettings)
   const [isHydrated, setIsHydrated] = useState(false)
 
   // Load settings from localStorage on mount
@@ -17,11 +53,11 @@ export function useSettings() {
     setIsHydrated(true)
     
     if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem('app-settings')
+      const savedSettings = localStorage.getItem('mmw-hubix-settings')
       if (savedSettings) {
         try {
           const parsed = JSON.parse(savedSettings)
-          setSettings(parsed)
+          setSettings({ ...defaultSettings, ...parsed })
         } catch (error) {
           console.error('Failed to parse saved settings:', error)
         }
@@ -32,7 +68,7 @@ export function useSettings() {
   // Save settings to localStorage whenever they change (only after hydration)
   useEffect(() => {
     if (isHydrated && typeof window !== 'undefined') {
-      localStorage.setItem('app-settings', JSON.stringify(settings))
+      localStorage.setItem('mmw-hubix-settings', JSON.stringify(settings))
     }
   }, [settings, isHydrated])
 
@@ -41,7 +77,7 @@ export function useSettings() {
   }
 
   return {
-    ...settings,
+    settings,
     updateSettings,
     isHydrated
   }

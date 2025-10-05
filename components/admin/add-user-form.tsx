@@ -21,15 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
 
 const addUserSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z.string().optional(),
   role: z.enum(["ADMIN", "HELPER", "GUEST"], { required_error: "Role is required." }),
   department: z.string().min(1, { message: "Department is required." }),
-  isActive: z.boolean().default(true),
 })
 
 type AddUserFormValues = z.infer<typeof addUserSchema>
@@ -46,16 +44,17 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       email: "",
       role: "GUEST",
       department: "",
-      isActive: true,
     },
   })
 
   async function onSubmit(data: AddUserFormValues) {
     try {
+      // Always set isActive to true for new users
+      const userData = { ...data, isActive: true };
       const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(userData),
       });
 
       if (!response.ok) {
@@ -92,7 +91,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email (Optional)</FormLabel>
               <FormControl>
                 <Input placeholder="e.g. john.doe@school.edu" {...field} />
               </FormControl>
@@ -132,26 +131,6 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
                 <Input placeholder="e.g. IT Support" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="isActive"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-              <div className="space-y-0.5">
-                <FormLabel>Active Status</FormLabel>
-                <FormDescription>
-                  Inactive users will not be able to log in.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
             </FormItem>
           )}
         />

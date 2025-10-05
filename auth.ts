@@ -62,18 +62,9 @@ const DEMO_ACCOUNTS = [
     department: "IT",
     description: "Can manage IT Perfect system but cannot access website admin features"
   },
-  // IT Prefect - View only access
+  // Guest accounts - View only access
   { 
     id: "4", 
-    username: "itprefect", 
-    password: "prefect123", 
-    name: "IT Prefect Member", 
-    role: UserRole.GUEST, 
-    department: "IT",
-    description: "View-only access to training videos and resources"
-  },
-  { 
-    id: "5", 
     username: "student1", 
     password: "student123", 
     name: "Student Zhang", 
@@ -82,7 +73,7 @@ const DEMO_ACCOUNTS = [
     description: "View-only access to training videos and resources"
   },
   { 
-    id: "6", 
+    id: "5", 
     username: "student2", 
     password: "student456", 
     name: "Student Li", 

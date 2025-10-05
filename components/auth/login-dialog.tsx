@@ -93,7 +93,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             <h4 className="font-medium text-sm mb-2">Demo Accounts:</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Admin: admin / mmw2025</li>
-              <li>• IT Prefect: itprefect / prefect123</li>
+              <li>• Helper: helper / helper123</li>
+              <li>• Guest: guest / guest123</li>
             </ul>
           </div>
 

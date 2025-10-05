@@ -10,7 +10,7 @@ let users = [...teamMembers];
 
 const userSchema = z.object({
   name: z.string().min(2),
-  email: z.string().email(),
+  email: z.string().optional(),
   role: z.enum(["ADMIN", "HELPER", "GUEST"]),
   department: z.string(),
   isActive: z.boolean(),
@@ -24,7 +24,12 @@ export async function GET() {
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    return NextResponse.json(users);
+    // Map status to role for consistency
+    const formattedUsers = users.map((user: any) => ({
+      ...user,
+      role: (user.status || user.role) as "ADMIN" | "HELPER" | "GUEST"
+    }));
+    return NextResponse.json(formattedUsers);
   } catch (error) {
     console.error("[ADMIN_USERS_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
@@ -44,6 +49,7 @@ export async function POST(req: Request) {
     const newUser = {
       ...newUserData,
       id: String(users.length + 1),
+      email: newUserData.email || "",
       lastLoginAt: new Date().toISOString(),
       avatar: "/abstract-profile.png",
       phone: "",

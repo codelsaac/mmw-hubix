@@ -1,7 +1,11 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Users, Target, Award, Shield, Mail, Phone } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/hooks/use-auth"
 import { teamMembers } from "@/lib/team-data"
 
 const organizationStructure = [
@@ -142,54 +146,72 @@ export function TeamInformation() {
           <CardDescription>Meet our dedicated IT Prefect team</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {teamMembers.map((member) => (
-              <div key={member.id} className="p-4 border border-border rounded-lg space-y-3">
-                <div className="flex items-start gap-3">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
-                    <AvatarFallback>
-                      {member.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm">{member.name}</h4>
-                      <Badge variant={member.status === "admin" ? "default" : "secondary"} className="text-xs">
-                        {member.status === "admin" ? "Admin" : "Prefect"}
-                      </Badge>
+          {useAuth().user?.role === "ADMIN" ? (
+            <div className="space-y-3">
+              <Textarea
+                defaultValue={teamMembers
+                  .map(
+                    (member, index) =>
+                      `${index + 1}. ${member.name} — ${member.role} — ${member.email} — ${member.phone}\nSpecialties: ${member.specialties.join(", ")}`
+                  )
+                  .join("\n\n")}
+                rows={14}
+                className="min-h-[280px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                Edit the team member details above. Changes are not saved automatically.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {teamMembers.map((member) => (
+                <div key={member.id} className="p-4 border border-border rounded-lg space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
+                      <AvatarFallback>
+                        {member.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-sm">{member.name}</h4>
+                        <Badge variant={member.status === "admin" ? "default" : "secondary"} className="text-xs">
+                          {member.status === "admin" ? "Admin" : "Prefect"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{member.role}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">{member.role}</p>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Mail className="w-3 h-3" />
-                    <span>{member.email}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Mail className="w-3 h-3" />
+                      <span>{member.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Phone className="w-3 h-3" />
+                      <span>{member.phone}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Phone className="w-3 h-3" />
-                    <span>{member.phone}</span>
-                  </div>
-                </div>
 
-                <div className="space-y-1">
-                  <p className="text-xs font-medium">Specialties:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {member.specialties.map((specialty) => (
-                      <Badge key={specialty} variant="outline" className="text-xs">
-                        {specialty}
-                      </Badge>
-                    ))}
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium">Specialties:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {member.specialties.map((specialty) => (
+                        <Badge key={specialty} variant="outline" className="text-xs">
+                          {specialty}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
