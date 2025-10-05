@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger"
 export interface Announcement {
   id: string
   title: string
@@ -30,7 +31,7 @@ class AnnouncementService {
       }
       return await response.json()
     } catch (error) {
-      console.error("Error loading announcements:", error)
+      logger.error("Error loading announcements:", error)
       return []
     }
   }
@@ -51,7 +52,7 @@ class AnnouncementService {
 
       return await response.json()
     } catch (error) {
-      console.error("Error creating announcement:", error)
+      logger.error("Error creating announcement:", error)
       return null
     }
   }
@@ -72,7 +73,7 @@ class AnnouncementService {
 
       return await response.json()
     } catch (error) {
-      console.error("Error updating announcement:", error)
+      logger.error("Error updating announcement:", error)
       return null
     }
   }
@@ -85,7 +86,7 @@ class AnnouncementService {
 
       return response.ok
     } catch (error) {
-      console.error("Error deleting announcement:", error)
+      logger.error("Error deleting announcement:", error)
       return false
     }
   }
@@ -98,7 +99,7 @@ class AnnouncementService {
 
       return response.ok
     } catch (error) {
-      console.error("Error joining event:", error)
+      logger.error("Error joining event:", error)
       return false
     }
   }

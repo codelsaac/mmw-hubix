@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger"
 export interface Resource {
   id: number
   name: string
@@ -72,7 +73,7 @@ class ResourceService {
         return JSON.parse(stored)
       }
     } catch (error) {
-      console.error("Error loading resources:", error)
+      logger.error("Error loading resources:", error)
     }
 
     // Initialize with default resources if none exist
@@ -88,7 +89,7 @@ class ResourceService {
       // Trigger storage event for other components
       window.dispatchEvent(new CustomEvent("resourcesUpdated", { detail: resources }))
     } catch (error) {
-      console.error("Error saving resources:", error)
+      logger.error("Error saving resources:", error)
     }
   }
 

@@ -4,6 +4,7 @@ import { authOptions } from "@/auth"
 import { InternalEventDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 
+import { logger } from "@/lib/logger"
 // GET /api/dashboard/internal-events - Get internal events for current user
 export async function GET() {
   try {
@@ -22,7 +23,7 @@ export async function GET() {
     
     return NextResponse.json(events)
   } catch (error) {
-    console.error('Error fetching internal events:', error)
+    logger.error('Error fetching internal events:', error)
     return NextResponse.json({ error: 'Failed to fetch internal events' }, { status: 500 })
   }
 }
@@ -30,9 +31,9 @@ export async function GET() {
 // POST /api/dashboard/internal-events - Create new internal event
 export async function POST(request: NextRequest) {
   try {
-    console.log('POST /api/dashboard/internal-events - Starting request')
+    logger.log('POST /api/dashboard/internal-events - Starting request')
     const session = await getServerSession(authOptions)
-    console.log('Internal Event Session:', { 
+    logger.log('Internal Event Session:', { 
       user: session?.user ? { 
         id: session.user.id, 
         email: session.user.email, 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     
     // Only allow authenticated IT Prefects and Admins to create events
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
-      console.log('Internal Event Authorization failed:', { 
+      logger.log('Internal Event Authorization failed:', { 
         hasUser: !!session?.user, 
         role: session?.user?.role, 
         department: session?.user?.department 
@@ -52,10 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json()
-    console.log('Internal Event Request data:', data)
+    logger.log('Internal Event Request data:', data)
     
     // Ensure the user exists in the database first
-    console.log('Ensuring user exists for internal event:', session.user.id)
+    logger.log('Ensuring user exists for internal event:', session.user.id)
     await prisma.user.upsert({
       where: { id: session.user.id },
       update: {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
         department: session.user.department || 'IT',
       }
     })
-    console.log('User ensured in database for internal event')
+    logger.log('User ensured in database for internal event')
     
     const event = await InternalEventDB.createInternalEvent({
       title: data.title,
@@ -85,10 +86,10 @@ export async function POST(request: NextRequest) {
       createdBy: session.user.id
     })
 
-    console.log('Internal Event created successfully:', event.id)
+    logger.log('Internal Event created successfully:', event.id)
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
-    console.error('Error creating internal event:', error)
+    logger.error('Error creating internal event:', error)
     return NextResponse.json({ error: `Failed to create internal event: ${error.message}` }, { status: 500 })
   }
 }

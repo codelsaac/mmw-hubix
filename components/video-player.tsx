@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { videoStorageService } from "@/lib/video-storage"
 
+import { logger } from "@/lib/logger"
 interface VideoPlayerProps {
   videoUrl?: string
   title?: string
@@ -32,7 +33,7 @@ export function VideoPlayer({ videoUrl, title, className }: VideoPlayerProps) {
           }
         })
         .catch((err) => {
-          console.error('Failed to load video:', err)
+          logger.error('Failed to load video:', err)
           setError('Failed to load video')
         })
         .finally(() => {

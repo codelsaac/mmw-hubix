@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { ActivityDB } from '@/lib/database'
 
+import { logger } from "@/lib/logger"
 // PUT /api/dashboard/activities/[id] - Update activity
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -30,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(activity)
   } catch (error) {
-    console.error('Error updating activity:', error)
+    logger.error('Error updating activity:', error)
     return NextResponse.json({ error: 'Failed to update activity' }, { status: 500 })
   }
 }
@@ -49,7 +50,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true, message: 'Activity deleted successfully' })
   } catch (error) {
-    console.error('Error deleting activity:', error)
+    logger.error('Error deleting activity:', error)
     return NextResponse.json({ error: 'Failed to delete activity' }, { status: 500 })
   }
 }

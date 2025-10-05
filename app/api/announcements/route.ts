@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 
+import { logger } from "@/lib/logger"
 // GET /api/announcements - Get all announcements
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -29,7 +30,7 @@ export async function GET() {
 
     return NextResponse.json(announcements)
   } catch (error) {
-    console.error("Error fetching announcements:", error)
+    logger.error("Error fetching announcements:", error)
     return NextResponse.json(
       { error: "Failed to fetch announcements" },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(announcement, { status: 201 })
   } catch (error) {
-    console.error("Error creating announcement:", error)
+    logger.error("Error creating announcement:", error)
     return NextResponse.json(
       { error: "Failed to create announcement" },
       { status: 500 }

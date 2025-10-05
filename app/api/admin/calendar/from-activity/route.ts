@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { PublicCalendarDB, ActivityDB } from '@/lib/database'
 
+import { logger } from "@/lib/logger"
 // POST /api/admin/calendar/from-activity - Create calendar event from activity
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       message: 'Calendar event created successfully from activity'
     }, { status: 201 })
   } catch (error) {
-    console.error('Error creating calendar event from activity:', error)
+    logger.error('Error creating calendar event from activity:', error)
     return NextResponse.json({ error: 'Failed to create calendar event from activity' }, { status: 500 })
   }
 }

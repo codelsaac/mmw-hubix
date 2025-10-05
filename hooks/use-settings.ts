@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { logger } from "@/lib/logger"
 
 export interface Settings {
   // General Settings
@@ -59,7 +60,7 @@ export function useSettings() {
           const parsed = JSON.parse(savedSettings)
           setSettings({ ...defaultSettings, ...parsed })
         } catch (error) {
-          console.error('Failed to parse saved settings:', error)
+          logger.error('Failed to parse saved settings:', error)
         }
       }
     }

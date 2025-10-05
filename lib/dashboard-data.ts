@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger"
 export interface DashboardStats {
   activePrefects: number
   upcomingEvents: number
@@ -63,7 +64,7 @@ class DashboardService {
             systemUptime: "98%",
           }
     } catch (error) {
-      console.error('Error loading dashboard stats:', error)
+      logger.error('Error loading dashboard stats:', error)
       return {
         activePrefects: 12,
         upcomingEvents: 5,
@@ -109,7 +110,7 @@ class DashboardService {
       const saved = localStorage.getItem("dashboard-activities")
       return saved ? JSON.parse(saved) : defaultActivities
     } catch (error) {
-      console.error('Error loading dashboard activities:', error)
+      logger.error('Error loading dashboard activities:', error)
       return defaultActivities
     }
   }
@@ -147,7 +148,7 @@ class DashboardService {
       const saved = localStorage.getItem("dashboard-tasks")
       return saved ? JSON.parse(saved) : defaultTasks
     } catch (error) {
-      console.error('Error loading dashboard tasks:', error)
+      logger.error('Error loading dashboard tasks:', error)
       return defaultTasks
     }
   }
@@ -157,7 +158,7 @@ class DashboardService {
       try {
         localStorage.setItem("dashboard-stats", JSON.stringify(this.stats))
       } catch (error) {
-        console.error('Error saving dashboard stats:', error)
+        logger.error('Error saving dashboard stats:', error)
       }
     }
   }
@@ -167,7 +168,7 @@ class DashboardService {
       try {
         localStorage.setItem("dashboard-activities", JSON.stringify(this.activities))
       } catch (error) {
-        console.error('Error saving dashboard activities:', error)
+        logger.error('Error saving dashboard activities:', error)
       }
     }
   }
@@ -177,7 +178,7 @@ class DashboardService {
       try {
         localStorage.setItem("dashboard-tasks", JSON.stringify(this.tasks))
       } catch (error) {
-        console.error('Error saving dashboard tasks:', error)
+        logger.error('Error saving dashboard tasks:', error)
       }
     }
   }

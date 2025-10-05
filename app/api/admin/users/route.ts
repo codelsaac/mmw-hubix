@@ -4,15 +4,18 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
+import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation"
+import { logger } from "@/lib/logger"
+import { withDatabaseLock } from "@/lib/database-lock"
 
 // In-memory store for demonstration purposes
 let users = [...teamMembers];
 
 const userSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().optional(),
+  name: z.string().min(2).max(100).transform(sanitizeString),
+  email: z.string().email().max(255),
   role: z.enum(["ADMIN", "HELPER", "GUEST"]),
-  department: z.string(),
+  department: z.string().min(1).max(100).transform(sanitizeString),
   isActive: z.boolean(),
 });
 
@@ -31,7 +34,7 @@ export async function GET() {
     }));
     return NextResponse.json(formattedUsers);
   } catch (error) {
-    console.error("[ADMIN_USERS_GET]", error);
+    logger.error("[ADMIN_USERS_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -40,28 +43,36 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
+      return createErrorResponse("Unauthorized", 403);
     }
 
     const body = await req.json();
-    const newUserData = userSchema.parse(body);
+    const validation = validateInput(userSchema, body);
+    if (!validation.success) {
+      return createErrorResponse(validation.error, 400);
+    }
+    const newUserData = validation.data;
 
-    const newUser = {
-      ...newUserData,
-      id: String(users.length + 1),
-      email: newUserData.email || "",
-      lastLoginAt: new Date().toISOString(),
-      avatar: "/abstract-profile.png",
-      phone: "",
-      specialties: [],
-      status: newUserData.role,
-    };
+    // Use database lock to prevent race conditions
+    const result = await withDatabaseLock('users', async () => {
+      const newUser = {
+        ...newUserData,
+        id: String(users.length + 1),
+        lastLoginAt: new Date().toISOString(),
+        avatar: "/abstract-profile.png",
+        phone: "",
+        specialties: [],
+        status: newUserData.role,
+      };
 
-    users.push(newUser);
-    return NextResponse.json(newUser, { status: 201 });
+      users.push(newUser);
+      return newUser;
+    });
+
+    return NextResponse.json(result, { status: 201 });
 
   } catch (error) {
-    console.error("[ADMIN_USERS_POST]", error);
+    logger.error("[ADMIN_USERS_POST]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }
@@ -90,7 +101,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json(usersToUpdate);
 
   } catch (error) {
-    console.error("[ADMIN_USERS_PATCH]", error);
+    logger.error("[ADMIN_USERS_PATCH]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }
@@ -120,7 +131,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ deletedCount });
 
   } catch (error) {
-    console.error("[ADMIN_USERS_DELETE]", error);
+    logger.error("[ADMIN_USERS_DELETE]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }

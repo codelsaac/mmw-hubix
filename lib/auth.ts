@@ -55,7 +55,7 @@ export class AuthService {
         throw new Error("Authentication failed")
       }
     } catch (error) {
-      console.error("Auth service error:", error)
+      // Removed console.error for production safety
       throw error
     }
   }
@@ -82,7 +82,7 @@ export class AuthService {
         throw new Error("Authentication failed")
       }
     } catch (error) {
-      console.error("Auth service error:", error)
+      // Removed console.error for production safety
       throw error
     }
   }
@@ -91,7 +91,7 @@ export class AuthService {
     try {
       await signOut({ redirect: false })
     } catch (error) {
-      console.error("Sign out error:", error)
+      // Removed console.error for production safety
       throw error
     }
   }

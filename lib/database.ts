@@ -57,7 +57,18 @@ export const AnnouncementDB = {
   },
 
   // Update announcement
-  async updateAnnouncement(id: string, data: any) {
+  async updateAnnouncement(id: string, data: Partial<{
+    title: string
+    club: string
+    date: Date
+    time: string
+    location: string
+    description: string
+    maxAttendees: number
+    type: string
+    isPublic: boolean
+    status: string
+  }>) {
     return await prisma.announcement.update({
       where: { id },
       data: { ...data, updatedAt: new Date() },
@@ -149,7 +160,15 @@ export const PublicCalendarDB = {
   },
 
   // Update public event
-  async updatePublicEvent(id: string, data: any) {
+  async updatePublicEvent(id: string, data: Partial<{
+    title: string
+    description: string
+    startTime: Date
+    endTime: Date
+    location: string
+    eventType: string
+    isVisible: boolean
+  }>) {
     return await prisma.publicEvent.update({
       where: { id },
       data: { ...data, updatedAt: new Date() },

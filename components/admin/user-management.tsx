@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Search, UserPlus } from "lucide-react";
 import { AddUserForm } from "./add-user-form";
+import { logger } from "@/lib/logger"
 type RoleValue = 'ADMIN' | 'HELPER' | 'GUEST'
 
 interface UserForGrid {
@@ -93,7 +94,7 @@ export function UserManagement() {
         }));
         setUsers(formattedUsers);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         // Handle error (e.g., show a toast message)
       }
     }
@@ -186,7 +187,7 @@ export function UserManagement() {
       });
       if (!response.ok) throw new Error('Failed to update users');
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       // Revert on error
       setUsers(prevSnapshot);
     }
@@ -222,7 +223,7 @@ export function UserManagement() {
       });
       if (!res.ok) throw new Error('Failed to delete users');
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       // Revert on error
       setUsers(prevSnapshot);
     }
@@ -244,7 +245,7 @@ export function UserManagement() {
       });
       if (!res.ok) throw new Error('Failed to apply bulk role update');
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setUsers(prevSnapshot);
     }
   }

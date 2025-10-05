@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { PublicCalendarDB } from '@/lib/database'
 
+import { logger } from "@/lib/logger"
 // PUT /api/admin/calendar/[id] - Update calendar event
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -27,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(event)
   } catch (error) {
-    console.error('Error updating calendar event:', error)
+    logger.error('Error updating calendar event:', error)
     return NextResponse.json({ error: 'Failed to update calendar event' }, { status: 500 })
   }
 }
@@ -49,7 +50,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       message: 'Calendar event deleted successfully' 
     })
   } catch (error) {
-    console.error('Error deleting calendar event:', error)
+    logger.error('Error deleting calendar event:', error)
     return NextResponse.json({ error: 'Failed to delete calendar event' }, { status: 500 })
   }
 }

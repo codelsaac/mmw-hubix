@@ -13,6 +13,7 @@ import { Settings, Database, Shield, Bell, Palette, Download, Upload, CheckCircl
 import { useSettings } from "@/hooks/use-settings"
 import { toast } from "sonner"
 
+import { logger } from "@/lib/logger"
 export function SystemSettings() {
   const { settings, updateSettings } = useSettings()
   const [localSettings, setLocalSettings] = useState(settings)
@@ -35,7 +36,7 @@ export function SystemSettings() {
       description: "Changes have been applied to the website.",
       icon: <CheckCircle className="w-4 h-4" />,
     })
-    console.log("[v0] Settings saved and applied to website:", localSettings)
+    logger.log("[v0] Settings saved and applied to website:", localSettings)
   }
 
   const handleExportData = () => {
