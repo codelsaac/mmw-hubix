@@ -3,6 +3,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 
 import { logger } from "@/lib/logger"
 const ALLOWED_FILE_TYPES = {
@@ -68,6 +69,12 @@ function isValidFileSignature(mimeType: string, signature: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResponse = await rateLimit(request, RATE_LIMITS.UPLOAD)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {

@@ -1,8 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 
 import { logger } from "@/lib/logger"
 export async function POST(req: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResponse = await rateLimit(req, RATE_LIMITS.CHAT)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const { messages } = await req.json()
 
     // Add system prompt for school context
