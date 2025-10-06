@@ -74,6 +74,10 @@ const DEMO_ACCOUNTS = [
 ]
  
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development-only",
+  pages: {
+    signIn: '/',
+  },
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -132,9 +136,6 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
-  },
-  pages: {
-    signIn: '/',
   },
 }
 

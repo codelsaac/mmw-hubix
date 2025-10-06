@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session?.user?.username) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
 
@@ -105,6 +105,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Convert file to buffer first
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
     // Additional security: Check file signature (magic numbers)
     const fileSignature = await getFileSignature(buffer)
     if (!isValidFileSignature(file.type, fileSignature)) {
@@ -113,9 +117,6 @@ export async function POST(request: NextRequest) {
         error: 'File content does not match declared type. Possible security threat.' 
       })
     }
-
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
 
     // Generate unique filename
     const timestamp = Date.now()
