@@ -94,7 +94,7 @@ export function UserManagement() {
         }));
         setUsers(formattedUsers);
       } catch (error) {
-        logger.error(error);
+        logger.error('Error fetching users:', error);
         // Handle error (e.g., show a toast message)
       }
     }
@@ -187,7 +187,7 @@ export function UserManagement() {
       });
       if (!response.ok) throw new Error('Failed to update users');
     } catch (error) {
-      logger.error(error);
+      logger.error('Error updating users:', error);
       // Revert on error
       setUsers(prevSnapshot);
     }
@@ -223,7 +223,7 @@ export function UserManagement() {
       });
       if (!res.ok) throw new Error('Failed to delete users');
     } catch (e) {
-      logger.error(e);
+      logger.error('Error deleting users:', e);
       // Revert on error
       setUsers(prevSnapshot);
     }
@@ -245,7 +245,7 @@ export function UserManagement() {
       });
       if (!res.ok) throw new Error('Failed to apply bulk role update');
     } catch (e) {
-      logger.error(e);
+      logger.error('Error applying bulk role update:', e);
       setUsers(prevSnapshot);
     }
   }

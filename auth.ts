@@ -114,6 +114,10 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub
       }
       
+      if (token.username && session.user) {
+        session.user.username = token.username as string
+      }
+      
       if (token.role && session.user) {
         session.user.role = token.role as string
       }
@@ -130,6 +134,7 @@ export const authOptions: NextAuthOptions = {
     },
     jwt({ token, user }) {
       if (user) {
+        token.username = user.username
         token.role = user.role
         token.department = user.department
         token.description = user.description

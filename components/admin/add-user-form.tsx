@@ -66,7 +66,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       toast({ title: "User created successfully!" });
       onSuccess(newUser);
     } catch (error) {
-      logger.error(error);
+      logger.error('Error creating user:', error);
       toast({ title: "Error creating user", description: "Please try again.", variant: "destructive" });
     }
   }
