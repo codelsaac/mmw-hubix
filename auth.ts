@@ -34,43 +34,6 @@ const DEMO_ACCOUNTS = [
     department: "IT",
     description: "Can manage IT Perfect system but cannot access website admin features"
   },
-  { 
-    id: "3", 
-    username: "ithelper", 
-    password: process.env.DEMO_ITHELPER_PASSWORD || "ithelper123", 
-    name: "IT System Assistant", 
-    role: UserRole.HELPER, 
-    department: "IT",
-    description: "Can manage IT Perfect system but cannot access website admin features"
-  },
-  // Guest accounts - View only access
-  { 
-    id: "4", 
-    username: "itprefect", 
-    password: process.env.DEMO_ITPREFECT_PASSWORD || "prefect123", 
-    name: "IT Prefect Member", 
-    role: UserRole.GUEST, 
-    department: "IT",
-    description: "View-only access to training videos and resources"
-  },
-  { 
-    id: "5", 
-    username: "student1", 
-    password: process.env.DEMO_STUDENT1_PASSWORD || "student123", 
-    name: "Student Zhang", 
-    role: UserRole.GUEST, 
-    department: "IT",
-    description: "View-only access to training videos and resources"
-  },
-  { 
-    id: "6", 
-    username: "student2", 
-    password: process.env.DEMO_STUDENT2_PASSWORD || "student456", 
-    name: "Student Li", 
-    role: UserRole.GUEST, 
-    department: "IT",
-    description: "View-only access to training videos and resources"
-  }
 ]
  
 export const authOptions: NextAuthOptions = {

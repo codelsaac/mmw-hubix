@@ -118,9 +118,9 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 ### Default Demo Accounts
 | Role | Username | Password | Access Level |
 |---|---|---|---|
-| **IT Prefect Admin** | `admin` | `mmw2025` | Full admin console access |
-| **IT Prefect** | `helper` | `helper123` | IT dashboard access |
-| **Public User** | `guest` | `guest123` | Read-only access |
+| **Admin** | `admin` | `admin123` | Full admin console access |
+| **Helper** | `helper` | `helper123` | IT dashboard access |
+| **Guest** | `guest` | `guest123` | Read-only access |
 
 
 **Note:** Production deployment uses Google OAuth with school accounts for IT Prefect authentication.

@@ -10,6 +10,7 @@ import { Header } from "@/components/header";
 import { FooterSitemap } from "@/components/footer-sitemap";
 import { SessionProvider } from "@/components/auth/session-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { PageTransition } from "@/components/page-transition";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -63,7 +64,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <ErrorBoundary>
             <div className="relative flex min-h-screen flex-col bg-background">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </main>
               <FooterSitemap />
             </div>
           </ErrorBoundary>

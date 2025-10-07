@@ -19,14 +19,20 @@ const cachedAuth = cache(() => getServerSession(authOptions))
 /**
  * Server-side authentication check with caching
  */
-export async function requireAuth(): Promise<AuthenticatedUser> {
+export async function requireAuth(roles?: UserRole[]): Promise<AuthenticatedUser> {
   const session = await cachedAuth()
 
   if (!session?.user) {
     redirect('/')
   }
 
-  return session.user as AuthenticatedUser
+  const user = session.user as AuthenticatedUser
+
+  if (roles && !roles.includes(user.role)) {
+    redirect('/unauthorized')
+  }
+
+  return user
 }
 
 /**
@@ -117,4 +123,23 @@ export async function canManageITSystem(): Promise<boolean> {
   if (!user) return false
 
   return PermissionService.canManageITSystem(user.role)
+}
+
+/**
+ * Server-side authentication check for API routes (throws errors instead of redirecting)
+ */
+export async function requireAuthForAPI(roles?: UserRole[]): Promise<AuthenticatedUser> {
+  const session = await cachedAuth()
+
+  if (!session?.user) {
+    throw new Error('Unauthorized')
+  }
+
+  const user = session.user as AuthenticatedUser
+
+  if (roles && !roles.includes(user.role)) {
+    throw new Error('Insufficient permissions')
+  }
+
+  return user
 }

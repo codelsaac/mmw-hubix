@@ -64,6 +64,7 @@ model User {
   createdTasks      Task[]     @relation("CreatedTasks")
   assignedTasks     Task[]     @relation("AssignedTasks")
   createdAnnouncements Announcement[]
+  createdArticles   Article[]
 }
 
 model VerificationToken {
@@ -117,19 +118,18 @@ model PublicEvent {
 }
 
 model InternalEvent {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  description String?  @db.Text
+  description String?   @db.Text
   startTime   DateTime
   endTime     DateTime
   location    String?
-  eventType   String   @default("meeting")
-  attendees   String?  @db.Text
+  eventType   String?
+  attendees   Json?
   createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  creator     User?    @relation(fields: [createdBy], references: [id])
+  creator     User?     @relation("CreatedInternalEvents", fields: [createdBy], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Activity {
@@ -162,6 +162,8 @@ model Task {
 
   assignee    User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
   creator     User?    @relation("CreatedTasks", fields: [createdBy], references: [id])
+
+  @@index([status, priority, dueDate])
 }
 
 model TrainingResource {
@@ -214,4 +216,33 @@ model Announcement {
   updatedAt    DateTime @updatedAt
 
   creator      User?    @relation(fields: [createdBy], references: [id])
+}
+
+model Article {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  content     String      @db.LongText
+  excerpt     String?     @db.Text
+  status      ArticleStatus @default(DRAFT)
+  isPublic    Boolean     @default(true)
+  publishedAt DateTime?
+  views       Int         @default(0)
+  tags        String?     @db.Text
+  category    String?
+  featuredImage String?   @db.VarChar(2048)
+  createdBy   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  creator     User?       @relation(fields: [createdBy], references: [id])
+
+  @@index([status, publishedAt])
+  @@index([slug])
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }

@@ -371,16 +371,11 @@ export const InternalEventDB = {
     endTime: Date
     location?: string
     eventType?: string
-    attendees?: string[] // Will be converted to JSON string
+    attendees?: any // Prisma will handle JSON
     createdBy?: string
   }) {
-    const eventData = {
-      ...data,
-      attendees: data.attendees ? JSON.stringify(data.attendees) : null
-    }
-    
     return await prisma.internalEvent.create({
-      data: eventData,
+      data,
       include: {
         creator: {
           select: { name: true, email: true }
@@ -391,14 +386,9 @@ export const InternalEventDB = {
 
   // Update internal event
   async updateInternalEvent(id: string, data: any) {
-    const updateData = { ...data }
-    if (data.attendees && Array.isArray(data.attendees)) {
-      updateData.attendees = JSON.stringify(data.attendees)
-    }
-    
     return await prisma.internalEvent.update({
       where: { id },
-      data: { ...updateData, updatedAt: new Date() }
+      data: { ...data, updatedAt: new Date() }
     })
   }
 }

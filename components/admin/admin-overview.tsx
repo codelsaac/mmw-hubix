@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield } from "lucide-react"
+import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield, BookOpen } from "lucide-react"
 import NextLink from "next/link"
 
 import { useTraining } from "@/hooks/use-training"
@@ -27,6 +27,14 @@ const useAdminStats = () => {
       icon: FileText,
       trend: "No announcements",
       href: "/admin/announcements",
+    },
+    {
+      title: "Articles",
+      value: "0",
+      description: "Published articles",
+      icon: BookOpen,
+      trend: "No articles published",
+      href: "/admin/articles",
     },
     {
       title: "Team Members",

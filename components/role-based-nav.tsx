@@ -30,6 +30,11 @@ const navigationItems: NavItem[] = [
     requiredPermissions: [Permission.VIEW_RESOURCES]
   },
   {
+    title: "Articles",
+    href: "/articles",
+    description: "Published articles and content"
+  },
+  {
     title: "IT System",
     href: "/dashboard",
     description: "內部儀表板和IT系統管理",

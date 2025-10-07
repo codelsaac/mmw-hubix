@@ -123,4 +123,19 @@
   body {
     @apply bg-background text-foreground font-sans scroll-smooth;
   }
+  
+  /* 添加平滑過渡 */
+  * {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+  
+  /* 改善滾動行為 */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* 頁面切換過渡 */
+  .page-transition {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
 }
