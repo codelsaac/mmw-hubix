@@ -1,8 +1,6 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { UserRole, Permission, PermissionService } from "@/lib/permissions"
-import { cache } from "react"
 
 export interface AuthenticatedUser {
   id: string
@@ -13,8 +11,8 @@ export interface AuthenticatedUser {
   description?: string
 }
 
-// Cache authentication checks to reduce database calls
-const cachedAuth = cache(() => getServerSession(authOptions))
+// Auth.js v5 already caches auth() calls internally
+const cachedAuth = auth
 
 /**
  * Server-side authentication check with caching

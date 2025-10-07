@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { InternalEventDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 
@@ -8,7 +7,7 @@ import { logger } from "@/lib/logger"
 // GET /api/dashboard/internal-events - Get internal events for current user
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Only allow authenticated IT Prefects and Admins
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
@@ -32,7 +31,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     logger.log('POST /api/dashboard/internal-events - Starting request')
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     logger.log('Internal Event Session:', { 
       user: session?.user ? { 
         id: session.user.id, 

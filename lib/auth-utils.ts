@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { createErrorResponse } from "./validation"
 
@@ -15,7 +14,7 @@ export interface AuthenticatedUser {
 
 export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session?.user) {
       return null
     }

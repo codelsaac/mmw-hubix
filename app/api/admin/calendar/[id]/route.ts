@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/auth'
+import { auth } from '@/auth'
 import { PublicCalendarDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // PUT /api/admin/calendar/[id] - Update calendar event
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Allow admins and IT department users to update calendar events
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
@@ -36,7 +35,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE /api/admin/calendar/[id] - Delete calendar event
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Allow admins and IT department users to delete calendar events
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 
 import { logger } from "@/lib/logger"
 // GET /api/announcements - Get all announcements
 export async function GET() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   try {
     // If the user is not authenticated, only return public announcements
@@ -41,7 +40,7 @@ export async function GET() {
 // POST /api/announcements - Create new announcement
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     if (!session?.user?.email) {
       return NextResponse.json(

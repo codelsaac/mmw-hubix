@@ -1,6 +1,6 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
+import NextAuth from "next-auth"
 import { UserRole } from "@/lib/permissions"
-import CredentialsProvider from "next-auth/providers/credentials"
+import Credentials from "next-auth/providers/credentials"
 
 // Enhanced user accounts with role-based access control
 const DEMO_ACCOUNTS = [
@@ -35,14 +35,15 @@ const DEMO_ACCOUNTS = [
     description: "Can manage IT Perfect system but cannot access website admin features"
   },
 ]
- 
-export const authOptions: NextAuthOptions = {
+
+// Auth.js v5 configuration
+export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development-only",
   pages: {
     signIn: '/',
   },
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: "credentials",
       credentials: {
         username: { label: "Username", type: "text" },
@@ -105,6 +106,4 @@ export const authOptions: NextAuthOptions = {
       return token
     },
   },
-}
-
-export default NextAuth(authOptions)
+})

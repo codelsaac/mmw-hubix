@@ -3,8 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Source_Sans_3, Playfair_Display } from "next/font/google"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
+import { auth } from "@/auth";
 import { cn } from "@/lib/utils"
 import { Header } from "@/components/header";
 import { FooterSitemap } from "@/components/footer-sitemap";
@@ -49,7 +48,7 @@ interface RootLayoutProps {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   return (
     <html lang="en" suppressHydrationWarning>

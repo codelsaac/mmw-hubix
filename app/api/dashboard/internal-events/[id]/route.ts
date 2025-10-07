@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/auth'
+import { auth } from '@/auth'
 import { InternalEventDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // PUT /api/dashboard/internal-events/[id] - Update internal event
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Only allow authenticated IT Prefects and Admins
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
@@ -36,7 +35,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE /api/dashboard/internal-events/[id] - Delete internal event
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Only allow authenticated IT Prefects and Admins to delete
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {

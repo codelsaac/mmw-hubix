@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { PublicCalendarDB, ActivityDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // POST /api/admin/calendar/from-activity - Create calendar event from activity
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Allow both admins and IT department users to create calendar events from activities
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {

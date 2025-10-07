@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { TaskDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 
@@ -8,7 +7,7 @@ import { logger } from "@/lib/logger"
 // GET /api/dashboard/tasks - Get all tasks or user-specific tasks
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
 // POST /api/dashboard/tasks - Create new task
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
