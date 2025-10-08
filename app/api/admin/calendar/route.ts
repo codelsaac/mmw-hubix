@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { PublicCalendarDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 
@@ -8,7 +7,7 @@ import { logger } from "@/lib/logger"
 // GET /api/admin/calendar - Get all public calendar events for admin management
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     
     // Allow admins and IT department users to access calendar management
     if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
@@ -27,7 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     logger.log('POST /api/admin/calendar - Starting request')
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     logger.log('Session:', { 
       user: session?.user ? { 
         id: session.user.id, 

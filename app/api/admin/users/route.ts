@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { teamMembers } from "@/lib/team-data"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
 import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation"
@@ -23,7 +22,7 @@ const userUpdateSchema = userSchema.partial().extend({ id: z.string() });
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
@@ -41,7 +40,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (session?.user?.role !== UserRole.ADMIN) {
       return createErrorResponse("Unauthorized", 403);
     }
@@ -82,7 +81,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
@@ -111,7 +110,7 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }

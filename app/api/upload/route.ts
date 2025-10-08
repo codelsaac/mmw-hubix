@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { auth } from "@/auth"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 
 import { logger } from "@/lib/logger"
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check authentication
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session?.user?.username) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
