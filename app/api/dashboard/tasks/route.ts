@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { TaskDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
+import { UserRole } from '@/lib/permissions'
 
 import { logger } from "@/lib/logger"
 // GET /api/dashboard/tasks - Get all tasks or user-specific tasks
@@ -52,14 +53,15 @@ export async function POST(request: NextRequest) {
       update: {
         name: session.user.name,
         email: session.user.email,
-        role: session.user.role,
+        role: session.user.role as UserRole,
         department: session.user.department,
       },
       create: {
         id: session.user.id,
+        username: session.user.username || session.user.email?.split('@')[0] || 'user',
         name: session.user.name || 'IT Prefect',
         email: session.user.email,
-        role: session.user.role || 'user',
+        role: (session.user.role as UserRole) || UserRole.GUEST,
         department: session.user.department || 'IT',
       }
     })

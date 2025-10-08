@@ -1,28 +1,48 @@
+"use client"
+
 import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { UserRole, Permission, PermissionService } from "@/lib/permissions"
+import { AuthUser } from "@/types/auth"
 
-import { logger } from "@/lib/logger"
-export interface AuthUser {
-  name?: string | null
-  email?: string | null
-  image?: string | null
-  role?: string
-  department?: string
-  description?: string
+export interface UseAuthReturn {
+  user: AuthUser | null
+  isLoading: boolean
+  isAuthenticated: boolean
+  isAdmin: boolean
+  isHelper: boolean
+  isGuest: boolean
+  signOut: () => Promise<void>
+  refreshUser: () => Promise<void>
+  hasPermission: (permission: Permission) => boolean
+  hasAnyPermission: (permissions: Permission[]) => boolean
+  hasAllPermissions: (permissions: Permission[]) => boolean
+  canAccessAdmin: () => boolean
+  canManageITSystem: () => boolean
+  isReadOnly: () => boolean
+  getRoleDisplayName: () => string
+  getRoleDescription: () => string
 }
 
-export function useAuth() {
+/**
+ * Unified client-side hook for authentication and permissions
+ * Combines functionality from use-auth and use-auth-permissions
+ */
+export function useAuth(): UseAuthReturn {
   const { data: session, status, update } = useSession()
   const router = useRouter()
   
+  const user = (session?.user as AuthUser) || null
+  const isAuthenticated = !!session?.user
+  const isLoading = status === "loading"
+  const userRole = user?.role as UserRole
+
   const refreshUser = async () => {
     try {
-      // Refresh the session data
       await update()
-      // Force a router refresh to ensure latest data
       router.refresh()
     } catch (error) {
-      logger.error("Failed to refresh user:", error)
+      console.error("Failed to refresh user:", error)
     }
   }
 
@@ -30,14 +50,62 @@ export function useAuth() {
     await signOut({ callbackUrl: "/" })
   }
 
+  const hasPermission = (permission: Permission): boolean => {
+    if (!userRole || !user) return false
+    return PermissionService.hasPermission(userRole, permission)
+  }
+
+  const hasAnyPermission = (permissions: Permission[]): boolean => {
+    if (!userRole || !user || !permissions) return false
+    return PermissionService.hasAnyPermission(userRole, permissions)
+  }
+
+  const hasAllPermissions = (permissions: Permission[]): boolean => {
+    if (!userRole || !user || !permissions) return false
+    return PermissionService.hasAllPermissions(userRole, permissions)
+  }
+
+  const canAccessAdmin = (): boolean => {
+    if (!userRole) return false
+    return PermissionService.canAccessAdmin(userRole)
+  }
+
+  const canManageITSystem = (): boolean => {
+    if (!userRole) return false
+    return PermissionService.canManageITSystem(userRole)
+  }
+
+  const isReadOnly = (): boolean => {
+    if (!userRole) return true
+    return PermissionService.isReadOnly(userRole)
+  }
+
+  const getRoleDisplayName = (): string => {
+    if (!userRole) return "未登入"
+    return PermissionService.getRoleDisplayName(userRole)
+  }
+
+  const getRoleDescription = (): string => {
+    if (!userRole) return "請先登入系統"
+    return PermissionService.getRoleDescription(userRole)
+  }
+
   return {
-    user: session?.user as AuthUser | undefined,
-    isLoading: status === "loading",
-    isAuthenticated: !!session,
-    isAdmin: session?.user?.role === "ADMIN",
-    isHelper: session?.user?.role === "HELPER",
-    isITPrefect: session?.user?.role === "GUEST",
+    user,
+    isLoading,
+    isAuthenticated,
+    isAdmin: user?.role === UserRole.ADMIN,
+    isHelper: user?.role === UserRole.HELPER,
+    isGuest: user?.role === UserRole.GUEST,
     signOut: handleSignOut,
-    refreshUser
+    refreshUser,
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
+    canAccessAdmin,
+    canManageITSystem,
+    isReadOnly,
+    getRoleDisplayName,
+    getRoleDescription
   }
 }

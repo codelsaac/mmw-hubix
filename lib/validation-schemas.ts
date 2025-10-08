@@ -175,7 +175,7 @@ export const ActivitySchemas = {
 // File upload schemas
 export const FileSchemas = {
   upload: z.object({
-    file: z.instanceof(File, 'File is required'),
+    file: z.instanceof(File, { message: 'File is required' }),
     category: z.string().min(1, 'Category is required').max(50, 'Category too long').optional(),
     description: BaseSchemas.shortText.optional()
   })
@@ -226,7 +226,34 @@ export const ValidationSchemas = {
   Pagination: PaginationSchemas
 }
 
-// Validation helper function
+// Sanitization helpers
+export function sanitizeString(input: string): string {
+  return input.trim().replace(/[<>]/g, '')
+}
+
+export function sanitizeHtml(input: string): string {
+  return input
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+}
+
+// Validation helper functions
+export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: string } {
+  try {
+    const validatedData = schema.parse(data)
+    return { success: true, data: validatedData }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+      return { success: false, error: errorMessage }
+    }
+    return { success: false, error: 'Invalid input format' }
+  }
+}
+
 export function validateSchema<T>(schema: z.ZodSchema<T>, data: unknown): {
   success: true
   data: T
@@ -249,4 +276,19 @@ export function validateSchema<T>(schema: z.ZodSchema<T>, data: unknown): {
       errors: ['Invalid data format']
     }
   }
+}
+
+// API response helpers (moved from validation.ts)
+export function createErrorResponse(message: string, status: number = 400): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+
+export function createSuccessResponse(data: any, status: number = 200): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  })
 }

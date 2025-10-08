@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
-import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation"
+import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
 import { withDatabaseLock } from "@/lib/database-lock"
 

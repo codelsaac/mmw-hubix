@@ -5,8 +5,9 @@ import { TaskDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // PUT /api/dashboard/tasks/[id] - Update task
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
@@ -15,7 +16,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const data = await request.json()
     
-    const task = await TaskDB.updateTask(params.id, {
+    const task = await TaskDB.updateTask(id, {
       title: data.title,
       description: data.description,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
@@ -32,15 +33,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PATCH /api/dashboard/tasks/[id]/complete - Complete task
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const task = await TaskDB.completeTask(params.id)
+    const task = await TaskDB.completeTask(id)
     return NextResponse.json(task)
   } catch (error) {
     logger.error('Error completing task:', error)

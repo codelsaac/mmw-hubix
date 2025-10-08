@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuthPermissions } from "@/hooks/use-auth-permissions"
+import { useAuth } from "@/hooks/use-auth"
 import { UserRole } from "@/lib/permissions"
 
 interface UserRoleDisplayProps {
@@ -12,7 +12,7 @@ interface UserRoleDisplayProps {
 }
 
 export function UserRoleDisplay({ showDescription = true, className }: UserRoleDisplayProps) {
-  const { user, getRoleDisplayName, getRoleDescription, isAuthenticated } = useAuthPermissions()
+  const { user, getRoleDisplayName, getRoleDescription, isAuthenticated } = useAuth()
 
   if (!isAuthenticated || !user) {
     return (
@@ -28,7 +28,7 @@ export function UserRoleDisplay({ showDescription = true, className }: UserRoleD
         return "destructive" as const
       case UserRole.HELPER:
         return "default" as const
-      case UserRole.IT_PREFECT:
+      case UserRole.GUEST:
         return "secondary" as const
       default:
         return "outline" as const
@@ -57,7 +57,7 @@ interface UserRoleCardProps {
 }
 
 export function UserRoleCard({ className }: UserRoleCardProps) {
-  const { user, getRoleDisplayName, getRoleDescription, isAuthenticated } = useAuthPermissions()
+  const { user, getRoleDisplayName, getRoleDescription, isAuthenticated } = useAuth()
 
   if (!isAuthenticated || !user) {
     return (

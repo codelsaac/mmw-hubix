@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuthForAPI } from '@/lib/auth-middleware'
+import { requireAuthAPI } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { UserRole } from '@/lib/permissions'
@@ -7,13 +7,14 @@ import { UserRole } from '@/lib/permissions'
 // GET /api/admin/articles/[id] - Get specific article for admin
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuthForAPI([UserRole.ADMIN])
+    const user = await requireAuthAPI([UserRole.ADMIN])
+    const { id } = await params
 
     const article = await prisma.article.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         creator: {
           select: {
@@ -46,16 +47,17 @@ export async function GET(
 // PUT /api/admin/articles/[id] - Update article
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuthForAPI([UserRole.ADMIN])
+    const user = await requireAuthAPI([UserRole.ADMIN])
+    const { id } = await params
 
     const data = await request.json()
 
     // Check if article exists
     const existingArticle = await prisma.article.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!existingArticle) {
@@ -87,7 +89,7 @@ export async function PUT(
     }
 
     const article = await prisma.article.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title: data.title,
         slug: slug,
@@ -128,14 +130,15 @@ export async function PUT(
 // DELETE /api/admin/articles/[id] - Delete article
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuthForAPI([UserRole.ADMIN])
+    const user = await requireAuthAPI([UserRole.ADMIN])
+    const { id } = await params
 
     // Check if article exists
     const existingArticle = await prisma.article.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!existingArticle) {
@@ -143,7 +146,7 @@ export async function DELETE(
     }
 
     await prisma.article.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ message: 'Article deleted successfully' })

@@ -5,8 +5,9 @@ import { ActivityDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // PUT /api/dashboard/activities/[id] - Update activity
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
@@ -20,7 +21,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const data = await request.json()
     
-    const activity = await ActivityDB.updateActivity(params.id, {
+    const activity = await ActivityDB.updateActivity(id, {
       type: data.type,
       title: data.title,
       description: data.description,
@@ -37,8 +38,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/dashboard/activities/[id] - Delete activity
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user || session.user.role !== 'admin') {
@@ -46,7 +48,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Delete activity from database
-    await ActivityDB.updateActivity(params.id, { status: 'deleted' })
+    await ActivityDB.updateActivity(id, { status: 'deleted' })
 
     return NextResponse.json({ success: true, message: 'Activity deleted successfully' })
   } catch (error) {

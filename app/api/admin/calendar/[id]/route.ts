@@ -5,8 +5,9 @@ import { PublicCalendarDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // PUT /api/admin/calendar/[id] - Update calendar event
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     // Allow admins and IT department users to update calendar events
@@ -16,7 +17,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const data = await request.json()
     
-    const event = await PublicCalendarDB.updatePublicEvent(params.id, {
+    const event = await PublicCalendarDB.updatePublicEvent(id, {
       title: data.title,
       description: data.description,
       startTime: data.startTime ? new Date(data.startTime) : undefined,
@@ -34,8 +35,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/admin/calendar/[id] - Delete calendar event
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     // Allow admins and IT department users to delete calendar events
@@ -43,7 +45,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await PublicCalendarDB.deletePublicEvent(params.id)
+    await PublicCalendarDB.deletePublicEvent(id)
 
     return NextResponse.json({ 
       success: true, 

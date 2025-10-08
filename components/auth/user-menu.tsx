@@ -1,6 +1,5 @@
 "use client"
 
-import { useSession, signIn, signOut } from "next-auth/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +11,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { User, LogOut, Settings } from "lucide-react"
+import { LogOut, Settings } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { SimpleLoginDialog } from './simple-login-dialog'
-import { UserRoleDisplay } from "@/components/user-role-display"
-import Link from "next/link"
 
 export function UserMenu() {
   const { user, isLoading, signOut } = useAuth()
@@ -95,10 +92,6 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-        </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>

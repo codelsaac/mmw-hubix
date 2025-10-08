@@ -394,7 +394,7 @@ export function InternalCalendar() {
                           {event.isInternal ? (
                             <div className="w-3 h-3 rounded-full bg-gray-400" title="Private Event (Only visible to you)" />
                           ) : (
-                            <Globe className="w-3 h-3 text-blue-600" title="Public Event (Shared with all users)" />
+                            <Globe className="w-3 h-3 text-blue-600" />
                           )}
                         </div>
                         <div className="flex-1 space-y-2">
@@ -474,7 +474,7 @@ export function InternalCalendar() {
                   {selectedEvent.isInternal ? (
                     <div className="w-4 h-4 rounded-full bg-gray-400" title="Private Event (Only visible to you)" />
                   ) : (
-                    <Globe className="w-4 h-4 text-blue-600" title="Public Event (Shared with all users)" />
+                    <Globe className="w-4 h-4 text-blue-600" />
                   )}
                 </CardTitle>
               </CardHeader>

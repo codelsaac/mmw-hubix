@@ -7,11 +7,12 @@ import { logger } from "@/lib/logger"
 // GET /api/announcements/[id] - Get single announcement
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const announcement = await prisma.announcement.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         creator: {
           select: {
@@ -43,9 +44,10 @@ export async function GET(
 // PUT /api/announcements/[id] - Update announcement
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
@@ -81,7 +83,7 @@ export async function PUT(
     } = body
 
     const announcement = await prisma.announcement.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         title,
         club,
@@ -118,9 +120,10 @@ export async function PUT(
 // DELETE /api/announcements/[id] - Delete announcement
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
@@ -142,7 +145,7 @@ export async function DELETE(
     }
 
     await prisma.announcement.delete({
-      where: { id: params.id },
+      where: { id: id },
     })
 
     return NextResponse.json({ success: true })

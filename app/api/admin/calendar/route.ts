@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { PublicCalendarDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
+import { UserRole } from '@/lib/permissions'
 
 import { logger } from "@/lib/logger"
 // GET /api/admin/calendar - Get all public calendar events for admin management
@@ -71,14 +72,15 @@ export async function POST(request: NextRequest) {
       update: {
         name: session.user.name,
         email: session.user.email,
-        role: session.user.role,
+        role: session.user.role as UserRole,
         department: session.user.department,
       },
       create: {
         id: session.user.id,
+        username: session.user.username || session.user.email?.split('@')[0] || 'user',
         name: session.user.name || 'Admin User',
         email: session.user.email,
-        role: session.user.role || 'admin',
+        role: (session.user.role as UserRole) || UserRole.ADMIN,
         department: session.user.department || 'Admin',
       }
     })
@@ -99,6 +101,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
     logger.error('Error creating calendar event:', error)
-    return NextResponse.json({ error: `Failed to create calendar event: ${error.message}` }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: `Failed to create calendar event: ${message}` }, { status: 500 })
   }
 }

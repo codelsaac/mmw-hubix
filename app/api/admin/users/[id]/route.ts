@@ -8,7 +8,7 @@ import { UserRole } from '@/lib/permissions';
 import { logger } from "@/lib/logger"
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
 
@@ -16,7 +16,7 @@ export async function PATCH(
     return new NextResponse('Unauthorized', { status: 403 });
   }
 
-  const userId = params.id;
+  const { id: userId } = await params
 
   const schema = z.object({
     name: z.string().min(1).optional(),

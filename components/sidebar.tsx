@@ -7,12 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { LogIn, ExternalLink, ChevronDown } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
-import { LoginDialog } from "@/components/auth/login-dialog"
+import { SimpleLoginDialog } from "@/components/auth/simple-login-dialog"
 import { UserMenu } from "@/components/auth/user-menu"
 import { AIChat } from "@/components/ai-chat"
 
 export function Sidebar() {
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const [itCardOpen, setItCardOpen] = useState(false)
   const { user, isAuthenticated } = useAuth()
 
@@ -57,15 +56,16 @@ export function Sidebar() {
                   </div>
                 </Link>
               ) : (
-                <Button
-                  variant="outline"
-                  className="w-full bg-transparent"
-                  size="sm"
-                  onClick={() => setLoginDialogOpen(true)}
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
+                <SimpleLoginDialog>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-transparent"
+                    size="sm"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Login
+                  </Button>
+                </SimpleLoginDialog>
               )}
             </CardContent>
           )}
@@ -73,8 +73,6 @@ export function Sidebar() {
 
         {/* System Status */}
       </aside>
-
-      <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
     </>
   )
 }

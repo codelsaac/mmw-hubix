@@ -85,7 +85,7 @@ export class InternalServerError extends Error implements AppError {
 
 // Error handler for API routes
 export function handleApiError(error: unknown): { message: string; statusCode: number } {
-  if (error instanceof AppError) {
+  if (error instanceof ValidationError || error instanceof AuthenticationError || error instanceof AuthorizationError || error instanceof NotFoundError) {
     logger.error(`API Error [${error.code}]:`, error.message)
     return {
       message: error.message,

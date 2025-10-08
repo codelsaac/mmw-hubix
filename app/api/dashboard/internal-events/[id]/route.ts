@@ -5,8 +5,9 @@ import { InternalEventDB } from '@/lib/database'
 
 import { logger } from "@/lib/logger"
 // PUT /api/dashboard/internal-events/[id] - Update internal event
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     // Only allow authenticated IT Prefects and Admins
@@ -16,7 +17,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const data = await request.json()
     
-    const event = await InternalEventDB.updateInternalEvent(params.id, {
+    const event = await InternalEventDB.updateInternalEvent(id, {
       title: data.title,
       description: data.description,
       startTime: data.startTime ? new Date(data.startTime) : undefined,
@@ -34,8 +35,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/dashboard/internal-events/[id] - Delete internal event
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     // Only allow authenticated IT Prefects and Admins to delete
@@ -44,7 +46,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // For safety, we could add a soft delete instead of hard delete
-    await InternalEventDB.updateInternalEvent(params.id, {
+    await InternalEventDB.updateInternalEvent(id, {
       eventType: 'deleted'
     })
 

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/use-auth"
 import { UserMenu } from "@/components/auth/user-menu"
+import { UserRole } from "@/lib/permissions"
 import {
   Users,
   Calendar,
@@ -92,8 +93,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="text-right">
                     <p className="text-sm font-medium">{user.name}</p>
                     <div className="flex items-center gap-1">
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"} className="text-xs">
-                        {user.role === "admin" ? "Admin" : "Prefect"}
+                      <Badge variant={user.role === UserRole.ADMIN ? "default" : "secondary"} className="text-xs">
+                        {user.role === UserRole.ADMIN ? "Admin" : "Prefect"}
                       </Badge>
                     </div>
                   </div>
@@ -138,7 +139,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
 
             {/* Cross Navigation */}
-            {user?.role === "admin" && (
+            {user?.role === UserRole.ADMIN && (
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {isAdminRoute ? "Dashboard" : "Admin"}

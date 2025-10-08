@@ -5,11 +5,12 @@ import { logger } from "@/lib/logger"
 // POST /api/announcements/[id]/join - Join an event
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const announcement = await prisma.announcement.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     })
 
     if (!announcement) {
@@ -27,7 +28,7 @@ export async function POST(
     }
 
     const updatedAnnouncement = await prisma.announcement.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         attendees: {
           increment: 1,

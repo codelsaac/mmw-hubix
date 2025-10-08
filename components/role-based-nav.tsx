@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { useAuthPermissions } from "@/hooks/use-auth-permissions"
+import { useAuth } from "@/hooks/use-auth"
 import { Permission } from "@/lib/permissions"
 
 interface NavItem {
@@ -57,7 +57,7 @@ interface RoleBasedNavProps {
 
 export function RoleBasedNav({ className, showDescriptions = false }: RoleBasedNavProps) {
   const pathname = usePathname()
-  const { hasAnyPermission, isAuthenticated } = useAuthPermissions()
+  const { hasAnyPermission, isAuthenticated } = useAuth()
 
   // Filter navigation items based on user permissions
   const visibleItems = navigationItems.filter(item => {
@@ -114,7 +114,7 @@ export function RoleBasedMenuItem({
   children, 
   fallback = null 
 }: RoleBasedMenuItemProps) {
-  const { hasAnyPermission, isAuthenticated } = useAuthPermissions()
+  const { hasAnyPermission, isAuthenticated } = useAuth()
 
   if (!isAuthenticated) return fallback
   

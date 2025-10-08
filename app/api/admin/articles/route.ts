@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuthForAPI } from '@/lib/auth-middleware'
+import { requireAuthAPI } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { UserRole } from '@/lib/permissions'
@@ -7,7 +7,7 @@ import { UserRole } from '@/lib/permissions'
 // GET /api/admin/articles - Get all articles for admin management
 export async function GET() {
   try {
-    const user = await requireAuthForAPI([UserRole.ADMIN])
+    const user = await requireAuthAPI([UserRole.ADMIN])
 
     const articles = await prisma.article.findMany({
       include: {
@@ -41,7 +41,7 @@ export async function GET() {
 // POST /api/admin/articles - Create new article
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuthForAPI([UserRole.ADMIN])
+    const user = await requireAuthAPI([UserRole.ADMIN])
 
     const data = await request.json()
     

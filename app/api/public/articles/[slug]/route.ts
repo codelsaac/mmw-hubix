@@ -5,12 +5,13 @@ import { logger } from '@/lib/logger'
 // GET /api/public/articles/[slug] - Get specific published article by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params
     const article = await prisma.article.findUnique({
-      where: {
-        slug: params.slug,
+      where: { 
+        slug,
         status: 'PUBLISHED',
         isPublic: true,
       },

@@ -10,7 +10,7 @@ import { usePublicArticles, type Article } from "@/hooks/use-articles"
 import { notFound } from "next/navigation"
 
 interface ArticlePageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default function ArticlePage({ params }: ArticlePageProps) {
@@ -18,12 +18,19 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [slug, setSlug] = useState<string>('')
 
   useEffect(() => {
+    params.then(({ slug }) => setSlug(slug))
+  }, [params])
+
+  useEffect(() => {
+    if (!slug) return
+    
     const loadArticle = async () => {
       try {
         setLoading(true)
-        const data = await fetchArticleBySlug(params.slug)
+        const data = await fetchArticleBySlug(slug)
         setArticle(data)
         setError(null)
       } catch (err) {
@@ -37,7 +44,7 @@ export default function ArticlePage({ params }: ArticlePageProps) {
     }
 
     loadArticle()
-  }, [params.slug, fetchArticleBySlug])
+  }, [slug, fetchArticleBySlug])
 
   const handleShare = async () => {
     if (navigator.share && article) {
