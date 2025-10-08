@@ -56,6 +56,21 @@ export const UserSchemas = {
   login: z.object({
     username: BaseSchemas.username,
     password: z.string().min(1, 'Password is required')
+  }),
+
+  changePassword: z.object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(6, 'New password must be at least 6 characters long'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password')
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  }),
+
+  profileUpdate: z.object({
+    name: BaseSchemas.name.optional(),
+    email: BaseSchemas.email.optional(),
+    department: z.string().min(1).max(100).optional()
   })
 }
 

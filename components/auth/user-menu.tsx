@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { LogOut, Settings } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { SimpleLoginDialog } from './simple-login-dialog'
+import Link from "next/link"
 
 export function UserMenu() {
   const { user, isLoading, signOut } = useAuth()
@@ -92,9 +93,11 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/profile">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut}>

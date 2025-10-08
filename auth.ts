@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth"
 import { UserRole } from "@/lib/permissions"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { getCurrentPassword } from "@/lib/password-utils"
 
 // Enhanced user accounts with role-based access control
 const DEMO_ACCOUNTS = [
@@ -53,17 +54,23 @@ export const authOptions: NextAuthOptions = {
         
         // Check demo accounts
         const user = DEMO_ACCOUNTS.find(
-          account => account.username === credentials.username && account.password === credentials.password
+          account => account.username === credentials.username
         )
         
         if (user) {
-          return {
-            id: user.id,
-            username: user.username,
-            name: user.name,
-            role: user.role,
-            department: user.department,
-            description: user.description
+          // Check if user has updated their password
+          const currentPassword = getCurrentPassword(user.id)
+          const passwordToCheck = currentPassword || user.password
+          
+          if (credentials.password === passwordToCheck) {
+            return {
+              id: user.id,
+              username: user.username,
+              name: user.name,
+              role: user.role,
+              department: user.department,
+              description: user.description
+            }
           }
         }
         

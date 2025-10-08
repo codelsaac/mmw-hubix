@@ -15,7 +15,9 @@
     "db:push:sqlite": "prisma db push --schema prisma/schema.sqlite.prisma",
     "db:generate:sqlite": "prisma generate --schema prisma/schema.sqlite.prisma",
     "db:seed:sqlite": "set DATABASE_URL=file:./prisma/dev.db && tsx prisma/seed.ts",
-    "dev:sqlite": "npm run db:push:sqlite && npm run db:generate:sqlite && next dev"
+    "dev:sqlite": "npm run db:push:sqlite && npm run db:generate:sqlite && next dev",
+    "quality-check": "node scripts/quality-check.js",
+    "pre-deploy": "npm run quality-check && npm run build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

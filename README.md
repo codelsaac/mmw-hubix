@@ -133,12 +133,20 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 - **AI Assistant**: Conversational chatbot accessible via floating button for campus navigation, schedules, policies, and IT support
 - **Responsive Design**: Fully functional on desktop, tablet, and mobile devices
 
+### 👤 User Profile & Settings
+- **Profile Management**: Users can update their personal information (name, email, department)
+- **Password Security**: Secure password change functionality with current password verification
+- **User Preferences**: Theme selection, notification settings, and personal customization
+- **Access Control**: Users can only edit their own profile information
+- **Settings Access**: Available via user menu dropdown or direct navigation to `/dashboard/profile`
+
 ### 🔐 IT Prefect System (Authenticated)
 - **Team Dashboard**: Mission statement, organizational structure, and internal communications
 - **Internal Calendar**: Manage team meetings, duties, and training sessions (viewable by all prefects, editable by admins)
 - **Training Library**: Categorized repository of training videos and materials with search functionality
 - **Event Management**: Create and track IT-related events and activities
 - **Task System**: Assign and manage team tasks and responsibilities
+- **User Profile & Settings**: Personal profile management with password change functionality and user preferences
 
 ### ⚙️ Admin Console (Admin Only)
 - **User Management**: Account permissions, role assignment, and access control
@@ -189,6 +197,43 @@ Content-Type: application/json
 }
 ```
 - Batch delete users (requires ADMIN)
+
+#### User Profile & Settings (/dashboard/profile)
+- Profile management page with three tabs: Profile, Password, Preferences
+- Permission guard: any authenticated user can access their own profile
+- Features:
+  - Edit personal information (name, email, department)
+  - Change password with current password verification
+  - Set user preferences (theme, notifications)
+
+API:
+```http
+GET /api/dashboard/profile
+```
+- Fetch current user's profile data (requires authentication)
+
+```http
+PATCH /api/dashboard/profile
+Content-Type: application/json
+
+{
+  "name": "New Name",
+  "email": "user@example.com",
+  "department": "IT"
+}
+```
+- Update user profile information (requires authentication, can only edit own profile)
+
+```http
+PATCH /api/dashboard/profile/password
+Content-Type: application/json
+
+{
+  "currentPassword": "oldpassword",
+  "newPassword": "newpassword"
+}
+```
+- Change user password (requires authentication, current password verification)
 
 ## 🛠 Tech Stack
 
