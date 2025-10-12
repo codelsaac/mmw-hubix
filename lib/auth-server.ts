@@ -64,7 +64,7 @@ export async function requireAuthAPI(roles?: UserRole[]): Promise<AuthenticatedU
 export async function requirePermission(permission: Permission): Promise<AuthenticatedUser> {
   const user = await requireAuth()
 
-  if (!PermissionService.hasPermission(user.role, permission)) {
+  if (!PermissionService.hasPermission(user.role, permission, user.permissions)) {
     redirect('/unauthorized')
   }
 
@@ -77,7 +77,7 @@ export async function requirePermission(permission: Permission): Promise<Authent
 export async function requireAdmin(): Promise<AuthenticatedUser> {
   const user = await requireAuth()
 
-  if (!PermissionService.canAccessAdmin(user.role)) {
+  if (!PermissionService.canAccessAdmin(user.role, user.permissions)) {
     redirect('/unauthorized')
   }
 
@@ -90,7 +90,7 @@ export async function requireAdmin(): Promise<AuthenticatedUser> {
 export async function requireITSystemAccess(): Promise<AuthenticatedUser> {
   const user = await requireAuth()
 
-  if (!PermissionService.canManageITSystem(user.role)) {
+  if (!PermissionService.canManageITSystem(user.role, user.permissions)) {
     redirect('/unauthorized')
   }
 
@@ -117,7 +117,7 @@ export async function checkPermission(permission: Permission): Promise<boolean> 
   const user = await getCurrentUser()
   if (!user) return false
 
-  return PermissionService.hasPermission(user.role, permission)
+  return PermissionService.hasPermission(user.role, permission, user.permissions)
 }
 
 /**
@@ -127,7 +127,7 @@ export async function canAccessAdmin(): Promise<boolean> {
   const user = await getCurrentUser()
   if (!user) return false
 
-  return PermissionService.canAccessAdmin(user.role)
+  return PermissionService.canAccessAdmin(user.role, user.permissions)
 }
 
 /**
@@ -137,7 +137,7 @@ export async function canManageITSystem(): Promise<boolean> {
   const user = await getCurrentUser()
   if (!user) return false
 
-  return PermissionService.canManageITSystem(user.role)
+  return PermissionService.canManageITSystem(user.role, user.permissions)
 }
 
 /**

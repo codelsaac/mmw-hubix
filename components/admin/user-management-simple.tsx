@@ -21,6 +21,7 @@ type RoleValue = 'ADMIN' | 'HELPER' | 'GUEST'
 
 interface UserForGrid {
   id: string
+  username: string
   name?: string | null
   email?: string | null
   role: RoleValue
@@ -49,6 +50,7 @@ export function UserManagement() {
       const data: any[] = await response.json()
       const formattedUsers: UserForGrid[] = data.map((user: any) => ({
         id: user.id,
+        username: user.username,
         name: user.name ?? null,
         email: user.email ?? null,
         role: user.role as RoleValue,
@@ -68,6 +70,7 @@ export function UserManagement() {
   function handleAddUserSuccess(newUser: any) {
     const formattedUser: UserForGrid = {
       id: newUser.id,
+      username: newUser.username,
       name: newUser.name ?? null,
       email: newUser.email ?? null,
       role: newUser.role as RoleValue,
@@ -99,10 +102,11 @@ export function UserManagement() {
   }
 
   const filteredUsers = users.filter((user) => {
+    const username = (user.username ?? '').toLowerCase()
     const name = (user.name ?? '').toLowerCase()
     const email = (user.email ?? '').toLowerCase()
     const q = searchQuery.toLowerCase()
-    return name.includes(q) || email.includes(q)
+    return username.includes(q) || name.includes(q) || email.includes(q)
   })
 
   const getRoleBadgeVariant = (role: RoleValue) => {
@@ -158,7 +162,7 @@ export function UserManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
+                  <TableHead>Username</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
@@ -171,7 +175,7 @@ export function UserManagement() {
               <TableBody>
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-mono text-sm">{user.id}</TableCell>
+                    <TableCell className="font-mono text-sm">{user.username}</TableCell>
                     <TableCell>{user.name || '-'}</TableCell>
                     <TableCell>{user.email || '-'}</TableCell>
                     <TableCell>

@@ -18,6 +18,19 @@ export function HydrationSafeWrapper({
 
   useEffect(() => {
     setIsHydrated(true)
+    
+    // Clean up browser extension attributes that cause hydration issues
+    const cleanupExtensionAttributes = () => {
+      const elements = document.querySelectorAll('[bis_skin_checked]')
+      elements.forEach(element => {
+        element.removeAttribute('bis_skin_checked')
+      })
+    }
+
+    // Run cleanup after extensions have finished modifying the DOM
+    const timeoutId = setTimeout(cleanupExtensionAttributes, 100)
+    
+    return () => clearTimeout(timeoutId)
   }, [])
 
   if (!isHydrated) {

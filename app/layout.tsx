@@ -11,6 +11,7 @@ import { FooterSitemap } from "@/components/footer-sitemap";
 import { SessionProvider } from "@/components/auth/session-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PageTransition } from "@/components/page-transition";
+import { BrowserExtensionCleanup } from "@/components/browser-extension-cleanup";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -61,10 +62,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         suppressHydrationWarning={true}
       >
         <SessionProvider session={session}>
+          <BrowserExtensionCleanup />
           <ErrorBoundary>
-            <div className="relative flex min-h-screen flex-col bg-background">
+            <div className="relative flex min-h-screen flex-col bg-background" suppressHydrationWarning>
               <Header />
-              <main className="flex-1">
+              <main className="flex-1" suppressHydrationWarning>
                 <PageTransition>
                   {children}
                 </PageTransition>

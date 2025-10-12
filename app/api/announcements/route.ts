@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
+import { UserRole } from "@/lib/permissions"
 
 import { logger } from "@/lib/logger"
 // GET /api/announcements - Get all announcements
@@ -43,18 +44,33 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    // Ensure the user exists in the database first (upsert pattern)
+    const user = await prisma.user.upsert({
+      where: { id: session.user.id },
+      update: {
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role as UserRole,
+        department: session.user.department,
+      },
+      create: {
+        id: session.user.id,
+        username: session.user.username || session.user.email?.split('@')[0] || 'user',
+        name: session.user.name || 'User',
+        email: session.user.email,
+        role: (session.user.role as UserRole) || UserRole.GUEST,
+        department: session.user.department || 'General',
+      }
     })
 
-    if (!user || (user.role !== "ADMIN" && user.role !== "HELPER")) {
+    if (user.role !== "ADMIN" && user.role !== "HELPER") {
       return NextResponse.json(
         { error: "Insufficient permissions" },
         { status: 403 }

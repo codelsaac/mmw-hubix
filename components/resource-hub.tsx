@@ -173,9 +173,6 @@ export function ResourceHub() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <CardDescription className="text-sm">{resource.description}</CardDescription>
-                      {resource.clicks > 0 && (
-                        <div className="mt-2 text-xs text-muted-foreground">{resource.clicks} clicks</div>
-                      )}
                     </CardContent>
                   </Card>
                 )

@@ -25,11 +25,12 @@ import { toast } from "@/components/ui/use-toast"
 
 import { logger } from "@/lib/logger"
 const addUserSchema = z.object({
+  username: z.string().min(2, { message: "Username must be at least 2 characters." }).max(50),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().optional(),
+  email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
   role: z.enum(["ADMIN", "HELPER", "GUEST"], { required_error: "Role is required." }),
   department: z.string().min(1, { message: "Department is required." }),
-})
+});
 
 type AddUserFormValues = z.infer<typeof addUserSchema>
 
@@ -41,39 +42,62 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
   const form = useForm<AddUserFormValues>({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
+      username: "",
       name: "",
       email: "",
       role: "GUEST",
       department: "",
     },
-  })
+  });
 
   async function onSubmit(data: AddUserFormValues) {
     try {
-      // Always set isActive to true for new users
-      const userData = { ...data, isActive: true };
+      // Clean email field - convert empty string to undefined
+      const cleanedData = {
+        ...data,
+        email: data.email && data.email.trim() !== '' ? data.email : undefined,
+        isActive: true
+      };
+      
       const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(cleanedData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create user');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create user' }));
+        throw new Error(errorData.error || 'Failed to create user');
       }
 
       const newUser = await response.json();
       toast({ title: "User created successfully!" });
+      form.reset();
       onSuccess(newUser);
     } catch (error) {
       logger.error('Error creating user:', error);
-      toast({ title: "Error creating user", description: "Please try again.", variant: "destructive" });
+      const errorMessage = error instanceof Error ? error.message : 'Please try again.';
+      toast({ title: "Error creating user", description: errorMessage, variant: "destructive" });
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. johndoe" {...field} />
+              </FormControl>
+              <FormDescription>Unique username for login</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="name"

@@ -1,22 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { teamMembers } from "@/lib/team-data"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
 import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
-import { withDatabaseLock } from "@/lib/database-lock"
-
-// In-memory store for demonstration purposes
-let users = [...teamMembers];
+import { prisma } from "@/lib/prisma"
 
 const userSchema = z.object({
+  username: z.string().min(2).max(50).transform(sanitizeString),
   name: z.string().min(2).max(100).transform(sanitizeString),
-  email: z.string().email().max(255),
+  email: z.string().email().max(255).optional(),
   role: z.enum(["ADMIN", "HELPER", "GUEST"]),
-  department: z.string().min(1).max(100).transform(sanitizeString),
-  isActive: z.boolean(),
+  department: z.string().min(1).max(100).transform(sanitizeString).optional(),
+  isActive: z.boolean().optional().default(true),
 });
 
 const userUpdateSchema = userSchema.partial().extend({ id: z.string() });
@@ -27,19 +24,32 @@ export async function GET() {
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
-    // Map status to role for consistency
-    const formattedUsers = users.map((user: any) => ({
-      ...user,
-      role: (user.status || user.role) as "ADMIN" | "HELPER" | "GUEST"
-    }));
-    return NextResponse.json(formattedUsers);
+    
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        role: true,
+        department: true,
+        isActive: true,
+        lastLoginAt: true,
+        image: true,
+      },
+      orderBy: {
+        lastLoginAt: 'desc'
+      }
+    });
+    
+    return NextResponse.json(users);
   } catch (error) {
     logger.error("[ADMIN_USERS_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
@@ -53,23 +63,50 @@ export async function POST(req: Request) {
     }
     const newUserData = validation.data;
 
-    // Use database lock to prevent race conditions
-    const result = await withDatabaseLock('users', async () => {
-      const newUser = {
-        ...newUserData,
-        id: String(users.length + 1),
-        lastLoginAt: new Date().toISOString(),
-        avatar: "/abstract-profile.png",
-        phone: "",
-        specialties: [],
-        status: newUserData.role,
-      };
+    // Check if username already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { username: newUserData.username }
+    });
+    
+    if (existingUser) {
+      return createErrorResponse("Username already exists", 400);
+    }
 
-      users.push(newUser);
-      return newUser;
+    // Check if email already exists (if provided)
+    if (newUserData.email) {
+      const existingEmail = await prisma.user.findUnique({
+        where: { email: newUserData.email }
+      });
+      
+      if (existingEmail) {
+        return createErrorResponse("Email already exists", 400);
+      }
+    }
+
+    const newUser = await prisma.user.create({
+      data: {
+        username: newUserData.username,
+        name: newUserData.name,
+        email: newUserData.email || null,
+        role: newUserData.role,
+        department: newUserData.department || null,
+        isActive: newUserData.isActive ?? true,
+        image: "/abstract-profile.png",
+      },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        role: true,
+        department: true,
+        isActive: true,
+        lastLoginAt: true,
+        image: true,
+      }
     });
 
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json(newUser, { status: 201 });
 
   } catch (error) {
     logger.error("[ADMIN_USERS_POST]", error);
@@ -80,7 +117,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
@@ -90,15 +127,33 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     const usersToUpdate = z.array(userUpdateSchema).parse(body);
 
-    usersToUpdate.forEach(update => {
-      const index = users.findIndex(u => u.id === update.id);
-      if (index !== -1) {
-        const existingUser = users[index];
-        users[index] = { ...existingUser, ...update };
-      }
+    // Update users in database
+    const updatePromises = usersToUpdate.map(async (update) => {
+      const { id, ...data } = update;
+      
+      // Remove undefined values
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([_, v]) => v !== undefined)
+      );
+
+      return await prisma.user.update({
+        where: { id },
+        data: cleanData,
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          email: true,
+          role: true,
+          department: true,
+          isActive: true,
+          lastLoginAt: true,
+        }
+      });
     });
 
-    return NextResponse.json(usersToUpdate);
+    const updatedUsers = await Promise.all(updatePromises);
+    return NextResponse.json(updatedUsers);
 
   } catch (error) {
     logger.error("[ADMIN_USERS_PATCH]", error);
@@ -109,7 +164,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
@@ -124,11 +179,21 @@ export async function DELETE(req: Request) {
       return new NextResponse("No user IDs provided", { status: 400 });
     }
 
-    const initialLength = users.length;
-    users = users.filter(u => !ids.includes(u.id));
-    const deletedCount = initialLength - users.length;
+    // Prevent deleting the current user
+    if (session.user.id && ids.includes(session.user.id)) {
+      return new NextResponse("Cannot delete your own account", { status: 400 });
+    }
 
-    return NextResponse.json({ deletedCount });
+    // Delete users from database
+    const result = await prisma.user.deleteMany({
+      where: {
+        id: {
+          in: ids
+        }
+      }
+    });
+
+    return NextResponse.json({ deletedCount: result.count });
 
   } catch (error) {
     logger.error("[ADMIN_USERS_DELETE]", error);

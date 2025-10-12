@@ -41,8 +41,8 @@ const sitemapSections: SitemapSection[] = [
 
 export function FooterSitemap() {
   return (
-    <footer className="border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto max-w-screen-2xl px-4 py-12">
+    <footer className="border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" suppressHydrationWarning>
+      <div className="container mx-auto max-w-screen-2xl px-4 py-12" suppressHydrationWarning>
         {/* Header Section */}
         <div className="mb-12 text-center" suppressHydrationWarning>
           <div className="mb-4 flex items-center justify-center space-x-2" suppressHydrationWarning>

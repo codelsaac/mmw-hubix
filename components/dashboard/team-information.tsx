@@ -1,38 +1,61 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Users, Target, Award, Shield, Mail, Phone } from "lucide-react"
+import { Target, Award, Shield } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
-import { teamMembers } from "@/lib/team-data"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
-const organizationStructure = [
-  {
-    level: "Leadership",
-    positions: [
-      { title: "Head IT Prefect", description: "Overall team leadership and strategic planning" },
-      { title: "Deputy Head", description: "Assists head prefect and manages training programs" },
-    ],
-  },
-  {
-    level: "Senior Level",
-    positions: [
-      { title: "Senior Prefects", description: "Lead specific technical areas and mentor junior members" },
-      { title: "Specialist Roles", description: "Focus on specialized technical domains" },
-    ],
-  },
-  {
-    level: "Junior Level",
-    positions: [
-      { title: "Junior Prefects", description: "Provide frontline support and learn from senior members" },
-      { title: "Trainee Prefects", description: "New members undergoing initial training" },
-    ],
-  },
-]
 
 export function TeamInformation() {
+  const { user } = useAuth()
+  const [teamNotes, setTeamNotes] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Fetch team notes from API
+  useEffect(() => {
+    async function fetchTeamNotes() {
+      try {
+        const response = await fetch("/api/dashboard/team-notes")
+        if (response.ok) {
+          const data = await response.json()
+          setTeamNotes(data.content || "")
+        }
+      } catch (error) {
+        console.error("Failed to fetch team notes:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchTeamNotes()
+  }, [])
+
+  // Save team notes to API (admin only)
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const response = await fetch("/api/dashboard/team-notes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: teamNotes }),
+      })
+
+      if (response.ok) {
+        toast.success("團隊資訊已儲存")
+      } else {
+        toast.error("儲存失敗，請重試")
+      }
+    } catch (error) {
+      console.error("Failed to save team notes:", error)
+      toast.error("儲存失敗，請重試")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -108,34 +131,6 @@ export function TeamInformation() {
         </Card>
       </div>
 
-      {/* Organizational Structure */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Organizational Structure
-          </CardTitle>
-          <CardDescription>Understanding our team hierarchy and responsibilities</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {organizationStructure.map((level) => (
-              <div key={level.level} className="space-y-3">
-                <h3 className="font-semibold text-primary">{level.level}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {level.positions.map((position) => (
-                    <div key={position.title} className="p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-medium text-sm">{position.title}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">{position.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Team Members */}
       <Card>
         <CardHeader>
@@ -146,70 +141,30 @@ export function TeamInformation() {
           <CardDescription>Meet our dedicated IT Prefect team</CardDescription>
         </CardHeader>
         <CardContent>
-          {useAuth().user?.role === "ADMIN" ? (
+          {isLoading ? (
+            <div className="min-h-[160px] flex items-center justify-center text-muted-foreground">
+              載入中...
+            </div>
+          ) : user?.role === "ADMIN" ? (
             <div className="space-y-3">
               <Textarea
-                defaultValue={teamMembers
-                  .map(
-                    (member, index) =>
-                      `${index + 1}. ${member.name} — ${member.role} — ${member.email} — ${member.phone}\nSpecialties: ${member.specialties.join(", ")}`
-                  )
-                  .join("\n\n")}
-                rows={14}
-                className="min-h-[280px]"
+                value={teamNotes}
+                onChange={(event) => setTeamNotes(event.target.value)}
+                rows={18}
+                className="min-h-[320px]"
+                placeholder="請在此輸入隊伍資訊或備註。"
+                disabled={isSaving}
               />
-              <p className="text-xs text-muted-foreground">
-                Edit the team member details above. Changes are not saved automatically.
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">內容儲存在資料庫，所有成員皆可查看。</p>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? "儲存中..." : "儲存"}
+                </Button>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="p-4 border border-border rounded-lg space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
-                      <AvatarFallback>
-                        {member.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-sm">{member.name}</h4>
-                        <Badge variant={member.status === "admin" ? "default" : "secondary"} className="text-xs">
-                          {member.status === "admin" ? "Admin" : "Prefect"}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{member.role}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Mail className="w-3 h-3" />
-                      <span>{member.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Phone className="w-3 h-3" />
-                      <span>{member.phone}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium">Specialties:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {member.specialties.map((specialty) => (
-                        <Badge key={specialty} variant="outline" className="text-xs">
-                          {specialty}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="min-h-[160px] whitespace-pre-wrap rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm leading-6">
+              {teamNotes || "暫時未有隊伍資訊。"}
             </div>
           )}
         </CardContent>

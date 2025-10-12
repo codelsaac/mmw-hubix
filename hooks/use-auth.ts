@@ -36,6 +36,7 @@ export function useAuth(): UseAuthReturn {
   const isAuthenticated = !!session?.user
   const isLoading = status === "loading"
   const userRole = user?.role as UserRole
+  const customPermissions = user?.permissions || null
 
   const refreshUser = async () => {
     try {
@@ -52,32 +53,32 @@ export function useAuth(): UseAuthReturn {
 
   const hasPermission = (permission: Permission): boolean => {
     if (!userRole || !user) return false
-    return PermissionService.hasPermission(userRole, permission)
+    return PermissionService.hasPermission(userRole, permission, customPermissions)
   }
 
   const hasAnyPermission = (permissions: Permission[]): boolean => {
     if (!userRole || !user || !permissions) return false
-    return PermissionService.hasAnyPermission(userRole, permissions)
+    return PermissionService.hasAnyPermission(userRole, permissions, customPermissions)
   }
 
   const hasAllPermissions = (permissions: Permission[]): boolean => {
     if (!userRole || !user || !permissions) return false
-    return PermissionService.hasAllPermissions(userRole, permissions)
+    return PermissionService.hasAllPermissions(userRole, permissions, customPermissions)
   }
 
   const canAccessAdmin = (): boolean => {
     if (!userRole) return false
-    return PermissionService.canAccessAdmin(userRole)
+    return PermissionService.canAccessAdmin(userRole, customPermissions)
   }
 
   const canManageITSystem = (): boolean => {
     if (!userRole) return false
-    return PermissionService.canManageITSystem(userRole)
+    return PermissionService.canManageITSystem(userRole, customPermissions)
   }
 
   const isReadOnly = (): boolean => {
     if (!userRole) return true
-    return PermissionService.isReadOnly(userRole)
+    return PermissionService.isReadOnly(userRole, customPermissions)
   }
 
   const getRoleDisplayName = (): string => {

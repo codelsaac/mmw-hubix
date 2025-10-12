@@ -1,5 +1,6 @@
 ---
-alwaysApply: true
+trigger: always_on
+---
 
 # MMW Hubix - Project Rules & Quality Assurance
 

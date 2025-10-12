@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import { UserRole } from "@/lib/permissions"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { getCurrentPassword } from "@/lib/password-utils"
+import { prisma } from "@/lib/prisma"
 
 // Enhanced user accounts with role-based access control
 const DEMO_ACCOUNTS = [
@@ -36,7 +37,7 @@ const DEMO_ACCOUNTS = [
     description: "Can manage IT Perfect system but cannot access website admin features"
   },
 ]
- 
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development-only",
   pages: {
@@ -52,6 +53,30 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) return null
         
+        try {
+          // First check database users
+          const dbUser = await prisma.user.findUnique({
+            where: { username: credentials.username },
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              role: true,
+              department: true,
+              permissions: true,
+              isActive: true,
+              lastLoginAt: true
+            }
+          })
+
+          if (dbUser && dbUser.isActive) {
+            // For database users, you would check password hash here
+            // For now, we'll skip to demo accounts
+          }
+        } catch (error) {
+          console.error("Database query error during auth:", error)
+        }
+        
         // Check demo accounts
         const user = DEMO_ACCOUNTS.find(
           account => account.username === credentials.username
@@ -63,13 +88,45 @@ export const authOptions: NextAuthOptions = {
           const passwordToCheck = currentPassword || user.password
           
           if (credentials.password === passwordToCheck) {
-            return {
-              id: user.id,
-              username: user.username,
-              name: user.name,
-              role: user.role,
-              department: user.department,
-              description: user.description
+            // Try to get permissions from database if user exists
+            try {
+              const dbUser = await prisma.user.findUnique({
+                where: { username: user.username },
+                select: {
+                  id: true,
+                  permissions: true
+                }
+              })
+
+              // Update last login time
+              if (dbUser) {
+                await prisma.user.update({
+                  where: { id: dbUser.id },
+                  data: { lastLoginAt: new Date() }
+                })
+              }
+
+              return {
+                id: dbUser?.id || user.id,
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                department: user.department,
+                description: user.description,
+                permissions: dbUser?.permissions || null
+              }
+            } catch (error) {
+              console.error("Error loading user permissions:", error)
+              // Fallback to basic user info without custom permissions
+              return {
+                id: user.id,
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                department: user.department,
+                description: user.description,
+                permissions: null
+              }
             }
           }
         }
@@ -79,7 +136,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    session({ session, token }) {
+    async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
@@ -99,6 +156,28 @@ export const authOptions: NextAuthOptions = {
       if (token.description && session.user) {
         session.user.description = token.description as string
       }
+
+      // Load fresh permissions from database on each session check
+      if (token.username && session.user) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { username: token.username as string },
+            select: { permissions: true }
+          })
+          
+          if (dbUser) {
+            session.user.permissions = dbUser.permissions
+            token.permissions = dbUser.permissions
+          }
+        } catch (error) {
+          console.error("Error loading permissions in session:", error)
+        }
+      }
+
+      // Use cached permissions if available
+      if (token.permissions !== undefined && session.user) {
+        session.user.permissions = token.permissions as string | null
+      }
       
       return session
     },
@@ -108,6 +187,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role
         token.department = user.department
         token.description = user.description
+        token.permissions = user.permissions
       }
       return token
     },

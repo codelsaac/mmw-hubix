@@ -19,9 +19,22 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Edit, Trash2, ExternalLink, Search } from "lucide-react"
-import { resourceService, type Resource } from "@/lib/resources"
+import { toast } from "sonner"
+import { logger } from "@/lib/logger"
 
 const resourceCategories = ["Academics", "Student Life", "Resources"]
+
+interface Resource {
+  id: string
+  name: string
+  url: string
+  description: string
+  category: string
+  status: "active" | "maintenance" | "inactive"
+  clicks: number
+  createdAt?: string
+  updatedAt?: string
+}
 
 export function ResourceManagement() {
   const [resources, setResources] = useState<Resource[]>([])
@@ -29,21 +42,28 @@ export function ResourceManagement() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [editingResource, setEditingResource] = useState<Resource | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const loadedResources = resourceService.getResources()
-    setResources(loadedResources)
-
-    // Listen for resource updates from other components
-    const handleResourcesUpdated = (event: CustomEvent) => {
-      setResources(event.detail)
-    }
-
-    window.addEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
-    return () => {
-      window.removeEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
-    }
+    fetchResources()
   }, [])
+
+  async function fetchResources() {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/admin/resources')
+      if (!response.ok) {
+        throw new Error('Failed to fetch resources')
+      }
+      const data = await response.json()
+      setResources(data)
+    } catch (error) {
+      logger.error('Error fetching resources:', error)
+      toast.error('Failed to load resources')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredResources = resources.filter((resource) => {
     const matchesSearch =
@@ -53,24 +73,64 @@ export function ResourceManagement() {
     return matchesSearch && matchesCategory
   })
 
-  const handleSaveResource = (resourceData: any) => {
-    if (editingResource) {
-      const updatedResource = resourceService.updateResource(editingResource.id, resourceData)
-      if (updatedResource) {
-        setResources(resourceService.getResources())
+  async function handleSaveResource(resourceData: any) {
+    try {
+      if (editingResource) {
+        // Update existing resource
+        const response = await fetch('/api/admin/resources', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([{ id: editingResource.id, ...resourceData }])
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to update resource')
+        }
+        
+        toast.success('Resource updated successfully')
+      } else {
+        // Create new resource
+        const response = await fetch('/api/admin/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(resourceData)
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to create resource')
+        }
+        
+        toast.success('Resource created successfully')
       }
-    } else {
-      resourceService.addResource(resourceData)
-      setResources(resourceService.getResources())
+      
+      await fetchResources()
+      setEditingResource(null)
+      setIsDialogOpen(false)
+    } catch (error) {
+      logger.error('Error saving resource:', error)
+      toast.error('Failed to save resource')
     }
-    setEditingResource(null)
-    setIsDialogOpen(false)
   }
 
-  const handleDeleteResource = (id: number) => {
-    const success = resourceService.deleteResource(id)
-    if (success) {
-      setResources(resourceService.getResources())
+  async function handleDeleteResource(id: string) {
+    if (!confirm('Are you sure you want to delete this resource?')) return
+    
+    try {
+      const response = await fetch('/api/admin/resources', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [id] })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete resource')
+      }
+      
+      toast.success('Resource deleted successfully')
+      await fetchResources()
+    } catch (error) {
+      logger.error('Error deleting resource:', error)
+      toast.error('Failed to delete resource')
     }
   }
 
@@ -137,6 +197,11 @@ export function ResourceManagement() {
           <CardDescription>Manage all homepage resource links</CardDescription>
         </CardHeader>
         <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">Loading resources...</div>
+          ) : filteredResources.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No resources found</div>
+          ) : (
           <div className="space-y-4">
             {filteredResources.map((resource) => (
               <div key={resource.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
@@ -157,7 +222,7 @@ export function ResourceManagement() {
                       {resource.url}
                     </span>
                     <span>{resource.clicks} clicks</span>
-                    <span>Updated {resource.lastUpdated}</span>
+                    <span>Updated {resource.updatedAt ? new Date(resource.updatedAt).toLocaleDateString() : 'N/A'}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -178,6 +243,7 @@ export function ResourceManagement() {
               </div>
             ))}
           </div>
+          )}
         </CardContent>
       </Card>
     </div>

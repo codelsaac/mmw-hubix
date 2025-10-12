@@ -75,58 +75,94 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 
 export class PermissionService {
   /**
-   * Check if a user has a specific permission
+   * Parse custom permissions from string
    */
-  static hasPermission(userRole: UserRole, permission: Permission): boolean {
+  static parseCustomPermissions(permissionsString: string | null | undefined): Permission[] {
+    if (!permissionsString) return []
+    try {
+      const parsed = JSON.parse(permissionsString)
+      if (Array.isArray(parsed)) {
+        return parsed.filter(p => Object.values(Permission).includes(p as Permission))
+      }
+    } catch (error) {
+      console.error('Error parsing custom permissions:', error)
+    }
+    return []
+  }
+
+  /**
+   * Get merged permissions (role + custom user permissions)
+   */
+  static getMergedPermissions(userRole: UserRole, customPermissions?: string | null): Permission[] {
+    const rolePermissions = ROLE_PERMISSIONS[userRole] || []
+    const userPermissions = this.parseCustomPermissions(customPermissions)
+    
+    // Merge and deduplicate permissions
+    const allPermissions = [...rolePermissions, ...userPermissions]
+    return Array.from(new Set(allPermissions))
+  }
+
+  /**
+   * Check if a user has a specific permission (role-based OR custom)
+   */
+  static hasPermission(userRole: UserRole, permission: Permission, customPermissions?: string | null): boolean {
     if (!userRole) return false
-    const rolePermissions = ROLE_PERMISSIONS[userRole]
-    if (!rolePermissions) return false
-    return rolePermissions.includes(permission)
+    const allPermissions = this.getMergedPermissions(userRole, customPermissions)
+    return allPermissions.includes(permission)
   }
 
   /**
    * Check if a user has any of the specified permissions
    */
-  static hasAnyPermission(userRole: UserRole, permissions: Permission[]): boolean {
+  static hasAnyPermission(userRole: UserRole, permissions: Permission[], customPermissions?: string | null): boolean {
     if (!userRole || !permissions || permissions.length === 0) return false
-    return permissions.some(permission => this.hasPermission(userRole, permission))
+    return permissions.some(permission => this.hasPermission(userRole, permission, customPermissions))
   }
 
   /**
    * Check if a user has all of the specified permissions
    */
-  static hasAllPermissions(userRole: UserRole, permissions: Permission[]): boolean {
+  static hasAllPermissions(userRole: UserRole, permissions: Permission[], customPermissions?: string | null): boolean {
     if (!userRole || !permissions || permissions.length === 0) return false
-    return permissions.every(permission => this.hasPermission(userRole, permission))
+    return permissions.every(permission => this.hasPermission(userRole, permission, customPermissions))
   }
 
   /**
-   * Get all permissions for a user role
+   * Get all permissions for a user role (including custom)
    */
-  static getRolePermissions(userRole: UserRole): Permission[] {
+  static getRolePermissions(userRole: UserRole, customPermissions?: string | null): Permission[] {
     if (!userRole) return []
-    return ROLE_PERMISSIONS[userRole] || []
+    return this.getMergedPermissions(userRole, customPermissions)
   }
 
   /**
    * Check if user can access admin panel
    */
-  static canAccessAdmin(userRole: UserRole): boolean {
-    return this.hasPermission(userRole, Permission.MANAGE_WEBSITE)
+  static canAccessAdmin(userRole: UserRole, customPermissions?: string | null): boolean {
+    return this.hasPermission(userRole, Permission.MANAGE_WEBSITE, customPermissions)
   }
 
   /**
    * Check if user can manage IT Perfect system
    */
-  static canManageITSystem(userRole: UserRole): boolean {
-    return this.hasPermission(userRole, Permission.MANAGE_IT_SYSTEM)
+  static canManageITSystem(userRole: UserRole, customPermissions?: string | null): boolean {
+    return this.hasPermission(userRole, Permission.MANAGE_IT_SYSTEM, customPermissions)
   }
 
   /**
    * Check if user has read-only access
    */
-  static isReadOnly(userRole: UserRole): boolean {
-    return userRole === UserRole.GUEST
+  static isReadOnly(userRole: UserRole, customPermissions?: string | null): boolean {
+    // Check if user has any management permissions
+    const managementPerms = [
+      Permission.MANAGE_WEBSITE,
+      Permission.MANAGE_IT_SYSTEM,
+      Permission.MANAGE_RESOURCES,
+      Permission.MANAGE_TRAINING_VIDEOS,
+      Permission.MANAGE_TASKS,
+      Permission.MANAGE_ACTIVITIES
+    ]
+    return !this.hasAnyPermission(userRole, managementPerms, customPermissions)
   }
 
   /**

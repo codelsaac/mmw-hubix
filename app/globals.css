@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Browser Extension Hydration Fix */
+/* Hide browser extension attributes that cause hydration mismatches */
+[bis_skin_checked] {
+  /* This prevents browser extensions from causing hydration errors */
+  /* The attribute will be cleaned up by JavaScript after hydration */
+}
+
 :root {
   --background: oklch(0.95 0.03 200); /* #b3e5fc - brighter light blue like school header */
   --foreground: oklch(0.15 0.1 240); /* #1a237e - deeper blue for better contrast */

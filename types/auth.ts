@@ -11,6 +11,7 @@ export interface AuthenticatedUser {
   name?: string | null
   role: UserRole
   department?: string
+  permissions?: string | null
 }
 
 /**
@@ -26,5 +27,6 @@ export interface AuthUser {
   role?: UserRole
   department?: string
   description?: string
+  permissions?: string | null
 }
 

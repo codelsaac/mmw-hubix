@@ -36,24 +36,31 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       )
     }
 
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+    // Ensure the user exists in the database first (upsert pattern)
+    const user = await prisma.user.upsert({
+      where: { id: session.user.id },
+      update: {
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role as UserRole,
+        department: session.user.department,
+      },
+      create: {
+        id: session.user.id,
+        username: session.user.username || session.user.email?.split('@')[0] || 'user',
+        name: session.user.name || 'User',
+        email: session.user.email,
+        role: (session.user.role as UserRole) || UserRole.GUEST,
+        department: session.user.department || 'General',
+      }
     })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
 
     // Check permissions
     if (!PermissionService.hasPermission(user.role as UserRole, Permission.MANAGE_TRAINING_VIDEOS)) {
