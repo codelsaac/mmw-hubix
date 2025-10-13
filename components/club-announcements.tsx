@@ -16,7 +16,7 @@ export function ClubAnnouncements() {
       <section id="activity-news" className="space-y-6 scroll-mt-20 md:scroll-mt-24" suppressHydrationWarning>
         <div className="flex items-center justify-between" suppressHydrationWarning>
           <div suppressHydrationWarning>
-            <h2 className="text-2xl font-serif font-bold text-foreground">Activity News</h2>
+            <h2 className="text-xl font-serif font-bold text-foreground">Activity News</h2>
             <p className="text-muted-foreground">
               Stay updated with the latest events and activities from school clubs
             </p>
@@ -28,15 +28,15 @@ export function ClubAnnouncements() {
   }
 
   return (
-    <section id="activity-news" className="space-y-6 scroll-mt-20 md:scroll-mt-24" suppressHydrationWarning>
+    <section id="activity-news" className="space-y-6 scroll-mt-20 md:scroll-mt-24 animate-in fade-in slide-in-from-bottom-4 duration-500" suppressHydrationWarning>
       <div className="flex items-center justify-between" suppressHydrationWarning>
         <div suppressHydrationWarning>
-          <h2 className="text-2xl font-serif font-bold text-foreground">Activity News</h2>
+          <h2 className="text-2xl font-serif font-bold text-foreground animate-in fade-in slide-in-from-left-4 duration-700">Activity News</h2>
           <p className="text-muted-foreground">Stay updated with the latest events and activities from school clubs</p>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="transition-all duration-300 hover:scale-105 hover:shadow-md">
           View All
-          <ChevronRight className="w-4 h-4 ml-1" />
+          <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
         </Button>
       </div>
 
@@ -44,8 +44,8 @@ export function ClubAnnouncements() {
         {activeAnnouncements.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>No active activity news at the moment.</div>
         ) : (
-          activeAnnouncements.map((announcement) => (
-            <Card key={announcement.id} className="hover:shadow-md transition-shadow" suppressHydrationWarning>
+          activeAnnouncements.map((announcement, index) => (
+            <Card key={announcement.id} className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${index * 100}ms` }} suppressHydrationWarning>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between" suppressHydrationWarning>
                   <div className="space-y-1" suppressHydrationWarning>
@@ -93,7 +93,7 @@ export function ClubAnnouncements() {
                   </div>
                   <Button
                     size="sm"
-                    className="ml-4"
+                    className="ml-4 transition-all duration-300 hover:scale-105"
                     disabled={announcement.attendees >= announcement.maxAttendees}
                     onClick={() => joinEvent(announcement.id)}
                   >

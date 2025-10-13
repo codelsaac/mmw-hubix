@@ -44,6 +44,7 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified DateTime?
+  password      String?
   image         String?   @db.VarChar(2048)
   role          UserRole  @default(GUEST)
   department    String?
@@ -51,20 +52,20 @@ model User {
   isActive      Boolean   @default(true)
   lastLoginAt   DateTime?
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts Account[]
+  sessions Session[]
 
   createdResources         Resource[]
   createdPublicEvents      PublicEvent[]
-  createdInternalEvents    InternalEvent[] @relation("CreatedInternalEvents")
+  createdInternalEvents    InternalEvent[]    @relation("CreatedInternalEvents")
   createdTrainingResources TrainingResource[]
 
-  createdActivities Activity[] @relation("CreatedActivities")
-  assignedActivities Activity[] @relation("AssignedActivities")
-  createdTasks      Task[]     @relation("CreatedTasks")
-  assignedTasks     Task[]     @relation("AssignedTasks")
+  createdActivities    Activity[]     @relation("CreatedActivities")
+  assignedActivities   Activity[]     @relation("AssignedActivities")
+  createdTasks         Task[]         @relation("CreatedTasks")
+  assignedTasks        Task[]         @relation("AssignedTasks")
   createdAnnouncements Announcement[]
-  createdArticles   Article[]
+  createdArticles      Article[]
 }
 
 model VerificationToken {
@@ -97,9 +98,8 @@ model Resource {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  creator     User?    @relation(fields: [createdBy], references: [id])
+  creator User? @relation(fields: [createdBy], references: [id])
 }
-
 
 model PublicEvent {
   id          String   @id @default(cuid())
@@ -114,22 +114,22 @@ model PublicEvent {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  creator     User?    @relation(fields: [createdBy], references: [id])
+  creator User? @relation(fields: [createdBy], references: [id])
 }
 
 model InternalEvent {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  description String?   @db.Text
+  description String?  @db.Text
   startTime   DateTime
   endTime     DateTime
   location    String?
   eventType   String?
   attendees   Json?
   createdBy   String?
-  creator     User?     @relation("CreatedInternalEvents", fields: [createdBy], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  creator     User?    @relation("CreatedInternalEvents", fields: [createdBy], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Activity {
@@ -144,8 +144,8 @@ model Activity {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  assignee    User?    @relation("AssignedActivities", fields: [assignedTo], references: [id])
-  creator     User?    @relation("CreatedActivities", fields: [createdBy], references: [id])
+  assignee User? @relation("AssignedActivities", fields: [assignedTo], references: [id])
+  creator  User? @relation("CreatedActivities", fields: [createdBy], references: [id])
 }
 
 model Task {
@@ -160,36 +160,36 @@ model Task {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  assignee    User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
-  creator     User?    @relation("CreatedTasks", fields: [createdBy], references: [id])
+  assignee User? @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  creator  User? @relation("CreatedTasks", fields: [createdBy], references: [id])
 
   @@index([status, priority, dueDate])
 }
 
 model TrainingResource {
-  id          String      @id @default(cuid())
+  id          String              @id @default(cuid())
   title       String
-  description String?     @db.Text
+  description String?             @db.Text
   contentType ResourceContentType
 
-  videoUrl    String?     @db.VarChar(2048)
+  videoUrl    String? @db.VarChar(2048)
   duration    Int?
-  textContent String?     @db.LongText
-  fileName    String?     @db.VarChar(255)
-  fileUrl     String?     @db.VarChar(2048)
+  textContent String? @db.LongText
+  fileName    String? @db.VarChar(255)
+  fileUrl     String? @db.VarChar(2048)
   fileSize    Int?
   mimeType    String?
 
-  category    String
-  difficulty  String?
-  instructor  String?
-  views       Int         @default(0)
-  isPublic    Boolean     @default(false)
-  createdBy   String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  category   String
+  difficulty String?
+  instructor String?
+  views      Int      @default(0)
+  isPublic   Boolean  @default(false)
+  createdBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  creator     User?       @relation(fields: [createdBy], references: [id])
+  creator User? @relation(fields: [createdBy], references: [id])
 }
 
 enum ResourceContentType {
@@ -215,27 +215,27 @@ model Announcement {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  creator      User?    @relation(fields: [createdBy], references: [id])
+  creator User? @relation(fields: [createdBy], references: [id])
 }
 
 model Article {
-  id          String      @id @default(cuid())
-  title       String
-  slug        String      @unique
-  content     String      @db.LongText
-  excerpt     String?     @db.Text
-  status      ArticleStatus @default(DRAFT)
-  isPublic    Boolean     @default(true)
-  publishedAt DateTime?
-  views       Int         @default(0)
-  tags        String?     @db.Text
-  category    String?
-  featuredImage String?   @db.VarChar(2048)
-  createdBy   String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String        @id @default(cuid())
+  title         String
+  slug          String        @unique
+  content       String        @db.LongText
+  excerpt       String?       @db.Text
+  status        ArticleStatus @default(DRAFT)
+  isPublic      Boolean       @default(true)
+  publishedAt   DateTime?
+  views         Int           @default(0)
+  tags          String?       @db.Text
+  category      String?
+  featuredImage String?       @db.VarChar(2048)
+  createdBy     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  creator     User?       @relation(fields: [createdBy], references: [id])
+  creator User? @relation(fields: [createdBy], references: [id])
 
   @@index([status, publishedAt])
   @@index([slug])
@@ -256,18 +256,18 @@ model TeamNotes {
 }
 
 model Notification {
-  id          String           @id @default(cuid())
-  title       String
-  message     String           @db.Text
-  type        NotificationType @default(INFO)
-  priority    NotificationPriority @default(NORMAL)
-  isRead      Boolean          @default(false)
-  userId      String?
-  link        String?          @db.VarChar(2048)
-  metadata    String?          @db.Text
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  
+  id        String               @id @default(cuid())
+  title     String
+  message   String               @db.Text
+  type      NotificationType     @default(INFO)
+  priority  NotificationPriority @default(NORMAL)
+  isRead    Boolean              @default(false)
+  userId    String?
+  link      String?              @db.VarChar(2048)
+  metadata  String?              @db.Text
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
   @@index([userId, isRead, createdAt])
   @@index([createdAt])
 }
@@ -289,15 +289,15 @@ enum NotificationPriority {
 }
 
 model SiteSetting {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String   @db.Text
-  category  String   @default("general")
+  id        String      @id @default(cuid())
+  key       String      @unique
+  value     String      @db.Text
+  category  String      @default("general")
   label     String?
   type      SettingType @default(STRING)
-  isPublic  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isPublic  Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@index([category])
   @@index([key])

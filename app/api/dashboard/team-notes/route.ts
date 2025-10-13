@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server"
-import auth from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { requireAuthAPI } from "@/lib/auth-server"
+import { UserRole } from "@/lib/permissions"
 
 export async function GET() {
   try {
     // Allow all authenticated users to read team notes
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    await requireAuthAPI()
 
     // Get the first (and only) team notes record
     let teamNotes = await prisma.teamNotes.findFirst({
@@ -33,12 +31,8 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const session = await auth()
-    
     // Only admins can update team notes
-    if (!session?.user || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
-    }
+    const user = await requireAuthAPI([UserRole.ADMIN])
 
     const { content } = await req.json()
 
@@ -55,7 +49,7 @@ export async function PUT(req: Request) {
         where: { id: teamNotes.id },
         data: {
           content,
-          updatedBy: session.user.id,
+          updatedBy: user.id,
         },
       })
     } else {
@@ -63,7 +57,7 @@ export async function PUT(req: Request) {
       teamNotes = await prisma.teamNotes.create({
         data: {
           content,
-          updatedBy: session.user.id,
+          updatedBy: user.id,
         },
       })
     }

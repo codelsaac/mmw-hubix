@@ -84,7 +84,9 @@ export function ResourceManagement() {
         })
         
         if (!response.ok) {
-          throw new Error('Failed to update resource')
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          logger.error('Failed to update resource:', errorData)
+          throw new Error(errorData.error || 'Failed to update resource')
         }
         
         toast.success('Resource updated successfully')
@@ -97,7 +99,9 @@ export function ResourceManagement() {
         })
         
         if (!response.ok) {
-          throw new Error('Failed to create resource')
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          logger.error('Failed to create resource:', { status: response.status, error: errorData })
+          throw new Error(errorData.error || `Failed to create resource (${response.status})`)
         }
         
         toast.success('Resource created successfully')
@@ -108,7 +112,8 @@ export function ResourceManagement() {
       setIsDialogOpen(false)
     } catch (error) {
       logger.error('Error saving resource:', error)
-      toast.error('Failed to save resource')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save resource'
+      toast.error(errorMessage)
     }
   }
 

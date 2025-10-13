@@ -10,8 +10,14 @@ const userUpdates = new Map<string, any>()
 
 const profileUpdateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name too long').optional(),
-  email: z.string().email('Invalid email format').optional(),
-  department: z.string().max(100, 'Department name too long').optional(),
+  email: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().email('Invalid email format').optional()
+  ),
+  department: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().max(100, 'Department name too long').optional()
+  ),
 })
 
 export async function GET() {
@@ -49,7 +55,10 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
+    logger.log('[PROFILE_PATCH] Received body:', body)
+    
     const validatedData = profileUpdateSchema.parse(body)
+    logger.log('[PROFILE_PATCH] Validated data:', validatedData)
     
     const userId = session.user.id
     

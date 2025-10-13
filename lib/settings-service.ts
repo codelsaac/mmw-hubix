@@ -1,12 +1,11 @@
 import { prisma } from "@/lib/prisma"
-import { SettingType } from "@prisma/client"
 
 export interface SettingDefinition {
   key: string
   value: string
   category: string
   label?: string
-  type: SettingType
+  type: "STRING" | "NUMBER" | "BOOLEAN" | "JSON"
   isPublic?: boolean
 }
 
@@ -106,15 +105,6 @@ export const DEFAULT_SETTINGS: SettingDefinition[] = [
     type: "STRING",
     isPublic: false,
   },
-  // Appearance Settings
-  {
-    key: "colorTheme",
-    value: "school-blue-yellow",
-    category: "appearance",
-    label: "Color Theme",
-    type: "STRING",
-    isPublic: true,
-  },
 ]
 
 /**
@@ -125,11 +115,19 @@ export async function initializeSettings() {
     const existingSettings = await prisma.siteSetting.count()
     
     if (existingSettings === 0) {
-      // Insert all default settings
-      await prisma.siteSetting.createMany({
-        data: DEFAULT_SETTINGS,
-        skipDuplicates: true,
-      })
+      // Insert default settings one by one to handle duplicates
+      for (const setting of DEFAULT_SETTINGS) {
+        try {
+          await prisma.siteSetting.create({
+            data: setting,
+          })
+        } catch (error) {
+          // Skip if setting already exists (unique constraint violation)
+          if ((error as any).code !== 'P2002') {
+            throw error
+          }
+        }
+      }
       console.log(`✅ Initialized ${DEFAULT_SETTINGS.length} default settings`)
     }
     
@@ -284,7 +282,7 @@ export async function deleteSetting(key: string) {
 /**
  * Helper function to parse setting value based on type
  */
-function parseSettingValue(value: string, type: SettingType): any {
+function parseSettingValue(value: string, type: "STRING" | "NUMBER" | "BOOLEAN" | "JSON"): any {
   switch (type) {
     case "BOOLEAN":
       return value === "true" || value === "1"

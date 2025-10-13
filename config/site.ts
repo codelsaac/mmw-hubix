@@ -20,7 +20,7 @@ export const siteConfig = {
   links: {
     twitter: "https://twitter.com/cccmmw",
     github: "https://github.com/your-org/mmw-hubix",
-    schoolSite: "https://www.cccmmw.edu.hk/",
+    schoolSite: "https://www.cccmmwc.edu.hk",
   },
 }
 

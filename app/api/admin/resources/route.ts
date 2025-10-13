@@ -69,6 +69,20 @@ export async function POST(req: NextRequest) {
     }
     const resourceData = validation.data;
 
+    // Verify user exists in database before setting createdBy
+    let createdById: string | null = null;
+    if (session.user?.id) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { id: true }
+      });
+      if (userExists) {
+        createdById = session.user.id;
+      } else {
+        logger.warn(`[ADMIN_RESOURCES_POST] Session user ID ${session.user.id} not found in database`);
+      }
+    }
+
     const newResource = await prisma.resource.create({
       data: {
         name: resourceData.name,
@@ -77,7 +91,7 @@ export async function POST(req: NextRequest) {
         category: resourceData.category,
         status: resourceData.status,
         clicks: 0,
-        createdBy: session.user.id,
+        createdBy: createdById,
       },
       include: {
         creator: {

@@ -24,9 +24,6 @@ export interface Settings {
   autoBackup: boolean
   backupFrequency: string
   
-  // Appearance Settings
-  colorTheme: string
-  
   // Legacy
   isMaintenanceMode?: boolean
 }
@@ -43,7 +40,6 @@ const defaultSettings: Settings = {
   emailNotifications: true,
   autoBackup: true,
   backupFrequency: "weekly",
-  colorTheme: "school-blue-yellow",
 }
 
 export function useSettings() {

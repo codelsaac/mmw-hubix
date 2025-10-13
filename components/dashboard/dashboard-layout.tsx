@@ -78,7 +78,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
                 <div>
                   <h1 className="text-lg font-serif font-bold text-foreground">
-                    {isAdminRoute ? "Admin Dashboard" : "IT Prefect Dashboard"}
+                    {isAdminRoute ? "Admin Dashboard" : "Dashboard"}
                   </h1>
                   <p className="text-xs text-muted-foreground">
                     {isAdminRoute ? "Content Management System" : "Internal Management System"}
@@ -93,8 +93,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="text-right">
                     <p className="text-sm font-medium">{user.name}</p>
                     <div className="flex items-center gap-1">
-                      <Badge variant={user.role === UserRole.ADMIN ? "default" : "secondary"} className="text-xs">
-                        {user.role === UserRole.ADMIN ? "Admin" : "Prefect"}
+                      <Badge 
+                        variant={user.role === UserRole.ADMIN ? "default" : "secondary"} 
+                        className="text-xs"
+                      >
+                        {user.role === UserRole.ADMIN 
+                          ? "Admin" 
+                          : user.role === UserRole.HELPER 
+                            ? "Helper" 
+                            : "Guest"}
                       </Badge>
                     </div>
                   </div>

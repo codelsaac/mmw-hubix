@@ -40,8 +40,8 @@ export function UserMenu() {
         return "bg-red-500 hover:bg-red-600"
       case "HELPER":
         return "bg-blue-500 hover:bg-blue-600"
-      case "IT_PREFECT":
-        return "bg-green-500 hover:bg-green-600"
+      case "GUEST":
+        return "bg-gray-500 hover:bg-gray-600"
       default:
         return "bg-gray-500 hover:bg-gray-600"
     }
@@ -53,8 +53,8 @@ export function UserMenu() {
         return "System Administrator"
       case "HELPER":
         return "IT Assistant"
-      case "IT_PREFECT":
-        return "IT Prefect"
+      case "GUEST":
+        return "Guest User"
       default:
         return role
     }

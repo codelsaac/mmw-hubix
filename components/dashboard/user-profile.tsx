@@ -12,6 +12,7 @@ import { User, Lock, Bell, Palette, CheckCircle, AlertCircle } from "lucide-reac
 import { useAuth } from "@/hooks/use-auth"
 import { toast } from "sonner"
 import { logger } from "@/lib/logger"
+import { Switch } from "@/components/ui/switch"
 
 interface ProfileData {
   name: string
@@ -28,7 +29,6 @@ interface PasswordData {
 }
 
 interface PreferencesData {
-  theme: string
   notifications: boolean
   emailNotifications: boolean
 }
@@ -56,7 +56,6 @@ export function UserProfile() {
   
   // Preferences data
   const [preferencesData, setPreferencesData] = useState<PreferencesData>({
-    theme: "school-blue-yellow",
     notifications: true,
     emailNotifications: true
   })
@@ -92,15 +91,34 @@ export function UserProfile() {
   const handleProfileUpdate = async () => {
     setIsLoading(true)
     try {
+      // Build payload, only include fields with values
+      const payload: Record<string, string> = {}
+      
+      if (profileData.name.trim()) {
+        payload.name = profileData.name.trim()
+      }
+      if (profileData.email.trim()) {
+        payload.email = profileData.email.trim()
+      }
+      if (profileData.department.trim()) {
+        payload.department = profileData.department.trim()
+      }
+
+      logger.log('[PROFILE_UPDATE] Sending payload:', payload)
+
       const response = await fetch('/api/dashboard/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(payload)
       })
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to update profile')
+        logger.error('[PROFILE_UPDATE] API error:', error)
+        const errorMsg = error.details 
+          ? `Validation error: ${error.details.map((d: any) => d.message).join(', ')}`
+          : error.error || error.message || 'Failed to update profile'
+        throw new Error(errorMsg)
       }
 
       const updatedUser = await response.json()
@@ -200,8 +218,8 @@ export function UserProfile() {
         return "bg-red-500"
       case "HELPER":
         return "bg-blue-500"
-      case "IT_PREFECT":
-        return "bg-green-500"
+      case "GUEST":
+        return "bg-gray-500"
       default:
         return "bg-gray-500"
     }
@@ -213,8 +231,8 @@ export function UserProfile() {
         return "System Administrator"
       case "HELPER":
         return "IT Assistant"
-      case "IT_PREFECT":
-        return "IT Prefect"
+      case "GUEST":
+        return "Guest User"
       default:
         return role
     }
@@ -232,10 +250,10 @@ export function UserProfile() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-3">
             <User className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
@@ -244,7 +262,7 @@ export function UserProfile() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Avatar className="h-12 w-12">
+          <Avatar className="h-12 w-12 ring-2 ring-primary/10 transition-all duration-300 hover:ring-primary/30 hover:scale-110">
             <AvatarImage src={user.image || ""} alt={user.name || ""} />
             <AvatarFallback>
               {user.name?.charAt(0) || user.email?.charAt(0) || "U"}
@@ -266,8 +284,8 @@ export function UserProfile() {
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-6">
-          <Card>
+        <TabsContent value="profile" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your personal information and account details</CardDescription>
@@ -278,6 +296,8 @@ export function UserProfile() {
                   <Label htmlFor="name">Full Name</Label>
                   <Input
                     id="name"
+                    name="name"
+                    autoComplete="name"
                     value={profileData.name}
                     onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Enter your full name"
@@ -287,7 +307,9 @@ export function UserProfile() {
                   <Label htmlFor="email">Email Address</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="Enter your email"
@@ -299,6 +321,8 @@ export function UserProfile() {
                   <Label htmlFor="username">Username</Label>
                   <Input
                     id="username"
+                    name="username"
+                    autoComplete="username"
                     value={profileData.username}
                     onChange={(e) => setProfileData(prev => ({ ...prev, username: e.target.value }))}
                     placeholder="Enter your username"
@@ -310,6 +334,8 @@ export function UserProfile() {
                   <Label htmlFor="department">Department</Label>
                   <Input
                     id="department"
+                    name="department"
+                    autoComplete="organization-title"
                     value={profileData.department}
                     onChange={(e) => setProfileData(prev => ({ ...prev, department: e.target.value }))}
                     placeholder="Enter your department"
@@ -317,7 +343,7 @@ export function UserProfile() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleProfileUpdate} disabled={isLoading}>
+                <Button onClick={handleProfileUpdate} disabled={isLoading} className="transition-all duration-300 hover:scale-105">
                   {isLoading ? "Updating..." : "Update Profile"}
                 </Button>
               </div>
@@ -325,8 +351,8 @@ export function UserProfile() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="password" className="space-y-6">
-          <Card>
+        <TabsContent value="password" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lock className="w-5 h-5" />
@@ -339,7 +365,9 @@ export function UserProfile() {
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <Input
                   id="currentPassword"
+                  name="currentPassword"
                   type="password"
+                  autoComplete="current-password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
                   placeholder="Enter your current password"
@@ -349,7 +377,9 @@ export function UserProfile() {
                 <Label htmlFor="newPassword">New Password</Label>
                 <Input
                   id="newPassword"
+                  name="newPassword"
                   type="password"
+                  autoComplete="new-password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
                   placeholder="Enter your new password"
@@ -360,14 +390,16 @@ export function UserProfile() {
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   placeholder="Confirm your new password"
                 />
               </div>
               <div className="flex justify-end">
-                <Button onClick={handlePasswordChange} disabled={isLoading}>
+                <Button onClick={handlePasswordChange} disabled={isLoading} className="transition-all duration-300 hover:scale-105">
                   {isLoading ? "Changing..." : "Change Password"}
                 </Button>
               </div>
@@ -375,8 +407,8 @@ export function UserProfile() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="preferences" className="space-y-6">
-          <Card>
+        <TabsContent value="preferences" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="w-5 h-5" />
@@ -386,70 +418,33 @@ export function UserProfile() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Theme Preference</Label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      {
-                        id: "school-blue-yellow",
-                        name: "School Blue & Yellow",
-                        colors: ["#87CEEB", "#003366", "#FFD700"],
-                      },
-                      { id: "classic-blue", name: "Classic Blue", colors: ["#E3F2FD", "#1976D2", "#FFC107"] },
-                      { id: "green-gold", name: "Green & Gold", colors: ["#E8F5E8", "#2E7D32", "#FF8F00"] },
-                    ].map((theme) => (
-                      <div
-                        key={theme.id}
-                        className={`p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
-                          preferencesData.theme === theme.id ? "border-primary bg-primary/5" : "border-border"
-                        }`}
-                        onClick={() => setPreferencesData(prev => ({ ...prev, theme: theme.id }))}
-                      >
-                        <div className="flex gap-2 mb-2">
-                          {theme.colors.map((color, index) => (
-                            <div key={index} className="w-6 h-6 rounded-full" style={{ backgroundColor: color }} />
-                          ))}
-                        </div>
-                        <p className="text-sm font-medium">{theme.name}</p>
-                        {preferencesData.theme === theme.id && <CheckCircle className="w-4 h-4 text-primary mt-1" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
                 <h4 className="font-medium">Notification Settings</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-primary/50 transition-all duration-300 hover:shadow-sm">
                     <div className="space-y-0.5">
-                      <Label>System Notifications</Label>
+                      <Label className="font-medium">System Notifications</Label>
                       <p className="text-sm text-muted-foreground">Receive notifications for system updates and announcements</p>
                     </div>
-                    <input
-                      type="checkbox"
+                    <Switch
                       checked={preferencesData.notifications}
-                      onChange={(e) => setPreferencesData(prev => ({ ...prev, notifications: e.target.checked }))}
-                      className="w-4 h-4"
+                      onCheckedChange={(checked) => setPreferencesData(prev => ({ ...prev, notifications: checked }))}
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-primary/50 transition-all duration-300 hover:shadow-sm">
                     <div className="space-y-0.5">
-                      <Label>Email Notifications</Label>
+                      <Label className="font-medium">Email Notifications</Label>
                       <p className="text-sm text-muted-foreground">Receive email notifications for important updates</p>
                     </div>
-                    <input
-                      type="checkbox"
+                    <Switch
                       checked={preferencesData.emailNotifications}
-                      onChange={(e) => setPreferencesData(prev => ({ ...prev, emailNotifications: e.target.checked }))}
-                      className="w-4 h-4"
+                      onCheckedChange={(checked) => setPreferencesData(prev => ({ ...prev, emailNotifications: checked }))}
                     />
                   </div>
                 </div>
               </div>
               
               <div className="flex justify-end">
-                <Button onClick={handlePreferencesUpdate}>
+                <Button onClick={handlePreferencesUpdate} className="transition-all duration-300 hover:scale-105">
                   Save Preferences
                 </Button>
               </div>

@@ -36,6 +36,16 @@ const sitemapSections: SitemapSection[] = [
         description: "Staff and student portal"
       }
     ]
+  },
+  {
+    title: "Quick Links",
+    links: [
+      {
+        title: "School Website",
+        href: "https://www.cccmmwc.edu.hk/",
+        description: "Visit our main school website"
+      }
+    ]
   }
 ]
 
@@ -47,7 +57,7 @@ export function FooterSitemap() {
         <div className="mb-12 text-center" suppressHydrationWarning>
           <div className="mb-4 flex items-center justify-center space-x-2" suppressHydrationWarning>
             <Icons.logo className="h-8 w-8" />
-            <h2 className="text-2xl font-bold tracking-tight">{siteConfig.name}</h2>
+            <h2 className="text-xl font-bold tracking-tight">{siteConfig.name}</h2>
           </div>
           <p className="text-muted-foreground max-w-2xl mx-auto" suppressHydrationWarning>
             {siteConfig.description}
@@ -103,16 +113,7 @@ export function FooterSitemap() {
           </div>
           
           {/* Social Links */}
-          <div className="flex items-center space-x-4" suppressHydrationWarning>
-            <Link
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm p-1"
-              aria-label="GitHub Repository"
-            >
-              <Icons.gitHub className="h-5 w-5" />
-            </Link>
+          <div className="flex items-center" suppressHydrationWarning>
             <Link
               href={siteConfig.links.schoolSite}
               target="_blank"
@@ -121,39 +122,6 @@ export function FooterSitemap() {
               aria-label="School Website"
             >
               <Icons.globe className="h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Quick Access Links */}
-        <div className="mt-8 pt-6 border-t border-border/20" suppressHydrationWarning>
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground" suppressHydrationWarning>
-            <Link 
-              href="/privacy" 
-              className="hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm px-1"
-            >
-              Privacy Policy
-            </Link>
-            <span className="text-border">•</span>
-            <Link 
-              href="/terms" 
-              className="hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm px-1"
-            >
-              Terms of Service
-            </Link>
-            <span className="text-border">•</span>
-            <Link 
-              href="/accessibility" 
-              className="hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm px-1"
-            >
-              Accessibility
-            </Link>
-            <span className="text-border">•</span>
-            <Link 
-              href="/contact" 
-              className="hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm px-1"
-            >
-              Contact Us
             </Link>
           </div>
         </div>

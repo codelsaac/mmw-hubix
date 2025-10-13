@@ -4,6 +4,12 @@ trigger: always_on
 
 # MMW Hubix - Project Rules & Quality Assurance
 
+## 📚 Documentation
+For detailed guides, see:
+- **[CONTRIBUTING.md](../../CONTRIBUTING.md)** - Development workflow & testing procedures
+- **[docs/](../../docs/)** - API, Notifications, Permissions, Settings documentation
+- **[README.md](../../README.md)** - Project overview
+
 ## Tech Stack
 - Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui
 - Prisma ORM: MySQL (production) / SQLite (dev with `npm run dev:sqlite`)
@@ -11,9 +17,9 @@ trigger: always_on
 - Zod validation, React Hook Form, Recharts, React Data Grid
 
 ## Key Conventions
-- **Files**: Components `kebab-case.tsx`, Pages `page.tsx`, API `route.ts`, Hooks `use-*.ts`
+- **Files**: Components `kebab-case.tsx`, Pages `page.tsx`, API [route.ts](cci:7://file:///c:/Users/user/Documents/IT%20perfect/mmw-hubix/app/api/dashboard/profile/route.ts:0:0-0:0), Hooks `use-*.ts` 
 - **Components**: Server Components default, add `"use client"` only when needed (state/effects)
-- **Imports**: `@/components/*`, `@/lib/*`, `@/hooks/*`, `@/app/*`
+- **Imports**: `@/components/*`, `@/lib/*`, `@/hooks/*`, `@/app/*` 
 - **Styling**: Tailwind only, use `cn()` from `lib/utils.ts`, no inline styles
 
 ## Auth & Roles
@@ -29,6 +35,8 @@ trigger: always_on
 - **PublicEvent/InternalEvent**: Calendar system with attendees
 - **Activity/Task**: Team management with assignments and priorities
 - **Resource**: External links organized by category
+- **SiteSetting**: Database-backed configuration system
+- **Notification**: Real-time notifications with priority levels
 
 ## Core Features
 - **Articles CMS**: Full content management with drafts, publishing, SEO
@@ -40,13 +48,14 @@ trigger: always_on
 - **Activity Management**: Task assignment and team coordination
 - **Resource Hub**: Curated external links with click tracking
 - **User Profile & Settings**: Personal profile management with password change functionality
+- **Notification System**: Real-time notifications with role targeting
 
 ## Database
-- Use singleton: `import { prisma } from "@/lib/prisma"`
+- Use singleton: `import { prisma } from "@/lib/prisma"` 
 - Primary keys: `cuid()` for cross-DB compatibility
-- MySQL types: `@db.Text`, `@db.VarChar(2048)`, `@db.VarChar(255)`, `@db.LongText`
+- MySQL types: `@db.Text`, `@db.VarChar(2048)`, `@db.VarChar(255)`, `@db.LongText` 
 - Keep `schema.prisma` and `schema.sqlite.prisma` in sync
-- Use proper indexes for performance: `@@index([status, publishedAt])`
+- Use proper indexes for performance: `@@index([status, publishedAt])` 
 
 ## API Patterns
 ```typescript
@@ -102,6 +111,7 @@ components/
 ├── dashboard/      # Dashboard components
 └── ui/             # Base UI components (shadcn/ui)
 
+docs/               # Documentation (API, Notifications, Permissions, Settings)
 hooks/              # Custom React hooks
 lib/                # Utilities, validation, database
 ```
@@ -124,7 +134,7 @@ lib/                # Utilities, validation, database
 ## 🚨 MANDATORY BUG CHECKING PROCEDURES
 
 ### Before Any Major Change:
-1. **Create Feature Branch**: `git checkout -b feature/your-feature-name`
+1. **Create Feature Branch**: `git checkout -b feature/your-feature-name` 
 2. **Document Changes**: Update README.md if adding new features
 3. **Follow Testing Protocol**: Complete all checks below
 
@@ -243,7 +253,7 @@ Before merging to main branch:
 
 ### 🔧 Common Bug Prevention Rules
 
-1. **API Route Files**: Never export helper functions - use utility files in `/lib/`
+1. **API Route Files**: Never export helper functions - use utility files in `/lib/` 
 2. **Import Paths**: Always use `@/` prefix for internal imports
 3. **Authentication**: Always check user permissions server-side
 4. **Error Handling**: Wrap all async operations in try/catch
@@ -306,8 +316,7 @@ When making major changes, document:
 ```
 
 ---
-
 **Remember**: Quality over speed. A bug-free deployment is better than a fast deployment with issues.
 
-If there is an important update, update the [README.md](../../README.md).
+If there is an important update, update the [README.md](../../README.md) and relevant docs in [/docs](cci:7://file:///c:/Users/user/Documents/IT%20perfect/mmw-hubix/docs:0:0-0:0).
 ---

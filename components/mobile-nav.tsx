@@ -28,11 +28,13 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
         <Link
-          href="/"
-          className="flex items-center"
-          onClick={() => setOpen(false)}
-        >
-          <Icons.logo className="mr-2 h-4 w-4" />
+            href="/"
+            className="flex items-center"
+            onClick={() => setOpen(false)}
+          >
+            <div className="h-20 w-20 mr-2">
+              <Icons.logo />
+            </div>
           <span className="font-bold">{siteConfig.name}</span>
         </Link>
         <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
@@ -53,6 +55,18 @@ export function MobileNav() {
                   </Link>
                 )
             )}
+            <div className="border-t pt-3 mt-3">
+              <Link
+                href={siteConfig.links.schoolSite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-foreground/60 hover:text-foreground/80 transition-colors"
+                onClick={() => setOpen(false)}
+              >
+                <Icons.globe className="h-4 w-4" />
+                <span>School Website</span>
+              </Link>
+            </div>
           </div>
         </div>
       </SheetContent>

@@ -16,8 +16,10 @@ export function MainNav() {
   return (
     <div className="mr-4 hidden md:flex">
       <Link href="/" className="mr-6 md:mr-8 flex items-center space-x-2">
-        <Icons.logo className="h-6 w-6" />
-        <span className="hidden font-bold sm:inline-block">
+          <div className="h-12 w-12 mr-2">
+            <Icons.logo />
+          </div>
+        <span className="hidden font-semibold text-md sm:inline-block">
           {siteConfig.name}
         </span>
       </Link>

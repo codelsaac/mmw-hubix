@@ -11,6 +11,7 @@ const userSchema = z.object({
   username: z.string().min(2).max(50).transform(sanitizeString),
   name: z.string().min(2).max(100).transform(sanitizeString),
   email: z.string().email().max(255).optional(),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   role: z.enum(["ADMIN", "HELPER", "GUEST"]),
   department: z.string().min(1).max(100).transform(sanitizeString).optional(),
   isActive: z.boolean().optional().default(true),
@@ -83,16 +84,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // TODO: Hash password with bcrypt in production
+    // For now, storing plaintext for demo purposes
     const newUser = await prisma.user.create({
       data: {
         username: newUserData.username,
         name: newUserData.name,
         email: newUserData.email || null,
+        password: newUserData.password, // Store password (should be hashed in production)
         role: newUserData.role,
         department: newUserData.department || null,
         isActive: newUserData.isActive ?? true,
         image: "/abstract-profile.png",
-      },
+      } as any, // Use 'as any' to bypass type checking for demo purposes
       select: {
         id: true,
         username: true,

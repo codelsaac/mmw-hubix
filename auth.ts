@@ -65,13 +65,34 @@ export const authOptions: NextAuthOptions = {
               department: true,
               permissions: true,
               isActive: true,
-              lastLoginAt: true
+              lastLoginAt: true,
+              password: true
             }
           })
 
-          if (dbUser && dbUser.isActive) {
-            // For database users, you would check password hash here
-            // For now, we'll skip to demo accounts
+          // Check if database user exists and has a password set
+          if (dbUser && dbUser.isActive && dbUser.password) {
+            // TODO: Use bcrypt.compare() for production
+            // For now, plaintext comparison for demo purposes
+            if (credentials.password === dbUser.password) {
+              // Update last login time
+              await prisma.user.update({
+                where: { id: dbUser.id },
+                data: { lastLoginAt: new Date() }
+              }).catch(err => console.error("Failed to update lastLoginAt:", err))
+              
+              return {
+                id: dbUser.id,
+                username: dbUser.username,
+                name: dbUser.name || dbUser.username,
+                role: dbUser.role,
+                department: dbUser.department || undefined,
+                permissions: dbUser.permissions || undefined
+              }
+            } else {
+              // Wrong password
+              return null
+            }
           }
         } catch (error) {
           console.error("Database query error during auth:", error)

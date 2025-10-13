@@ -51,18 +51,38 @@ export function ResourceHub() {
   useEffect(() => {
     setIsHydrated(true)
     
-    if (typeof window !== 'undefined') {
-      const loadedResources = resourceService.getResources()
-      setResources(loadedResources)
-
-      const handleResourcesUpdated = (event: CustomEvent) => {
-        setResources(event.detail)
+    const fetchResources = async () => {
+      try {
+        const response = await fetch('/api/resources')
+        if (response.ok) {
+          const data = await response.json()
+          setResources(data)
+        } else {
+          // Fallback to localStorage if API fails
+          const loadedResources = resourceService.getResources()
+          setResources(loadedResources)
+        }
+      } catch (error) {
+        console.error('Error fetching resources:', error)
+        // Fallback to localStorage
+        const loadedResources = resourceService.getResources()
+        setResources(loadedResources)
       }
+    }
 
-      window.addEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
-      return () => {
-        window.removeEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
-      }
+    fetchResources()
+
+    // Refresh resources every 30 seconds
+    const interval = setInterval(fetchResources, 30000)
+
+    const handleResourcesUpdated = (event: CustomEvent) => {
+      setResources(event.detail)
+    }
+
+    window.addEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
     }
   }, [])
 
@@ -96,7 +116,7 @@ export function ResourceHub() {
     return (
       <section className="space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-serif font-bold text-foreground">Resource Hub</h2>
+          <h2 className="text-2xl font-serif font-bold text-foreground">Resource Hub</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Quick access to all essential school resources, tools, and information in one centralized location.
           </p>
@@ -120,20 +140,20 @@ export function ResourceHub() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-serif font-bold text-foreground">Resource Hub</h2>
+        <h2 className="text-3xl font-serif font-bold text-foreground animate-in fade-in slide-in-from-top-4 duration-700">Resource Hub</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Quick access to all essential school resources, tools, and information in one centralized location.
         </p>
       </div>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors duration-300" />
           <Input
             placeholder="Search resources..."
-            className="pl-10"
+            className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -141,8 +161,8 @@ export function ResourceHub() {
       </div>
 
       <div className="grid gap-8">
-        {Object.entries(resourcesByCategory).map(([category, categoryResources]) => (
-          <div key={category} className="space-y-4">
+        {Object.entries(resourcesByCategory).map(([category, categoryResources], index) => (
+          <div key={category} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-serif font-semibold text-foreground">{category}</h3>
               <Badge variant="secondary" className="text-xs">
@@ -155,18 +175,18 @@ export function ResourceHub() {
                 return (
                   <Card
                     key={resource.id}
-                    className="hover:shadow-md transition-shadow cursor-pointer group"
+                    className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:scale-105 hover:border-primary/30"
                     onClick={() => handleResourceClick(resource)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                          <IconComponent className="w-5 h-5 text-primary" />
+                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                          <IconComponent className="w-5 h-5 text-primary transition-transform duration-300" />
                         </div>
                         <div className="flex-1">
                           <CardTitle className="text-base font-semibold flex items-center gap-2">
                             {resource.name}
-                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1" />
                           </CardTitle>
                         </div>
                       </div>

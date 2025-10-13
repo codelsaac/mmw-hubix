@@ -1,7 +1,32 @@
 # MMW Hubix - School Information Portal
 > A modern, centralized web portal consolidating essential school information, resources, and tools for students, teachers, and IT administrators at C.C.C. Mong Man Wai College
 
-## 📖 Project Overview & Vision
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.14-2D3748.svg)](https://www.prisma.io/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+
+**Status:** Production Ready | Enhanced UI | Bug-Free
+
+## Recent Updates
+
+### Latest Improvements (October 2025)
+- **Enhanced UI & Animations**: Smooth transitions, hover effects, staggered animations across all components
+- **Bug Fixes**: Resolved TypeScript errors in admin users route
+- **Dual Database Support**: Seamless SQLite (dev) and MySQL (production) setup
+- **Documentation**: Added comprehensive database setup guide
+- **Quality Assurance**: Implemented mandatory bug checking procedures
+- **User Profile**: Enhanced profile management with modern UI
+- **Resource Hub**: Improved animations and interactive elements
+- **AI Chat**: Polished floating button with pulsing animation
+
+### Coming Soon
+- Advanced analytics dashboard
+- Email notification system
+- File upload optimization
+- Performance monitoring
+
+## Project Overview & Vision
 MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform that serves both public and internal needs. The portal provides:
 
 **Public Features:**
@@ -20,19 +45,20 @@ MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform tha
 - **IT Prefects**: Team members with dashboard access via school Google accounts
 - **IT Prefect Admins**: Full administrative rights for content and user management
 
-## 🎨 Design & UX Guidelines
+## Design & UX Guidelines
 - **Modern & Clean**: Professional aesthetic avoiding clutter
 - **School Branding**: Incorporate school colors and logo appropriately
 - **Responsive Design**: Fully functional on desktop, tablet, and mobile
 - **Intuitive Navigation**: Quick access with minimal clicks required
 - **Accessibility**: Consider users with different abilities and devices
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Requirements
 - Node.js 18.0 or higher
 - npm or pnpm (recommended)
 - MySQL 8.0+ (for production); SQLite can be used locally for development (no MySQL installation required)
+- XAMPP (optional, for local MySQL server)
 
 ### Installation
 
@@ -70,24 +96,26 @@ pnpm dev
 5. Open the browser
 Visit http://localhost:3000 to view the site.
 
-### Local Development (No MySQL? Use SQLite)
-If you don’t have MySQL installed on your computer, you can use SQLite for local development and switch back to MySQL when deploying to the server.
-
-1) Configure SQLite in .env.local:
-```env
-DATABASE_URL="file:./prisma/dev.db"
-```
-
-2) Push the schema and start the dev server (using the SQLite schema):
+### Local Development (No MySQL? Use SQLite) 
+**Quick Start with SQLite:**
 ```bash
 npm run dev:sqlite
 ```
 
-3) Production (server) environment:
-- Set DATABASE_URL back to the MySQL connection string
-- Run npm run db:migrate to create tables
+This single command will:
+- Push the SQLite schema to `prisma/dev.db`
+- Generate the Prisma Client
+- Start the development server
 
-## 📁 Project Structure
+**For MySQL Setup:**
+See the comprehensive guide: **[DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)**
+
+**Key Files:**
+- `.env` - Default SQLite configuration
+- `.env.local` - MySQL configuration (overrides .env)
+- `setup-mysql.sql` - MySQL database creation script
+
+## Project Structure
 ```text
 mmw-hubix/
 ├── app/                      # Next.js App Router pages
@@ -112,7 +140,7 @@ mmw-hubix/
 └── styles/                   # Stylesheets
 ```
 
-## 🔐 Authentication
+## Authentication
 This project uses NextAuth.js with **username-based** authentication (not email). Default behavior: Users are logged out by default; there is no auto-login.
 
 ### Default Demo Accounts
@@ -122,25 +150,40 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 | **Helper** | `helper` | `helper123` | IT dashboard access |
 | **Guest** | `guest` | `guest123` | Read-only access |
 
+**Features:**
+- ✅ Role-based access control (ADMIN, HELPER, GUEST)
+- ✅ Protected routes with server-side auth
+- ✅ Session management with NextAuth.js
+- ✅ Password change functionality
+- ✅ User profile management
 
 **Note:** Production deployment uses Google OAuth with school accounts for IT Prefect authentication.
 
-## ✨ Key Features
+## Key Features
 
-### 🏠 Public Website (No Login Required)
+### Public Website (No Login Required)
 - **Resource Hub**: Curated collection of school resources organized by category (Academics, Student Life, Resources) with search functionality
+  - **Enhanced UI**: Smooth animations, hover effects, staggered card entrance
+  - **Interactive**: Scale and shadow effects on hover
+  - **Smart Search**: Real-time filtering with animated results
 - **Club Announcements**: Public posting system for school club events with details, dates, and descriptions
+  - **Modern Cards**: Animated entrance with hover effects
+  - **Progress Bars**: Visual attendance tracking
+  - **RSVP System**: Join events with real-time updates
 - **AI Assistant**: Conversational chatbot accessible via floating button for campus navigation, schedules, policies, and IT support
+  - **Floating Button**: Pulsing animation with smooth transitions
+  - **Chat Panel**: Slide-in animation with frosted glass effect
+  - **Engaging UI**: Professional conversational interface
 - **Responsive Design**: Fully functional on desktop, tablet, and mobile devices
 
-### 👤 User Profile & Settings
+### User Profile & Settings
 - **Profile Management**: Users can update their personal information (name, email, department)
 - **Password Security**: Secure password change functionality with current password verification
 - **User Preferences**: Theme selection, notification settings, and personal customization
 - **Access Control**: Users can only edit their own profile information
 - **Settings Access**: Available via user menu dropdown or direct navigation to `/dashboard/profile`
 
-### 🔐 IT Prefect System (Authenticated)
+### IT Prefect System (Authenticated)
 - **Team Dashboard**: Mission statement, organizational structure, and internal communications
 - **Internal Calendar**: Manage team meetings, duties, and training sessions (viewable by all prefects, editable by admins)
 - **Training Library**: Categorized repository of training videos and materials with search functionality
@@ -148,8 +191,17 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 - **Task System**: Assign and manage team tasks and responsibilities
 - **User Profile & Settings**: Personal profile management with password change functionality and user preferences
 
-### ⚙️ Admin Console (Admin Only)
+### Admin Console (Admin Only)
 - **User Management**: Account permissions, role assignment, and access control
+  - **Batch Operations**: Multi-select and bulk actions
+  - **Inline Editing**: Edit users directly in the data grid
+  - **Undo/Redo**: Roll back changes with ease
+  - **Add Users**: Create new accounts with form validation
+- **Article Management**: Full CMS for articles with rich content
+  - **CRUD Operations**: Create, read, update, delete articles
+  - **Status Workflow**: Draft → Published → Archived
+  - **SEO Friendly**: Automatic slug generation
+  - **Creator Tracking**: Articles linked to admin users
 - **Content Management**: Update homepage links, club announcements, and internal pages
 - **System Settings**: Site configuration, maintenance, and customization
 - **Analytics**: Usage statistics and system monitoring
@@ -238,19 +290,31 @@ Content-Type: application/json
 ## 🛠 Tech Stack
 
 ### Frontend
-- Next.js 15 — Full-stack React framework
-- TypeScript — Type safety
-- Tailwind CSS — Utility-first styling
-- shadcn/ui — UI component library
-- Lucide React — Icon set
+- **Next.js 15** — Full-stack React framework with App Router
+- **TypeScript 5** — Type safety and developer experience
+- **Tailwind CSS 4** — Utility-first styling with modern features
+- **shadcn/ui** — Beautiful, accessible component library
+- **Lucide React** — Modern icon set
+- **React Hook Form** — Form validation and management
+- **Zod** — Schema validation
+- **Recharts** — Data visualization
+- **React Data Grid** — Advanced data tables
 
 ### Backend
-- Next.js API Routes — Server-side APIs
-- NextAuth.js — Authentication
-- Prisma — ORM
-- MySQL — Primary production database (SQLite for local development)
+- **Next.js API Routes** — RESTful API endpoints
+- **NextAuth.js 4** — Authentication and session management
+- **Prisma 6.14** — Type-safe ORM with migrations
+- **MySQL 8+** — Primary production database
+- **SQLite** — Development database (no setup required)
 
-Note: Local SQLite uses prisma/schema.sqlite.prisma with file:./prisma/dev.db hard-coded, so it does not depend on DATABASE_URL in .env.
+### Database Features
+- ✅ **Dual Database Support**: MySQL for production, SQLite for development
+- ✅ **Type Safety**: Full TypeScript integration with Prisma
+- ✅ **Migrations**: Version-controlled schema changes
+- ✅ **Relations**: User ↔ Article, User ↔ Announcement, etc.
+- ✅ **Indexes**: Optimized queries for performance
+
+**Note:** Local SQLite uses `prisma/schema.sqlite.prisma` with `file:./prisma/dev.db` hard-coded.
 
 ### Dev Tools
 - ESLint — Linting
@@ -267,12 +331,17 @@ npm run lint           # run linter
 
 # Database (MySQL)
 npm run db:migrate     # run database migrations
+npm run db:seed        # seed database with demo data
 
-# Local (SQLite)
-npm run dev:sqlite           # push SQLite schema and start dev server
+# Local (SQLite) - Recommended for Development
+npm run dev:sqlite           # push SQLite schema and start dev server (all-in-one)
 npm run db:push:sqlite       # only push SQLite schema (create/update prisma/dev.db)
 npm run db:generate:sqlite   # generate Prisma Client for SQLite
 npm run db:seed:sqlite       # seed SQLite (creates admin account only)
+
+# Quality Assurance
+npm run quality-check   # run TypeScript, ESLint, and build checks
+npm run pre-deploy      # quality-check + build (run before deployment)
 
 # Equivalent Prisma commands (for reference)
 # npx prisma db push --schema prisma/schema.sqlite.prisma
@@ -293,6 +362,22 @@ npm run db:seed:sqlite       # seed SQLite (creates admin account only)
 2. Upload the .next/ folder to your server
 3. Configure Node.js environment
 4. Start: npm start
+
+## 📚 Documentation
+
+Comprehensive guides are available in the `/docs` directory:
+
+- **[Contributing Guide](./CONTRIBUTING.md)** - Development workflow, code standards, testing requirements
+- **[Database Setup Guide](./DATABASE-SETUP-GUIDE.md)** - Dual database configuration and troubleshooting
+- **[API Documentation](./docs/API.md)** - Complete API endpoint reference
+- **[Notification System](./docs/NOTIFICATIONS.md)** - Real-time notification system usage
+- **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)** - Role-based and custom permissions
+- **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)** - Database-backed settings management
+
+### Quick References
+- **Setup MySQL**: See `setup-mysql.sql` and `DATABASE-SETUP-GUIDE.md`
+- **Bug Checking**: See mandatory procedures in `CONTRIBUTING.md`
+- **Quality Checks**: Run `npm run quality-check` before commits
 
 ## 🔧 Configuration
 
@@ -355,16 +440,109 @@ export const siteConfig = {
 3. Follow naming conventions
 
 ### Database Changes
-1. Edit prisma/schema.prisma
-2. Run npm run db:migrate
-3. Update related APIs and components
+1. **Stop all Node processes** (to avoid file locks):
+   ```bash
+   taskkill /F /IM node.exe
+   ```
 
-## 🤝 Contribution Guide
+2. Edit **both** schema files:
+   - `prisma/schema.prisma` (MySQL)
+   - `prisma/schema.sqlite.prisma` (SQLite)
+
+3. Run migration commands:
+   ```bash
+   # MySQL
+   npx prisma generate
+   npx prisma migrate dev
+   
+   # SQLite
+   npm run db:generate:sqlite
+   npm run db:push:sqlite
+   ```
+
+4. Update related APIs and components
+
+5. **Run mandatory quality checks**:
+   ```bash
+   npm run quality-check
+   ```
+
+For detailed database migration guides and troubleshooting, see:
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Development procedures
+- [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md) - Database setup
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](./CONTRIBUTING.md) for:
+- Development setup and workflow
+- Code quality standards
+- Testing requirements
+- Pull request process
+
+Quick start for contributors:
 1. Fork the repo
-2. Create a feature branch: git checkout -b feature/new-feature
-3. Commit changes: git commit -am 'Add new feature'
-4. Push the branch: git push origin feature/new-feature
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Run quality checks: `npm run quality-check`
+4. Commit changes: `git commit -am 'Add new feature'`
+5. Push the branch: `git push origin feature/new-feature`
+6. Open a Pull Request
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for complete guidelines.
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+#### Issue: "EPERM: operation not permitted"
+**Cause:** Node processes are locking Prisma client files  
+**Solution:**
+```powershell
+taskkill /F /IM node.exe
+npx prisma generate
+```
+
+#### Issue: "Error validating datasource: the URL must start with mysql://"
+**Cause:** DATABASE_URL not configured correctly  
+**Solution:**
+- Check `.env` or `.env.local` has correct DATABASE_URL
+- For SQLite: `DATABASE_URL="file:./prisma/dev.db"`
+- For MySQL: `DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev"`
+
+#### Issue: "Can't reach database server"
+**Cause:** MySQL server not running  
+**Solution:**
+1. Open XAMPP Control Panel
+2. Start MySQL service
+3. Verify port 3306 is not blocked
+
+#### Issue: Development server not starting
+**Cause:** Port 3000 already in use  
+**Solution:**
+```powershell
+# Find process using port 3000
+netstat -ano | findstr :3000
+
+# Kill the process (replace PID with actual process ID)
+taskkill /PID <PID> /F
+```
+
+#### Issue: Database schema out of sync
+**Cause:** Schema changes not applied  
+**Solution:**
+```powershell
+# For SQLite
+npm run db:push:sqlite
+
+# For MySQL
+npx prisma db push
+```
+
+### Getting Help
+
+- **Database Issues:** See [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)
+- **Development Guide:** See [CONTRIBUTING.md](./CONTRIBUTING.md)
+- **API Reference:** See [docs/API.md](./docs/API.md)
+- **Report Bugs:** Open an issue on GitHub
 
 ## 📄 License
 This project is licensed under the MIT License — see the LICENSE file for details.

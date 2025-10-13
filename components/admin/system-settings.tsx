@@ -94,12 +94,11 @@ export function SystemSettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="backup">Backup</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -291,52 +290,6 @@ export function SystemSettings() {
                   <Upload className="w-4 h-4 mr-2" />
                   Import Data
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="appearance" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Appearance Settings
-              </CardTitle>
-              <CardDescription>Customize the visual appearance of the portal</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Color Theme</Label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      {
-                        id: "school-blue-yellow",
-                        name: "School Blue & Yellow",
-                        colors: ["#87CEEB", "#003366", "#FFD700"],
-                      },
-                      { id: "classic-blue", name: "Classic Blue", colors: ["#E3F2FD", "#1976D2", "#FFC107"] },
-                      { id: "green-gold", name: "Green & Gold", colors: ["#E8F5E8", "#2E7D32", "#FF8F00"] },
-                    ].map((theme) => (
-                      <div
-                        key={theme.id}
-                        className={`p-3 border rounded-lg cursor-pointer hover:bg-muted transition-colors ${
-                          localSettings.colorTheme === theme.id ? "border-primary bg-primary/5" : "border-border"
-                        }`}
-                        onClick={() => handleSettingChange("colorTheme", theme.id)}
-                      >
-                        <div className="flex gap-2 mb-2">
-                          {theme.colors.map((color, index) => (
-                            <div key={index} className="w-6 h-6 rounded-full" style={{ backgroundColor: color }} />
-                          ))}
-                        </div>
-                        <p className="text-sm font-medium">{theme.name}</p>
-                        {localSettings.colorTheme === theme.id && <CheckCircle className="w-4 h-4 text-primary mt-1" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>

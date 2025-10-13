@@ -28,6 +28,7 @@ const addUserSchema = z.object({
   username: z.string().min(2, { message: "Username must be at least 2 characters." }).max(50),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   role: z.enum(["ADMIN", "HELPER", "GUEST"], { required_error: "Role is required." }),
   department: z.string().min(1, { message: "Department is required." }),
 });
@@ -45,6 +46,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
       username: "",
       name: "",
       email: "",
+      password: "",
       role: "GUEST",
       department: "",
     },
@@ -91,7 +93,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. johndoe" {...field} />
+                <Input placeholder="e.g. johndoe" autoComplete="username" {...field} />
               </FormControl>
               <FormDescription>Unique username for login</FormDescription>
               <FormMessage />
@@ -105,7 +107,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. John Doe" {...field} />
+                <Input placeholder="e.g. John Doe" autoComplete="name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,8 +120,22 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
             <FormItem>
               <FormLabel>Email (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. john.doe@school.edu" {...field} />
+                <Input placeholder="e.g. john.doe@school.edu" autoComplete="email" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter password (min 6 characters)" autoComplete="new-password" {...field} />
+              </FormControl>
+              <FormDescription>Initial password for the user</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -153,7 +169,7 @@ export function AddUserForm({ onSuccess }: AddUserFormProps) {
             <FormItem>
               <FormLabel>Department</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. IT Support" {...field} />
+                <Input placeholder="e.g. IT Support" autoComplete="organization-title" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -130,7 +130,9 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
+                name="username"
                 type="text"
+                autoComplete="username"
                 placeholder="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -141,7 +143,9 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
