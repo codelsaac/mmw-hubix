@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAuthAPI } from "@/lib/auth-server"
 import { UserRole } from "@/lib/permissions"
+import { logger } from "@/lib/logger"
 
 export async function GET() {
   try {
@@ -24,7 +25,7 @@ export async function GET() {
 
     return NextResponse.json(teamNotes)
   } catch (error) {
-    console.error("Failed to fetch team notes:", error)
+    logger.error("Failed to fetch team notes:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -64,7 +65,7 @@ export async function PUT(req: Request) {
 
     return NextResponse.json(teamNotes)
   } catch (error) {
-    console.error("Failed to update team notes:", error)
+    logger.error("Failed to update team notes:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

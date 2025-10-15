@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { logger } from "@/lib/logger"
 
 export interface SettingDefinition {
   key: string
@@ -128,12 +129,12 @@ export async function initializeSettings() {
           }
         }
       }
-      console.log(`✅ Initialized ${DEFAULT_SETTINGS.length} default settings`)
+      logger.log(`✅ Initialized ${DEFAULT_SETTINGS.length} default settings`)
     }
     
     return true
   } catch (error) {
-    console.error("Failed to initialize settings:", error)
+    logger.error("Failed to initialize settings:", error)
     return false
   }
 }
@@ -157,7 +158,7 @@ export async function getAllSettings(includePrivate = false) {
     
     return settingsObject
   } catch (error) {
-    console.error("Failed to get settings:", error)
+    logger.error("Failed to get settings:", error)
     throw error
   }
 }
@@ -182,7 +183,7 @@ export async function getSetting(key: string) {
     
     return parseSettingValue(setting.value, setting.type)
   } catch (error) {
-    console.error(`Failed to get setting ${key}:`, error)
+    logger.error(`Failed to get setting ${key}:`, error)
     return null
   }
 }

@@ -32,9 +32,9 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   icons: {
-    icon: "/icon(no_background).png",
-    shortcut: "/icon(no_background).png",
-    apple: "/icon(no_background).png",
+    icon: "/icon2.png",
+    shortcut: "/icon2.png",
+    apple: "/icon2.png",
   },
 }
 

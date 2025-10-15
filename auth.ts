@@ -3,6 +3,8 @@ import { UserRole } from "@/lib/permissions"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { getCurrentPassword } from "@/lib/password-utils"
 import { prisma } from "@/lib/prisma"
+import { NotificationService } from "@/lib/notification-service"
+import { logger } from "@/lib/logger"
 
 // Enhanced user accounts with role-based access control
 const DEMO_ACCOUNTS = [
@@ -79,7 +81,19 @@ export const authOptions: NextAuthOptions = {
               await prisma.user.update({
                 where: { id: dbUser.id },
                 data: { lastLoginAt: new Date() }
-              }).catch(err => console.error("Failed to update lastLoginAt:", err))
+              }).catch(err => logger.error("Failed to update lastLoginAt:", err))
+              
+              // Create login success notification
+              try {
+                await NotificationService.createForUser(dbUser.id, {
+                  title: "Login Successful",
+                  message: `Welcome back, ${dbUser.name || dbUser.username}! You have successfully logged in.`,
+                  type: "SUCCESS",
+                  priority: "LOW"
+                })
+              } catch (notificationError) {
+                logger.error("Failed to create login success notification:", notificationError)
+              }
               
               return {
                 id: dbUser.id,
@@ -95,7 +109,7 @@ export const authOptions: NextAuthOptions = {
             }
           }
         } catch (error) {
-          console.error("Database query error during auth:", error)
+          logger.error("Database query error during auth:", error)
         }
         
         // Check demo accounts
@@ -125,6 +139,18 @@ export const authOptions: NextAuthOptions = {
                   where: { id: dbUser.id },
                   data: { lastLoginAt: new Date() }
                 })
+                
+                // Create login success notification for demo account
+                try {
+                  await NotificationService.createForUser(dbUser.id, {
+                    title: "Login Successful",
+                    message: `Welcome back, ${user.name}! You have successfully logged in.`,
+                    type: "SUCCESS",
+                    priority: "LOW"
+                  })
+                } catch (notificationError) {
+                  logger.error("Failed to create login success notification:", notificationError)
+                }
               }
 
               return {
@@ -137,7 +163,7 @@ export const authOptions: NextAuthOptions = {
                 permissions: dbUser?.permissions || null
               }
             } catch (error) {
-              console.error("Error loading user permissions:", error)
+              logger.error("Error loading user permissions:", error)
               // Fallback to basic user info without custom permissions
               return {
                 id: user.id,
@@ -191,7 +217,7 @@ export const authOptions: NextAuthOptions = {
             token.permissions = dbUser.permissions
           }
         } catch (error) {
-          console.error("Error loading permissions in session:", error)
+          logger.error("Error loading permissions in session:", error)
         }
       }
 

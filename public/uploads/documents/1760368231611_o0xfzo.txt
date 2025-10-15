@@ -1,0 +1,1 @@
+Design a comprehensive sitemap section to be displayed in the footer of Workspace . The sitemap should include clear navigation links to all major sections of the website, organized in a logical hierarchy with appropriate headings. Ensure the design is consistent with the overall website aesthetic while maintaining optimal usability and accessibility standards.

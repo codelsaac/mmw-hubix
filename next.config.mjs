@@ -13,14 +13,39 @@ const nextConfig = {
     ignoreBuildErrors: false, // Enable TypeScript validation
   },
   images: {
-    domains: [
-      'localhost',
-      'youtube.com',
-      'www.youtube.com',
-      'youtu.be',
-      'drive.google.com',
-      'i.ytimg.com',
-      'img.youtube.com'
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'youtube.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.youtube.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'youtu.be',
+      },
+      {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
     dangerouslyAllowSVG: true,

@@ -146,6 +146,7 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
                 name="password"
                 type="password"
                 autoComplete="current-password"
+                placeholder="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

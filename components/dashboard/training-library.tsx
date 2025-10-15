@@ -60,7 +60,7 @@ const contentTypes = [
 ]
 
 export function TrainingLibrary() {
-  const { resources, addResource, updateViews, deleteResource, clearAllResources } = useTraining()
+  const { resources, addResource, updateViews, deleteResource } = useTraining()
   const { user } = useAuth()
   const canManageResources = user?.role && PermissionService.hasPermission(user.role as UserRole, Permission.MANAGE_TRAINING_VIDEOS)
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -235,12 +235,6 @@ export function TrainingLibrary() {
     }
   }
 
-  const handleClearAllResources = () => {
-    if (confirm("Are you sure you want to delete all resources? This action cannot be undone.")) {
-      clearAllResources()
-      setWatchedResources(new Set())
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -251,10 +245,6 @@ export function TrainingLibrary() {
         </div>
         {canManageResources && (
           <div className="flex gap-2">
-            <Button variant="destructive" onClick={handleClearAllResources}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear All
-            </Button>
             <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
               <DialogTrigger asChild>
                 <Button>

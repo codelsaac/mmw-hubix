@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { logger } from "@/lib/logger"
 import {
   BookOpen,
   Calendar,
@@ -63,7 +64,7 @@ export function ResourceHub() {
           setResources(loadedResources)
         }
       } catch (error) {
-        console.error('Error fetching resources:', error)
+        logger.error('Error fetching resources:', error)
         // Fallback to localStorage
         const loadedResources = resourceService.getResources()
         setResources(loadedResources)
