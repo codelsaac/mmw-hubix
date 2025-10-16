@@ -10,33 +10,25 @@ import { Search, Calendar, Eye, FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { usePublicArticles, type Article } from "@/hooks/use-articles"
 
-const categoryOptions = ["Technology", "Science", "Education", "News", "General"]
 
 export default function ArticlesPage() {
   const { articles, loading, error, pagination, fetchArticles } = usePublicArticles()
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
 
   const handleSearch = () => {
     setCurrentPage(1)
-    fetchArticles(1, 10, selectedCategory === "all" ? undefined : selectedCategory, searchQuery || undefined)
-  }
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category)
-    setCurrentPage(1)
-    fetchArticles(1, 10, category === "all" ? undefined : category, searchQuery || undefined)
+    fetchArticles(1, 10, undefined, searchQuery || undefined)
   }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    fetchArticles(page, 10, selectedCategory === "all" ? undefined : selectedCategory, searchQuery || undefined)
+    fetchArticles(page, 10, undefined, searchQuery || undefined)
   }
 
   useEffect(() => {
-    handleSearch()
-  }, [])
+    fetchArticles(1, 10, undefined, undefined)
+  }, [fetchArticles])
 
   if (loading) {
     return (
@@ -82,28 +74,15 @@ export default function ArticlesPage() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600" />
             <Input
               placeholder="Search articles..."
-              className="pl-10"
+              className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categoryOptions.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Button onClick={handleSearch}>
             Search
           </Button>
@@ -113,7 +92,7 @@ export default function ArticlesPage() {
         <div className="space-y-6">
           {articles.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {searchQuery || selectedCategory !== "all" ? "No articles match your filters." : "No articles published yet."}
+              {searchQuery ? "No articles match your search." : "No articles published yet."}
             </div>
           ) : (
             articles.map((article) => (
@@ -121,11 +100,6 @@ export default function ArticlesPage() {
                 <CardHeader>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      {article.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {article.category}
-                        </Badge>
-                      )}
                       {article.tags && (
                         <div className="flex flex-wrap gap-1">
                           {article.tags.split(',').slice(0, 3).map((tag, index) => (

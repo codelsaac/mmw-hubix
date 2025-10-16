@@ -151,10 +151,10 @@ export function ResourceHub() {
 
       <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors duration-300" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors duration-300" />
           <Input
             placeholder="Search resources..."
-            className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20"
+            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm transition-all duration-300"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

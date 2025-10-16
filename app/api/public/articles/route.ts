@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
-    const category = searchParams.get('category')
     const search = searchParams.get('search')
 
     const skip = (page - 1) * limit
@@ -17,10 +16,6 @@ export async function GET(request: NextRequest) {
     const where: any = {
       status: 'PUBLISHED',
       isPublic: true,
-    }
-
-    if (category) {
-      where.category = category
     }
 
     if (search) {

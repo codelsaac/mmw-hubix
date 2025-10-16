@@ -44,7 +44,7 @@ export default function ArticlePage({ params }: ArticlePageProps) {
     }
 
     loadArticle()
-  }, [slug, fetchArticleBySlug])
+  }, [slug])
 
   const handleShare = async () => {
     if (navigator.share && article) {

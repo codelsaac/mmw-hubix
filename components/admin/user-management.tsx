@@ -317,10 +317,10 @@ export function UserManagement() {
       {/* Filters */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600" />
           <Input
             placeholder="Search users..."
-            className="pl-10"
+            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -347,8 +347,8 @@ export function UserManagement() {
 
       {/* Column Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Input placeholder="Filter by name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} />
-        <Input placeholder="Filter by email" value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)} />
+        <Input placeholder="Filter by name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm" />
+        <Input placeholder="Filter by email" value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)} className="bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm" />
         <select
           className="border rounded px-2 py-2 text-sm"
           value={roleFilter}

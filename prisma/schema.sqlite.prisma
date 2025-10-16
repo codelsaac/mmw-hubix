@@ -181,7 +181,7 @@ model TrainingResource {
   fileSize    Int?
   mimeType    String?
 
-  category    String
+  tags        String?     // JSON array of tags
   difficulty  String?
   instructor  String?
   views       Int         @default(0)

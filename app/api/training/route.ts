@@ -22,7 +22,13 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(resources)
+    // Parse tags from JSON strings
+    const processedResources = resources.map(resource => ({
+      ...resource,
+      tags: resource.tags ? JSON.parse(resource.tags) : []
+    }))
+
+    return NextResponse.json(processedResources)
   } catch (error) {
     logger.error('Error fetching training resources:', error)
     return NextResponse.json(
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
       title, 
       description, 
       contentType, 
-      category, 
+      tags, 
       difficulty,
       videoUrl,
       textContent,
@@ -87,9 +93,9 @@ export async function POST(request: NextRequest) {
     } = body
 
     // Validate required fields
-    if (!title || !contentType || !category) {
+    if (!title || !contentType) {
       return NextResponse.json(
-        { error: 'Title, content type, and category are required' },
+        { error: 'Title and content type are required' },
         { status: 400 }
       )
     }
@@ -116,13 +122,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For now, store everything as a training video until migration is complete
+    // Process tags - convert array to JSON string if needed
+    let processedTags = null
+    if (tags) {
+      if (Array.isArray(tags)) {
+        processedTags = JSON.stringify(tags)
+      } else if (typeof tags === 'string') {
+        processedTags = tags
+      }
+    }
+
     const resource = await prisma.trainingResource.create({
       data: {
         title,
         description: description || `${contentType} content: ${title}`,
         contentType,
-        category,
+        tags: processedTags,
         difficulty,
         videoUrl,
         textContent,

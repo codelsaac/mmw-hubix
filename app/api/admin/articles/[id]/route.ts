@@ -82,12 +82,6 @@ export async function PUT(
       slug = uniqueSlug
     }
 
-    // Set publishedAt if status changes to PUBLISHED
-    let publishedAt = existingArticle.publishedAt
-    if (data.status === 'PUBLISHED' && existingArticle.status !== 'PUBLISHED') {
-      publishedAt = new Date()
-    }
-
     const article = await prisma.article.update({
       where: { id },
       data: {
@@ -95,11 +89,8 @@ export async function PUT(
         slug: slug,
         content: data.content,
         excerpt: data.excerpt,
-        status: data.status,
         isPublic: data.isPublic,
-        publishedAt: publishedAt,
         tags: data.tags,
-        category: data.category,
         featuredImage: data.featuredImage,
       },
       include: {

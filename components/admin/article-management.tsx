@@ -21,27 +21,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Edit, Trash2, Calendar, Eye, Search, FileText } from "lucide-react"
 import { useArticles, type Article, type ArticleFormData } from "@/hooks/use-articles"
 
-const categoryOptions = ["Technology", "Science", "Education", "News", "General"]
-const statusOptions = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "ARCHIVED", label: "Archived" },
-]
 
 export function ArticleManagement() {
   const { articles, loading, addArticle, updateArticle, deleteArticle } = useArticles()
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
   const [editingArticle, setEditingArticle] = useState<Article | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const filteredArticles = articles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.category?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = selectedStatus === "all" || article.status === selectedStatus
-    return matchesSearch && matchesStatus
+      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesSearch
   })
 
   const handleSaveArticle = async (articleData: ArticleFormData) => {
@@ -68,13 +59,6 @@ export function ArticleManagement() {
     }
   }
 
-  const handleStatusChange = async (id: string, status: "DRAFT" | "PUBLISHED" | "ARCHIVED") => {
-    try {
-      await updateArticle(id, { status })
-    } catch (error) {
-      console.error('Error updating article status:', error)
-    }
-  }
 
   if (loading) {
     return (
@@ -123,32 +107,21 @@ export function ArticleManagement() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600" />
           <Input
             placeholder="Search articles..."
-            className="pl-10"
+            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="DRAFT">Draft</SelectItem>
-            <SelectItem value="PUBLISHED">Published</SelectItem>
-            <SelectItem value="ARCHIVED">Archived</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Articles List */}
       <div className="space-y-4">
         {filteredArticles.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {searchQuery || selectedStatus !== "all" ? "No articles match your filters." : "No articles yet."}
+            {searchQuery ? "No articles match your search." : "No articles yet."}
           </div>
         ) : (
           filteredArticles.map((article) => (
@@ -157,23 +130,6 @@ export function ArticleManagement() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      {article.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {article.category}
-                        </Badge>
-                      )}
-                      <Badge
-                        variant={
-                          article.status === "PUBLISHED"
-                            ? "default"
-                            : article.status === "ARCHIVED"
-                              ? "destructive"
-                              : "outline"
-                        }
-                        className="text-xs"
-                      >
-                        {article.status}
-                      </Badge>
                       {article.isPublic && (
                         <Badge variant="outline" className="text-xs">
                           Public
@@ -242,34 +198,6 @@ export function ArticleManagement() {
                   <div className="text-xs text-muted-foreground">
                     Slug: {article.slug}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {article.status === "DRAFT" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleStatusChange(article.id, "PUBLISHED")}
-                      >
-                        Publish
-                      </Button>
-                    )}
-                    {article.status === "PUBLISHED" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleStatusChange(article.id, "ARCHIVED")}
-                      >
-                        Archive
-                      </Button>
-                    )}
-                    {article.status === "ARCHIVED" && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleStatusChange(article.id, "PUBLISHED")}
-                      >
-                        Republish
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -293,10 +221,8 @@ function ArticleDialog({
     title: article?.title || "",
     content: article?.content || "",
     excerpt: article?.excerpt || "",
-    status: article?.status || "DRAFT",
     isPublic: article?.isPublic ?? true,
     tags: article?.tags || "",
-    category: article?.category || "",
     featuredImage: article?.featuredImage || "",
   })
 
@@ -325,38 +251,6 @@ function ArticleDialog({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value: "DRAFT" | "PUBLISHED" | "ARCHIVED") => setFormData({ ...formData, status: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((status) => (
-                  <SelectItem key={status.value} value={status.value}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
 
         <div className="space-y-2">
           <Label htmlFor="excerpt">Excerpt</Label>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export interface Article {
   id: string
@@ -8,12 +8,10 @@ export interface Article {
   slug: string
   content: string
   excerpt?: string
-  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   isPublic: boolean
   publishedAt?: string
   views: number
   tags?: string
-  category?: string
   featuredImage?: string
   createdBy?: string
   createdAt: string
@@ -29,10 +27,8 @@ export interface ArticleFormData {
   title: string
   content: string
   excerpt?: string
-  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   isPublic: boolean
   tags?: string
-  category?: string
   featuredImage?: string
 }
 
@@ -151,7 +147,7 @@ export function usePublicArticles() {
     pages: 0,
   })
 
-  const fetchArticles = async (page = 1, limit = 10, category?: string, search?: string) => {
+  const fetchArticles = useCallback(async (page = 1, limit = 10, category?: string, search?: string) => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -177,9 +173,9 @@ export function usePublicArticles() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const fetchArticleBySlug = async (slug: string) => {
+  const fetchArticleBySlug = useCallback(async (slug: string) => {
     try {
       const response = await fetch(`/api/public/articles/${slug}`)
       
@@ -192,11 +188,11 @@ export function usePublicArticles() {
       setError(err instanceof Error ? err.message : 'Failed to fetch article')
       throw err
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchArticles()
-  }, [])
+  }, [fetchArticles])
 
   return {
     articles,

@@ -9,7 +9,7 @@ export interface TrainingResource {
   title: string
   description: string
   contentType: ResourceContentType
-  category: string
+  tags: string[]
   difficulty: string
   views: number
   rating: number
@@ -43,7 +43,7 @@ export interface CreateResourceRequest {
   title: string
   description?: string
   contentType: ResourceContentType
-  category: string
+  tags: string[]
   difficulty?: string
   videoUrl?: string
   textContent?: string
@@ -54,12 +54,14 @@ export interface CreateResourceRequest {
   isPublic?: boolean
 }
 
-// Training categories configuration
-export const TRAINING_CATEGORIES = [
-  { id: "all", name: "All Resources", count: 0 },
-  { id: "basics", name: "IT Basics", count: 0 },
-  { id: "security", name: "Security", count: 0 },
-  { id: "troubleshooting", name: "Troubleshooting", count: 0 },
+// Default training categories configuration
+export const DEFAULT_TRAINING_CATEGORIES = [
+  { id: "it-basics", name: "IT Basics" },
+  { id: "security", name: "Security" },
+  { id: "troubleshooting", name: "Troubleshooting" },
+  { id: "networking", name: "Networking" },
+  { id: "programming", name: "Programming" },
+  { id: "database", name: "Database" },
 ] as const
 
 // Content types configuration

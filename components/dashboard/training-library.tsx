@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,6 +38,13 @@ import {
   Video,
   Edit3,
   Download,
+  Code,
+  Database,
+  Tag,
+  Plus,
+  XCircle,
+  Edit,
+  Check,
 } from "lucide-react"
 import { useTraining } from "@/hooks/use-training"
 import { TrainingResource, TrainingService, ResourceContentType } from "@/lib/training"
@@ -46,11 +53,15 @@ import { useAuth } from "@/hooks/use-auth"
 import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 
 import { logger } from "@/lib/logger"
-const categories = [
-  { id: "all", name: "All Resources", icon: BookOpen, count: 0 },
-  { id: "basics", name: "IT Basics", icon: Monitor, count: 0 },
-  { id: "security", name: "Security", icon: Shield, count: 0 },
-  { id: "troubleshooting", name: "Troubleshooting", icon: Wrench, count: 0 },
+
+// Default categories that will be available
+const defaultCategories = [
+  { id: "it-basics", name: "IT Basics", icon: Monitor, color: "bg-blue-100 text-blue-800" },
+  { id: "security", name: "Security", icon: Shield, color: "bg-red-100 text-red-800" },
+  { id: "troubleshooting", name: "Troubleshooting", icon: Wrench, color: "bg-orange-100 text-orange-800" },
+  { id: "networking", name: "Networking", icon: Users, color: "bg-green-100 text-green-800" },
+  { id: "programming", name: "Programming", icon: Code, color: "bg-purple-100 text-purple-800" },
+  { id: "database", name: "Database", icon: Database, color: "bg-indigo-100 text-indigo-800" },
 ]
 
 const contentTypes = [
@@ -70,12 +81,76 @@ export function TrainingLibrary() {
   const [selectedContentType, setSelectedContentType] = useState<ResourceContentType>("VIDEO")
   const [watchedResources, setWatchedResources] = useState<Set<number>>(new Set())
   const [isUploading, setIsUploading] = useState(false)
+  const [availableCategories, setAvailableCategories] = useState(defaultCategories)
+  const [newCategoryName, setNewCategoryName] = useState("")
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<string | null>(null)
+  const [editingCategoryName, setEditingCategoryName] = useState("")
+
+  // Get all unique categories from resources
+  const getAllCategories = () => {
+    const categorySet = new Set<string>()
+    resources.forEach(resource => {
+      if (resource.tags && Array.isArray(resource.tags)) {
+        resource.tags.forEach(tag => categorySet.add(tag))
+      }
+    })
+    return Array.from(categorySet)
+  }
+
+  const allCategories = getAllCategories()
+
+  // Load categories from database on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/training/categories')
+        if (response.ok) {
+          const dbCategories = await response.json()
+          const existingCategories = dbCategories.map((categoryName: string) => {
+            const defaultCategory = defaultCategories.find(dc => dc.name.toLowerCase() === categoryName.toLowerCase())
+            if (defaultCategory) return defaultCategory
+            return {
+              id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+              name: categoryName,
+              icon: Tag,
+              color: "bg-gray-100 text-gray-800"
+            }
+          })
+          setAvailableCategories([...defaultCategories, ...existingCategories.filter(ec => !defaultCategories.find(dc => dc.id === ec.id))])
+        }
+      } catch (error) {
+        logger.error('Error loading categories:', error)
+      }
+    }
+    
+    loadCategories()
+  }, [])
+
+  // Update available categories when resources change
+  useEffect(() => {
+    const existingCategories = allCategories.map(categoryName => {
+      const defaultCategory = defaultCategories.find(dc => dc.name.toLowerCase() === categoryName.toLowerCase())
+      if (defaultCategory) return defaultCategory
+      return {
+        id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+        name: categoryName,
+        icon: Tag,
+        color: "bg-gray-100 text-gray-800"
+      }
+    })
+    setAvailableCategories(prev => {
+      const newCategories = existingCategories.filter(ec => !prev.find(pc => pc.id === ec.id))
+      return [...prev, ...newCategories]
+    })
+  }, [resources])
 
   const filteredResources = resources.filter((resource) => {
-    const matchesCategory = selectedCategory === "all" || resource.category === selectedCategory
+    const matchesCategory = selectedCategory === "all" || (resource.tags && resource.tags.includes(selectedCategory))
     const matchesSearch =
       resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.description.toLowerCase().includes(searchQuery.toLowerCase())
+      resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (resource.tags && resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
     return matchesCategory && matchesSearch
   })
 
@@ -91,16 +166,19 @@ export function TrainingLibrary() {
     try {
       const title = formData.get("title") as string
       const description = formData.get("description") as string
-      const category = formData.get("category") as string
+      const categories = formData.get("categories") as string
       const difficulty = formData.get("difficulty") as string
       const videoUrl = formData.get("videoUrl") as string
       const textContent = formData.get("textContent") as string
       const file = formData.get("file") as File
 
-      if (!title || !category || !difficulty) {
-        alert("請填寫必填欄位：標題、類別和難度")
+      if (!title || !difficulty) {
+        alert("請填寫必填欄位：標題和難度")
         return
       }
+
+      // Parse categories from comma-separated string
+      const parsedCategories = categories ? categories.split(',').map(category => category.trim()).filter(category => category.length > 0) : []
 
       // Validate content type specific requirements
       if (selectedContentType === 'VIDEO' && !videoUrl) {
@@ -160,7 +238,7 @@ export function TrainingLibrary() {
       let resourceData: any = {
         title,
         description,
-        category,
+        tags: parsedCategories,
         difficulty: difficulty || "Beginner",
         contentType: selectedContentType,
       }
@@ -235,6 +313,190 @@ export function TrainingLibrary() {
     }
   }
 
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+
+    const newCategory = {
+      id: newCategoryName.toLowerCase().replace(/\s+/g, '-'),
+      name: newCategoryName.trim(),
+      icon: Tag,
+      color: "bg-gray-100 text-gray-800"
+    };
+
+    if (availableCategories.find(cat => cat.name.toLowerCase() === newCategory.name.toLowerCase())) {
+      alert('A category with this name already exists.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/training/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add',
+          categoryName: newCategory.name
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add category');
+      }
+
+      setAvailableCategories(prev => [...prev, newCategory]);
+      setNewCategoryName("");
+      setShowAddCategory(false);
+    } catch (error) {
+      logger.error('Error adding category:', error);
+      alert('Failed to add category. Please try again.');
+    }
+  };
+
+  const handleDeleteAllCategories = async () => {
+    if (!confirm('Are you sure you want to delete all categories? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/training/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'deleteAll'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete all categories');
+      }
+
+      setAvailableCategories(defaultCategories);
+      setSelectedCategory("all");
+    } catch (error) {
+      logger.error('Error deleting all categories:', error);
+      alert('Failed to delete all categories. Please try again.');
+    }
+  };
+
+  const handleEditCategory = (categoryName: string) => {
+    setEditingCategory(categoryName)
+    setEditingCategoryName(categoryName)
+  }
+
+  const handleSaveCategoryEdit = async () => {
+    if (!editingCategory || !editingCategoryName.trim()) return
+    
+    const newName = editingCategoryName.trim()
+    const oldName = editingCategory
+    
+    // Check if new name already exists
+    if (newName !== oldName && availableCategories.find(cat => cat.name.toLowerCase() === newName.toLowerCase())) {
+      alert('A category with this name already exists.')
+      return
+    }
+    
+    // Check if any resources are using this category
+    const resourcesUsingCategory = resources.filter(resource => 
+      resource.tags && resource.tags.includes(oldName)
+    )
+    
+    if (resourcesUsingCategory.length > 0) {
+      const confirmMessage = `This category is used by ${resourcesUsingCategory.length} resource(s). Are you sure you want to rename it? This will update the category name in all resources.`
+      if (!confirm(confirmMessage)) {
+        return
+      }
+    }
+    
+    try {
+      // Update the category in the database
+      const response = await fetch('/api/training/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'edit',
+          categoryName: oldName,
+          newCategoryName: newName
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update category')
+      }
+
+      // Update category in available categories
+      setAvailableCategories(prev => prev.map(cat => 
+        cat.name === oldName ? { ...cat, name: newName } : cat
+      ))
+      
+      // If the edited category was selected, update the selection
+      if (selectedCategory === oldName) {
+        setSelectedCategory(newName)
+      }
+      
+      // Reset editing state
+      setEditingCategory(null)
+      setEditingCategoryName("")
+    } catch (error) {
+      logger.error('Error updating category:', error)
+      alert('Failed to update category. Please try again.')
+    }
+  }
+
+  const handleCancelCategoryEdit = () => {
+    setEditingCategory(null)
+    setEditingCategoryName("")
+  }
+
+  const handleRemoveCategory = async (categoryName: string) => {
+    // Check if any resources are using this category
+    const resourcesUsingCategory = resources.filter(resource => 
+      resource.tags && resource.tags.includes(categoryName)
+    )
+    
+    if (resourcesUsingCategory.length > 0) {
+      const confirmMessage = `This category is used by ${resourcesUsingCategory.length} resource(s). Are you sure you want to remove it? This will remove the category from all resources.`
+      if (!confirm(confirmMessage)) {
+        return
+      }
+    } else {
+      if (!confirm(`Are you sure you want to remove the category "${categoryName}"?`)) {
+        return
+      }
+    }
+
+    try {
+      // Remove the category from the database
+      const response = await fetch('/api/training/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'remove',
+          categoryName: categoryName
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        logger.error('API Error:', { status: response.status, error: errorData })
+        throw new Error(`Failed to remove category: ${errorData.error || 'Unknown error'}`)
+      }
+
+      const result = await response.json()
+      logger.log('Category removal result:', result)
+
+      // Remove category from available categories
+      setAvailableCategories(prev => prev.filter(cat => cat.name !== categoryName))
+      
+      // If the removed category was selected, switch to "all"
+      if (selectedCategory === categoryName) {
+        setSelectedCategory("all")
+      }
+    } catch (error) {
+      logger.error('Error removing category:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to remove category. Please try again.'
+      alert(errorMessage)
+    }
+  }
+
 
   return (
     <div className="space-y-6">
@@ -297,17 +559,15 @@ export function TrainingLibrary() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select name="category" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="basics">IT Basics</SelectItem>
-                        <SelectItem value="security">Security</SelectItem>
-                        <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="categories">Categories</Label>
+                    <Input
+                      id="categories"
+                      name="categories"
+                      placeholder="Enter categories separated by commas (e.g., IT Basics, Security)"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Separate multiple categories with commas
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor="difficulty">Difficulty</Label>
@@ -395,10 +655,10 @@ export function TrainingLibrary() {
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600" />
           <Input
             placeholder="Search training videos..."
-            className="pl-10"
+            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -413,23 +673,138 @@ export function TrainingLibrary() {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Categories</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Categories</CardTitle>
+                <div className="flex items-center">
+                  {canManageResources && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAddCategory(!showAddCategory)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {canManageResources && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleDeleteAllCategories}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  <category.icon className="w-4 h-4 mr-3" />
-                  <span className="flex-1 text-left">{category.name}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {category.id === "all" ? resources.length : resources.filter((r) => r.category === category.id).length}
-                  </Badge>
-                </Button>
-              ))}
+              {showAddCategory && (
+                <div className="flex gap-2 mb-2">
+                  <Input
+                    placeholder="New category name"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                  />
+                  <Button size="sm" onClick={handleAddCategory}>
+                    Add
+                  </Button>
+                </div>
+              )}
+              <Button
+                variant={selectedCategory === "all" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <BookOpen className="w-4 h-4 mr-3" />
+                <span className="flex-1 text-left">All Resources</span>
+                <Badge variant="secondary" className="text-xs">
+                  {resources.length}
+                </Badge>
+              </Button>
+              {availableCategories.map((category) => {
+                const IconComponent = category.icon
+                const count = resources.filter((r) => r.tags && r.tags.includes(category.name)).length
+                const isEditing = editingCategory === category.name
+                
+                return (
+                  <div key={category.id} className="flex items-center group">
+                    {isEditing ? (
+                      <div className="flex-1 flex items-center gap-2">
+                        <IconComponent className="w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={editingCategoryName}
+                          onChange={(e) => setEditingCategoryName(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSaveCategoryEdit()}
+                          className="h-8 text-sm"
+                          autoFocus
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          onClick={handleSaveCategoryEdit}
+                          title="Save changes"
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                          onClick={handleCancelCategoryEdit}
+                          title="Cancel editing"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Button
+                          variant={selectedCategory === category.name ? "default" : "ghost"}
+                          className="flex-1 justify-start"
+                          onClick={() => setSelectedCategory(category.name)}
+                        >
+                          <IconComponent className="w-4 h-4 mr-3" />
+                          <span className="flex-1 text-left">{category.name}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {count}
+                          </Badge>
+                        </Button>
+                        {canManageResources && (
+                          <div className="flex items-center gap-1 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditCategory(category.name)
+                              }}
+                              title={`Edit category "${category.name}"`}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRemoveCategory(category.name)
+                              }}
+                              title={`Remove category "${category.name}"`}
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )
+              })}
             </CardContent>
           </Card>
 
@@ -531,6 +906,21 @@ export function TrainingLibrary() {
                 <CardContent className="space-y-3">
                   <CardDescription className="text-xs line-clamp-2">{resource.description}</CardDescription>
 
+                  {/* Display categories */}
+                  {resource.tags && resource.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {resource.tags.slice(0, 3).map((category, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {category}
+                        </Badge>
+                      ))}
+                      {resource.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{resource.tags.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
@@ -614,6 +1004,20 @@ export function TrainingLibrary() {
                     Download File
                   </a>
                 </Button>
+              </div>
+            )}
+            
+            {/* Display categories in detail view */}
+            {selectedResource?.tags && selectedResource.tags.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Categories</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedResource.tags.map((category, index) => (
+                    <Badge key={index} variant="secondary">
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
             
