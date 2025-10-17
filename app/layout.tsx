@@ -3,15 +3,8 @@ import type { Metadata, Viewport } from "next"
 import { Source_Sans_3, Playfair_Display } from "next/font/google"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
 import { cn } from "@/lib/utils"
-import { Header } from "@/components/header";
-import { FooterSitemap } from "@/components/footer-sitemap";
-import { SessionProvider } from "@/components/auth/session-provider";
-import { ErrorBoundary } from "@/components/error-boundary";
-import { PageTransition } from "@/components/page-transition";
-import { BrowserExtensionCleanup } from "@/components/browser-extension-cleanup";
+import { Providers } from "./providers";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -49,9 +42,7 @@ interface RootLayoutProps {
   children: React.ReactNode
 }
 
-export default async function RootLayout({ children }: RootLayoutProps) {
-  const session = await getServerSession(authOptions)
-
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -59,22 +50,8 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           "min-h-screen bg-background font-sans antialiased",
           sourceSans.variable
         )}
-        suppressHydrationWarning={true}
       >
-        <SessionProvider session={session}>
-          <BrowserExtensionCleanup />
-          <ErrorBoundary>
-            <div className="relative flex min-h-screen flex-col bg-background" suppressHydrationWarning>
-              <Header />
-              <main className="flex-1" suppressHydrationWarning>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-              </main>
-              <FooterSitemap />
-            </div>
-          </ErrorBoundary>
-        </SessionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

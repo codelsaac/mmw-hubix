@@ -1,0 +1,26 @@
+"use client"
+
+import type React from "react"
+import { SessionProvider } from "next-auth/react"
+import { ErrorBoundary } from "@/components/error-boundary"
+import { PageTransition } from "@/components/page-transition"
+import { BrowserExtensionCleanup } from "@/components/browser-extension-cleanup"
+import { Header } from "@/components/header"
+import { FooterSitemap } from "@/components/footer-sitemap"
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <SessionProvider>
+      <BrowserExtensionCleanup />
+      <ErrorBoundary>
+        <div className="relative flex min-h-screen flex-col bg-background">
+          <Header />
+          <main className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <FooterSitemap />
+        </div>
+      </ErrorBoundary>
+    </SessionProvider>
+  )
+}
