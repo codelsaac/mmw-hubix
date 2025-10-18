@@ -59,6 +59,7 @@ model User {
   createdPublicEvents      PublicEvent[]
   createdInternalEvents    InternalEvent[]    @relation("CreatedInternalEvents")
   createdTrainingResources TrainingResource[]
+  createdCategories        Category[]
 
   createdActivities    Activity[]     @relation("CreatedActivities")
   assignedActivities   Activity[]     @relation("AssignedActivities")
@@ -86,19 +87,36 @@ enum UserRole {
 //  APP CONTENT
 // ------------------
 
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?  @db.Text
+  icon        String?  // Icon name for the category
+  color       String?  // Color code for the category
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator   User?      @relation(fields: [createdBy], references: [id])
+  resources Resource[]
+}
+
 model Resource {
   id          String   @id @default(cuid())
   name        String
   url         String   @db.VarChar(2048)
   description String   @db.Text
-  category    String
+  categoryId  String
   status      String   @default("active")
   clicks      Int      @default(0)
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  creator User? @relation(fields: [createdBy], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+  creator  User?    @relation(fields: [createdBy], references: [id])
 }
 
 model PublicEvent {

@@ -1,0 +1,15 @@
+{
+    "terminal.integrated.env.windows": {
+        "MYSQL_HOST": "10.125.145.49",
+        "MYSQL_USER": "mmw20-1086",
+        "MYSQL_PASSWORD": "MmwS25555",
+        "MYSQL_DATABASE": "6A25"
+    },
+    "python.createEnvironment.contentButton": "show",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.useEnvironmentsExtension": true,
+    "files.autoSave": "onWindowChange",
+    "editor.experimentalGpuAcceleration": "on",
+    "files.autoGuessEncoding": true,
+    "files.autoSaveWhenNoErrors": true
+}

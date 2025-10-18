@@ -15,7 +15,7 @@ Thank you for contributing to MMW Hubix! This guide will help you understand our
 ### Prerequisites
 
 - Node.js 18+ and npm
-- MySQL (production) or SQLite (development)
+- MySQL 8+
 - Git
 
 ### Initial Setup
@@ -30,28 +30,21 @@ npm install
 
 # Setup environment variables
 cp .env.example .env.local
-# Edit .env.local with your database credentials
+# Edit .env.local with your MySQL database credentials
 
-# For SQLite development
-npm run db:generate:sqlite
-npm run db:push:sqlite
-npm run db:seed:sqlite
-
-# For MySQL production
+# Prepare database
 npx prisma generate
 npx prisma migrate dev
 npx prisma db seed
 
 # Start development server
-npm run dev        # MySQL
-npm run dev:sqlite # SQLite
+npm run dev
 ```
 
 ### Available Scripts
 
 ```bash
-npm run dev              # Start dev server (MySQL)
-npm run dev:sqlite       # Start dev server (SQLite)
+npm run dev              # Start dev server
 npm run build            # Production build
 npm run start            # Start production server
 npm run lint             # Run ESLint
@@ -111,7 +104,7 @@ export function helperFunction() { ... }
 ### Database
 
 - ✅ **Use Prisma only** - No raw SQL queries
-- ✅ **Sync schemas** - Keep `schema.prisma` and `schema.sqlite.prisma` aligned
+- ✅ **Schema managed in** `prisma/schema.prisma`
 - ✅ **Type annotations** - Use MySQL types: `@db.Text`, `@db.VarChar(2048)`
 - ✅ **Indexes** - Add indexes for frequently queried fields
 
@@ -217,10 +210,10 @@ If you modified the Prisma schema:
 
 ```bash
 # 1. Generate Prisma Client
-npm run db:generate:sqlite
+npx prisma generate
 
 # 2. Apply schema changes
-npm run db:push:sqlite
+npx prisma db push
 
 # 3. Verify migrations
 npx prisma studio

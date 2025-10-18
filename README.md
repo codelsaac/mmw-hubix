@@ -10,15 +10,19 @@
 
 ## Recent Updates
 
-### Latest Improvements (October 2025)
+### Latest Improvements (December 2024)
+- **Categories Management System**: Complete admin interface for managing resource categories with icons, colors, and sorting
+- **Enhanced Resource Hub**: Resources now properly organized by dynamic categories with visual indicators
+- **Database-Backed Settings System**: Comprehensive site configuration with categories (General, Security, Notifications, Backup)
+- **Database Schema Updates**: New Category and SiteSetting models with full CRUD operations and proper relationships
 - **Enhanced UI & Animations**: Smooth transitions, hover effects, staggered animations across all components
-- **Bug Fixes**: Resolved TypeScript errors in admin users route
-- **Dual Database Support**: Seamless SQLite (dev) and MySQL (production) setup
+- **Bug Fixes**: Resolved TypeScript errors in admin users route and database schema issues
+- **Database Support**: MySQL-first workflow for development and production
 - **Documentation**: Added comprehensive database setup guide
 - **Quality Assurance**: Implemented mandatory bug checking procedures
 - **User Profile**: Enhanced profile management with modern UI
-- **Resource Hub**: Improved animations and interactive elements
 - **AI Chat**: Polished floating button with pulsing animation
+- **System Settings**: Admin interface for site configuration with real-time updates
 
 ### Coming Soon
 - Advanced analytics dashboard
@@ -30,7 +34,7 @@
 MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform that serves both public and internal needs. The portal provides:
 
 **Public Features:**
-- **Resource Hub**: Curated links to school resources organized by category (Academics, Student Life, Resources)
+- **Resource Hub**: Curated links to school resources organized by dynamic categories with visual indicators
 - **AI Assistant**: Conversational chatbot for campus navigation, schedules, policies, and IT support
 - **Club Announcements**: Public posting system for school club events and activities
 
@@ -57,8 +61,8 @@ MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform tha
 ### Requirements
 - Node.js 18.0 or higher
 - npm or pnpm (recommended)
-- MySQL 8.0+ (for production); SQLite can be used locally for development (no MySQL installation required)
-- XAMPP (optional, for local MySQL server)
+- MySQL 8.0+ (required for both development and production)
+- XAMPP (recommended, for local MySQL server)
 
 ### Installation
 
@@ -78,7 +82,7 @@ pnpm install
 
 3. Set up the database
 ```bash
-# Create tables and indexes (MySQL)
+# Create tables and indexes
 npm run db:migrate
 
 # or with pnpm
@@ -89,6 +93,8 @@ pnpm db:migrate
 ```bash
 # using npm
 npm run dev
+# or with MySQL setup
+npm run dev:mysql
 # or using pnpm
 pnpm dev
 ```
@@ -96,23 +102,15 @@ pnpm dev
 5. Open the browser
 Visit http://localhost:3000 to view the site.
 
-### Local Development (No MySQL? Use SQLite) 
-**Quick Start with SQLite:**
-```bash
-npm run dev:sqlite
-```
+### Development Notes
 
-This single command will:
-- Push the SQLite schema to `prisma/dev.db`
-- Generate the Prisma Client
-- Start the development server
+The project now uses MySQL for both development and production, providing a consistent environment and eliminating the complexity of dual database configurations.
 
 **For MySQL Setup:**
 See the comprehensive guide: **[DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)**
 
 **Key Files:**
-- `.env` - Default SQLite configuration
-- `.env.local` - MySQL configuration (overrides .env)
+- `.env.local` - MySQL configuration
 - `setup-mysql.sql` - MySQL database creation script
 
 ## Project Structure
@@ -162,10 +160,12 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 ## Key Features
 
 ### Public Website (No Login Required)
-- **Resource Hub**: Curated collection of school resources organized by category (Academics, Student Life, Resources) with search functionality
+- **Resource Hub**: Curated collection of school resources organized by dynamic categories with search functionality
+  - **Dynamic Categories**: Admin-managed categories with custom icons, colors, and sorting
   - **Enhanced UI**: Smooth animations, hover effects, staggered card entrance
   - **Interactive**: Scale and shadow effects on hover
   - **Smart Search**: Real-time filtering with animated results
+  - **Click Tracking**: Analytics for resource usage and popularity
 - **Club Announcements**: Public posting system for school club events with details, dates, and descriptions
   - **Modern Cards**: Animated entrance with hover effects
   - **Progress Bars**: Visual attendance tracking
@@ -197,14 +197,24 @@ This project uses NextAuth.js with **username-based** authentication (not email)
   - **Inline Editing**: Edit users directly in the data grid
   - **Undo/Redo**: Roll back changes with ease
   - **Add Users**: Create new accounts with form validation
+- **Category Management**: Full control over resource categories, including:
+  - **CRUD Operations**: Create, read, update, and delete categories
+  - **Visual Customization**: Icons, colors, and sorting order
+  - **Resource Integration**: Categories automatically link to resources
+  - **Status Control**: Active/inactive category management
+  - **Meta API**: Dynamic icon and color options for customization
 - **Article Management**: Full CMS for articles with rich content
   - **CRUD Operations**: Create, read, update, delete articles
   - **Status Workflow**: Draft → Published → Archived
   - **SEO Friendly**: Automatic slug generation
   - **Creator Tracking**: Articles linked to admin users
-- **Content Management**: Update homepage links, club announcements, and internal pages
-- **System Settings**: Site configuration, maintenance, and customization
-- **Analytics**: Usage statistics and system monitoring
+- **System Settings**: Database-backed site configuration with categories:
+  - **General Settings**: Site name, description, file upload limits
+  - **Security Settings**: Session timeout, login attempts, access control
+  - **Notification Settings**: Email notifications and alert preferences
+  - **Backup Settings**: Automatic backup configuration
+  - **Real-time Updates**: Changes apply immediately across the site
+  - **Export/Import**: Settings backup and restore functionality
 
 #### User Management (/admin/users)
 - Data grid (react-data-grid) for all users
@@ -249,6 +259,84 @@ Content-Type: application/json
 }
 ```
 - Batch delete users (requires ADMIN)
+
+#### Categories Management (/admin/categories)
+- Complete category management interface for organizing resources
+- Permission guard: only ADMIN can access
+- Features:
+  - Create, edit, and delete resource categories
+  - Visual customization with icons and colors
+  - Sort order management
+  - Active/inactive status control
+  - Resource count tracking per category
+
+API:
+```http
+GET /api/admin/categories
+```
+- Fetch all categories with creator info and resource counts (requires ADMIN)
+
+```http
+POST /api/admin/categories
+Content-Type: application/json
+
+{
+  "name": "Academics",
+  "description": "Academic resources and tools",
+  "icon": "BookOpen",
+  "color": "#3b82f6",
+  "isActive": true,
+  "sortOrder": 1
+}
+```
+- Create new category (requires ADMIN)
+
+```http
+PATCH /api/admin/categories
+Content-Type: application/json
+
+[{
+  "id": "category_id",
+  "name": "Updated Name",
+  "description": "Updated description",
+  "icon": "Users",
+  "color": "#10b981",
+  "isActive": false,
+  "sortOrder": 2
+}]
+```
+- Update category (requires ADMIN)
+
+```http
+DELETE /api/admin/categories
+Content-Type: application/json
+
+{
+  "ids": ["category_id1", "category_id2"]
+}
+```
+- Delete categories (requires ADMIN, only if no resources are linked)
+
+```http
+GET /api/categories
+```
+- Fetch active categories for public use (no authentication required)
+
+```http
+GET /api/admin/categories/meta
+```
+- Fetch available icon and color options for category customization (requires ADMIN)
+
+#### System Settings (/admin/settings)
+- Database-backed site configuration with categorized settings
+- Permission guard: only ADMIN can access
+- Features:
+  - **General Settings**: Site name, description, file upload limits, maintenance mode
+  - **Security Settings**: Session timeout, login attempts, access control
+  - **Notification Settings**: Email notifications and alert preferences
+  - **Backup Settings**: Automatic backup configuration and frequency
+  - **Real-time Updates**: Changes apply immediately across the site
+  - **Export/Import**: Settings backup and restore functionality
 
 #### User Profile & Settings (/dashboard/profile)
 - Profile management page with three tabs: Profile, Password, Preferences
@@ -298,28 +386,59 @@ Content-Type: application/json
 - **React Hook Form** — Form validation and management
 - **Zod** — Schema validation
 - **Recharts** — Data visualization
-- **React Data Grid** — Advanced data tables
+- **Simple Tables** — Native HTML tables with Tailwind styling
+- **CSS Animations** — Native Tailwind animations
 
 ### Backend
 - **Next.js API Routes** — RESTful API endpoints
 - **NextAuth.js 4** — Authentication and session management
 - **Prisma 6.14** — Type-safe ORM with migrations
-- **MySQL 8+** — Primary production database
-- **SQLite** — Development database (no setup required)
+- **MySQL 8+** — Production database
 
 ### Database Features
-- ✅ **Dual Database Support**: MySQL for production, SQLite for development
 - ✅ **Type Safety**: Full TypeScript integration with Prisma
 - ✅ **Migrations**: Version-controlled schema changes
 - ✅ **Relations**: User ↔ Article, User ↔ Announcement, etc.
 - ✅ **Indexes**: Optimized queries for performance
-
-**Note:** Local SQLite uses `prisma/schema.sqlite.prisma` with `file:./prisma/dev.db` hard-coded.
+- ✅ **Simplified Setup**: Single database configuration
 
 ### Dev Tools
 - ESLint — Linting
 - PostCSS — CSS processing
 - TypeScript — Static typing
+
+## 🗄️ Database Models
+
+The application uses a comprehensive database schema with the following key models:
+
+### Core Models
+- **User**: Username-based authentication with roles (ADMIN, HELPER, GUEST), permissions, and activity tracking
+- **Category**: Resource categorization with icons, colors, sorting order, and status management
+- **Resource**: External links organized by category with click tracking and status control
+- **Article**: CMS system with slug, content, status workflow (Draft → Published → Archived), and featured images
+- **Announcement**: Club events with attendees, location, scheduling, and RSVP system
+- **SiteSetting**: Database-backed site configuration with categories, types, and public/private visibility
+
+### Event & Activity Models
+- **PublicEvent**: Public calendar events with visibility controls
+- **InternalEvent**: Internal team events with attendee management
+- **Activity**: Team activities with assignment and priority tracking
+- **Task**: Task management with due dates, priorities, and assignment system
+
+### Training & Content Models
+- **TrainingResource**: Multi-format resources (video, text, file) with categories, difficulty levels, and view tracking
+- **TeamNotes**: Collaborative team notes with version tracking
+
+### System Models
+- **Notification**: Real-time notification system with types, priorities, and read status
+- **SiteSetting**: Database-backed settings management with categories and types
+- **Account/Session**: NextAuth.js authentication models for OAuth and session management
+
+### Key Relationships
+- Users can create and manage all content types
+- Resources are linked to Categories for organization
+- Activities and Tasks support assignment relationships
+- All models include proper indexing for performance optimization
 
 ## 📋 Available Scripts
 ```bash
@@ -333,19 +452,13 @@ npm run lint           # run linter
 npm run db:migrate     # run database migrations
 npm run db:seed        # seed database with demo data
 
-# Local (SQLite) - Recommended for Development
-npm run dev:sqlite           # push SQLite schema and start dev server (all-in-one)
-npm run db:push:sqlite       # only push SQLite schema (create/update prisma/dev.db)
-npm run db:generate:sqlite   # generate Prisma Client for SQLite
-npm run db:seed:sqlite       # seed SQLite (creates admin account only)
-
 # Quality Assurance
 npm run quality-check   # run TypeScript, ESLint, and build checks
 npm run pre-deploy      # quality-check + build (run before deployment)
 
-# Equivalent Prisma commands (for reference)
-# npx prisma db push --schema prisma/schema.sqlite.prisma
-# npx prisma generate --schema prisma/schema.sqlite.prisma
+# MySQL Reference Commands
+npx prisma db push
+npx prisma generate
 ```
 
 ## 🌐 Deployment
@@ -365,19 +478,45 @@ npm run pre-deploy      # quality-check + build (run before deployment)
 
 ## 📚 Documentation
 
-Comprehensive guides are available in the `/docs` directory:
+### Directory Overview
+- **For Developers**
+  - **[Contributing Guide](./CONTRIBUTING.md)** – Development environment setup, code standards, testing requirements, and pull request workflow
+- **API & Integration**
+  - **[API Documentation](./docs/API.md)** – Endpoint reference, request/response formats, authentication, error handling, and rate limiting
+- **Core Systems**
+  - **[Notification System](./docs/NOTIFICATIONS.md)** – Architecture, creation workflow, user management, API endpoints, and React hook usage
+  - **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)** – Role defaults (ADMIN, HELPER, GUEST), custom permissions, server/client usage, and management API
+  - **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)** – Model overview, default values, admin tooling, visibility, and migration guidance
 
-- **[Contributing Guide](./CONTRIBUTING.md)** - Development workflow, code standards, testing requirements
-- **[Database Setup Guide](./DATABASE-SETUP-GUIDE.md)** - Dual database configuration and troubleshooting
-- **[API Documentation](./docs/API.md)** - Complete API endpoint reference
-- **[Notification System](./docs/NOTIFICATIONS.md)** - Real-time notification system usage
-- **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)** - Role-based and custom permissions
-- **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)** - Database-backed settings management
+### Quick Links
+- **Getting Started**
+  1. Read the `README.md` for project overview
+  2. Follow **[Contributing Guide](./CONTRIBUTING.md)** for setup
+  3. Review **[API Documentation](./docs/API.md)** for integration details
+- **Common Tasks**
+  - Adding a feature → **[Contributing Guide](./CONTRIBUTING.md)** (Code Patterns section)
+  - Creating API endpoints → **[API Documentation](./docs/API.md)** + **[Contributing Guide](./CONTRIBUTING.md)**
+  - Managing permissions → **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)**
+  - Working with notifications → **[Notification System](./docs/NOTIFICATIONS.md)**
+  - Configuring settings → **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)**
+- **Additional References**
+  - **[Database Setup Guide](./DATABASE-SETUP-GUIDE.md)** – Dual database configuration and troubleshooting
+  - Setup MySQL → See `setup-mysql.sql` and `DATABASE-SETUP-GUIDE.md`
+  - Mandatory bug checking → See **[Contributing Guide](./CONTRIBUTING.md)**
+  - Quality checks before commits → Run `npm run quality-check`
 
-### Quick References
-- **Setup MySQL**: See `setup-mysql.sql` and `DATABASE-SETUP-GUIDE.md`
-- **Bug Checking**: See mandatory procedures in `CONTRIBUTING.md`
-- **Quality Checks**: Run `npm run quality-check` before commits
+### Documentation Standards
+- **Keep it current** – Update docs whenever features change
+- **Be specific** – Include exact commands and working code examples
+- **Stay organized** – Use clear headings and consistent structure
+- **Link related docs** – Cross-reference connected guides for quicker navigation
+- **Test examples** – Validate all documented commands and snippets
+
+### Support
+1. Review this `README.md`
+2. Check the relevant document inside `docs/`
+3. Search existing GitHub issues
+4. Contact the development team if the answer is missing
 
 ## 🔧 Configuration
 
@@ -445,19 +584,14 @@ export const siteConfig = {
    taskkill /F /IM node.exe
    ```
 
-2. Edit **both** schema files:
+2. Edit schema file:
    - `prisma/schema.prisma` (MySQL)
-   - `prisma/schema.sqlite.prisma` (SQLite)
 
 3. Run migration commands:
    ```bash
    # MySQL
    npx prisma generate
    npx prisma migrate dev
-   
-   # SQLite
-   npm run db:generate:sqlite
-   npm run db:push:sqlite
    ```
 
 4. Update related APIs and components
@@ -530,9 +664,6 @@ taskkill /PID <PID> /F
 **Cause:** Schema changes not applied  
 **Solution:**
 ```powershell
-# For SQLite
-npm run db:push:sqlite
-
 # For MySQL
 npx prisma db push
 ```

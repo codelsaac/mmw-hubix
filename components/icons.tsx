@@ -24,6 +24,20 @@ export const Icons = {
       </div>
     )
   },
+  school: ({ className, ...props }: LucideProps) => {
+    const { fill, ...imageProps } = props as any
+    return (
+      <div className={cn("relative", className)}>
+        <Image
+          src="/mmwc_favicon.png"
+          alt="School Website"
+          fill={true}
+          style={{ objectFit: "contain" }}
+          {...imageProps}
+        />
+      </div>
+    )
+  },
   externalLink: (props: LucideProps) => <ExternalLink {...props} />,
   gitHub: (props: LucideProps) => <Github {...props} />,
   twitter: (props: LucideProps) => <Twitter {...props} />,

@@ -28,7 +28,7 @@ export function Header() {
               rel="noopener noreferrer"
               className="flex items-center gap-2"
             >
-              <Icons.globe className="h-4 w-4" />
+              <Icons.school className="h-4 w-4" />
               <span>School Website</span>
             </Link>
           </Button>

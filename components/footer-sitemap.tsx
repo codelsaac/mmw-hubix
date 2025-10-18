@@ -121,7 +121,7 @@ export function FooterSitemap() {
               className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm p-1"
               aria-label="School Website"
             >
-              <Icons.globe className="h-5 w-5" />
+              <Icons.school className="h-5 w-5" />
             </Link>
           </div>
         </div>

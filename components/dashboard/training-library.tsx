@@ -117,7 +117,7 @@ export function TrainingLibrary() {
               color: "bg-gray-100 text-gray-800"
             }
           })
-          setAvailableCategories([...defaultCategories, ...existingCategories.filter(ec => !defaultCategories.find(dc => dc.id === ec.id))])
+          setAvailableCategories([...defaultCategories, ...existingCategories.filter((ec: any) => !defaultCategories.find(dc => dc.id === ec.id))])
         }
       } catch (error) {
         logger.error('Error loading categories:', error)

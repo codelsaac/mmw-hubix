@@ -12,6 +12,7 @@ export interface Article {
   publishedAt?: string
   views: number
   tags?: string
+  category?: string
   featuredImage?: string
   createdBy?: string
   createdAt: string

@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "backendAuthType": "basic token",
+  "backendUsername": "admin",
+  "backendPassword": "admin123",
+  "executionArgs": {
+    "projectName": "mmw-hubix",
+    "projectPath": "C:\\Users\\user\\Documents\\IT perfect\\mmw-hubix",
+    "testIds": [],
+    "additionalInstruction": "Re-run the tests to verify that the authentication fixes have resolved the 401 and 403 errors. Focus on testing the API endpoints that were previously failing.",
+    "envs": {
+      "API_KEY": "sk-user-rle6Rz8njhXsm8jeLWF2htVq6EQOOnhvTYgxr4twKNiETwbw6QZQaIi2-iPSYvW3vmRjnshs2Q-ErmqibV0I49MClQZqqNCYk88vk_ACbS1_W2YuzE7XYwWJwf0Nle53OuQ"
+    }
+  },
+  "proxy": "http://c7a4397a-4a9b-47c7-a47a-09db4a5778e9:rnTz2RpXsKQ7sGZZThwelHTaGWNbiHaO@tun.testsprite.com:8080"
+}

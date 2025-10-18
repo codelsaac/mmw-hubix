@@ -428,7 +428,7 @@ export const ResourceDB = {
     name: string
     url: string
     description: string
-    category: string
+    categoryId: string
     status?: string
     createdBy?: string
   }) {

@@ -1,119 +1,63 @@
-# 🗄️ MMW Hubix - Dual Database Setup Guide
+# 🗄️ MMW Hubix - MySQL Database Setup Guide
 
-This project supports both **SQLite** (development) and **MySQL** (production).
+This project now standardizes on **MySQL** for both development and production environments.
 
 ## 📋 Current Configuration
 
-### Default: SQLite (in `.env`)
-```env
-DATABASE_URL="file:./prisma/dev.db"
-```
-
-### Optional: MySQL (in `.env.local`)
+### Configure `.env.local`
 ```env
 DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
+```
+
+If your MySQL instance requires authentication, include the password:
+
+```env
+DATABASE_URL="mysql://root:YOUR_PASSWORD@localhost:3306/mmw_hubix_dev?connection_limit=5"
 ```
 
 ---
 
 ## 🔧 Setup Instructions
 
-### Option 1: SQLite (✅ Already Configured)
+### Step 1: Start MySQL
+- Launch **XAMPP** (or your preferred MySQL server)
+- Start the **MySQL** service and ensure it is running on port `3306`
 
-**Status:** ✅ **READY TO USE**
-
-```powershell
-# Start with SQLite
-npm run dev:sqlite
-```
-
-**SQLite Database Location:** `prisma/dev.db`
-
----
-
-### Option 2: MySQL
-
-#### Step 1: Start XAMPP MySQL Server
-1. Open **XAMPP Control Panel**
-2. Click **Start** next to **MySQL**
-3. Wait for the green indicator
-
-#### Step 2: Create Database
-**Option A: Using phpMyAdmin**
+### Step 2: Create Database
 1. Open http://localhost/phpmyadmin
 2. Click **"New"** in the left sidebar
-3. Database name: `mmw_hubix_dev`
-4. Collation: `utf8mb4_unicode_ci`
+3. Set database name to `mmw_hubix_dev`
+4. Set collation to `utf8mb4_unicode_ci`
 5. Click **Create**
 
-**Option B: Using SQL Script**
-1. Open phpMyAdmin
-2. Click **SQL** tab
-3. Run the script from `setup-mysql.sql`
+Alternatively, run the SQL script in `setup-mysql.sql`.
 
-#### Step 3: Update Environment Variable
-**Create or update `.env.local`:**
-```env
-DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
-```
-
-**If you have a MySQL password:**
-```env
-DATABASE_URL="mysql://root:YOUR_PASSWORD@localhost:3306/mmw_hubix_dev?connection_limit=5"
-```
-
-#### Step 4: Push Schema and Generate Client
+### Step 3: Generate Client & Push Schema
 ```powershell
-# Generate Prisma Client for MySQL
 npx prisma generate
-
-# Push schema to MySQL database
 npx prisma db push
-
-# Seed the database with demo data
 npm run db:seed
-
-# Start development server
 npm run dev
 ```
 
 ---
 
-## 🔄 Switching Between Databases
+## 🔄 Applying Schema Changes
 
-### Switch to SQLite:
+Whenever you modify `prisma/schema.prisma`:
+
 ```powershell
-# Update .env to use SQLite
-DATABASE_URL="file:./prisma/dev.db"
-
-# Start with SQLite
-npm run dev:sqlite
-```
-
-### Switch to MySQL:
-```powershell
-# Update .env.local to use MySQL
-DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev"
-
-# Generate and push
 npx prisma generate
 npx prisma db push
-npm run db:seed
-
-# Start normally
-npm run dev
+npm run db:seed   # optional, when seed data changes
 ```
 
 ---
 
 ## ✅ Database Verification
 
-### Check SQLite Database:
-```powershell
-npx prisma studio --schema prisma/schema.sqlite.prisma
-```
+Use Prisma Studio to inspect data:
 
-### Check MySQL Database:
 ```powershell
 npx prisma studio
 ```
@@ -122,59 +66,25 @@ npx prisma studio
 
 ## 🚨 Troubleshooting
 
-### Issue: "EPERM: operation not permitted"
-**Solution:** Stop all Node processes first:
-```powershell
-taskkill /F /IM node.exe
-```
-
-### Issue: "Error validating datasource: the URL must start with mysql://"
-**Solution:** Make sure your DATABASE_URL in `.env` or `.env.local` is correct.
-
-### Issue: "Can't reach database server"
-**Solution:** 
-1. Verify XAMPP MySQL is running
-2. Check if port 3306 is not blocked
-3. Try: `telnet localhost 3306`
-
-### Issue: Database not in sync
-**Solution:**
-```powershell
-# For SQLite
-npx prisma db push --schema prisma/schema.sqlite.prisma
-
-# For MySQL
-npx prisma db push
-```
-
----
-
-## 📊 Article Model Status
-
-✅ **Article model is properly configured in both databases:**
-
-- **Database Relations:** `Article ←→ User` (via `createdBy`)
-- **Admin Access:** Protected routes with role-based auth
-- **API Endpoints:** `/api/admin/articles` (CRUD operations)
-- **Indexes:** Status, publishedAt, slug
-- **Features:** Draft/Published/Archived workflow
+- **"EPERM: operation not permitted"**: close running Node processes with `taskkill /F /IM node.exe`
+- **"Error validating datasource"**: ensure `DATABASE_URL` uses the `mysql://` scheme
+- **"Can't reach database server"**: verify MySQL is running, confirm port `3306`, and check firewall settings
+- **Database out of sync**: run `npx prisma db push`
+- **Seed data missing**: run `npm run db:seed`
 
 ---
 
 ## 🎯 Quick Start Commands
 
-### For Development (SQLite):
 ```powershell
-npm run dev:sqlite
-```
+# Start services
+net start mysql   # or use XAMPP Control Panel
 
-### For Production-like (MySQL):
-```powershell
-# 1. Start XAMPP MySQL
-# 2. Create database in phpMyAdmin
-# 3. Run:
+# Initialize schema & seed
 npx prisma db push
 npm run db:seed
+
+# Start development server
 npm run dev
 ```
 
@@ -182,13 +92,11 @@ npm run dev
 
 ## 📁 File Locations
 
-- Main Schema: `prisma/schema.prisma` (MySQL)
-- SQLite Schema: `prisma/schema.sqlite.prisma`
-- Environment: `.env` (default), `.env.local` (overrides)
-- Setup Script: `setup-mysql.sql`
-- Database: `prisma/dev.db` (SQLite)
+- Prisma schema: `prisma/schema.prisma`
+- Environment variables: `.env` (base), `.env.local` (developer overrides)
+- Setup script: `setup-mysql.sql`
+- Seed script: `prisma/seed.ts`
 
 ---
 
-**Status:** ✅ SQLite is configured and working!  
-**Next Step:** Follow MySQL setup steps above if needed.
+**Status:** ✅ MySQL workflow is unified across development and production.

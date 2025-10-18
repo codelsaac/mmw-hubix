@@ -17,14 +17,22 @@ export async function GET(req: Request) {
         name: true,
         url: true,
         description: true,
-        category: true,
         status: true,
         clicks: true,
         updatedAt: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true
+          }
+        }
       },
-      orderBy: {
-        category: 'asc'
-      }
+      orderBy: [
+        { category: { sortOrder: 'asc' } },
+        { category: { name: 'asc' } }
+      ]
     })
     
     // Transform to match the expected Resource interface
@@ -33,7 +41,10 @@ export async function GET(req: Request) {
       name: resource.name,
       url: resource.url,
       description: resource.description,
-      category: resource.category,
+      category: resource.category.name,
+      categoryId: resource.category.id,
+      categoryIcon: resource.category.icon,
+      categoryColor: resource.category.color,
       status: resource.status as "active" | "maintenance" | "inactive",
       clicks: resource.clicks,
       lastUpdated: new Date(resource.updatedAt).toISOString().split("T")[0]

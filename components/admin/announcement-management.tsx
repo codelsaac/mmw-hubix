@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,19 +18,44 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Edit, Trash2, Calendar, MapPin, Users, Search, Eye } from "lucide-react"
-import { useAnnouncements } from "@/hooks/use-announcements"
+import { Plus, Edit, Trash2, Calendar, MapPin, Users, Search, Eye, CheckCircle, XCircle, Clock } from "lucide-react"
+import { toast } from "sonner"
+import { logger } from "@/lib/logger"
 import type { Announcement } from "@/lib/announcements"
 
 const clubOptions = ["Computer Club", "Science Society", "Debate Club", "Art Club", "Music Club"]
 const eventTypes = ["Workshop", "Event", "Competition", "Meeting", "Seminar"]
 
 export function AnnouncementManagement() {
-  const { announcements, loading, addAnnouncement, updateAnnouncement, deleteAnnouncement } = useAnnouncements()
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [viewingAnnouncement, setViewingAnnouncement] = useState<Announcement | null>(null)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+
+  useEffect(() => {
+    fetchAnnouncements()
+  }, [])
+
+  async function fetchAnnouncements() {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/announcements')
+      if (!response.ok) {
+        throw new Error('Failed to fetch announcements')
+      }
+      const data = await response.json()
+      setAnnouncements(data)
+    } catch (error) {
+      logger.error('Error fetching announcements:', error)
+      toast.error('Failed to load activity news')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredAnnouncements = announcements.filter((announcement) => {
     const matchesSearch =
@@ -41,26 +65,97 @@ export function AnnouncementManagement() {
     return matchesSearch && matchesStatus
   })
 
-  const handleSaveAnnouncement = (announcementData: any) => {
-    if (editingAnnouncement) {
-      updateAnnouncement(editingAnnouncement.id, announcementData)
-    } else {
-      addAnnouncement({
-        ...announcementData,
-        attendees: 0,
-        status: announcementData.status || "active",
-      })
+  async function handleSaveAnnouncement(announcementData: any) {
+    try {
+      if (editingAnnouncement) {
+        // Update existing announcement
+        const response = await fetch(`/api/announcements/${editingAnnouncement.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(announcementData)
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || 'Failed to update announcement')
+        }
+        
+        toast.success('Activity news updated successfully')
+      } else {
+        // Create new announcement
+        const response = await fetch('/api/admin/announcements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...announcementData,
+            attendees: 0,
+            status: announcementData.status || "active",
+          })
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || 'Failed to create announcement')
+        }
+        
+        toast.success('Activity news created successfully')
+      }
+      
+      await fetchAnnouncements()
+      setEditingAnnouncement(null)
+      setIsDialogOpen(false)
+    } catch (error) {
+      logger.error('Error saving announcement:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save announcement'
+      toast.error(errorMessage)
     }
-    setEditingAnnouncement(null)
-    setIsDialogOpen(false)
   }
 
-  const handleDeleteAnnouncement = (id: string) => {
-    deleteAnnouncement(id)
+  async function handleDeleteAnnouncement(id: string) {
+    if (!confirm('Are you sure you want to delete this activity news? This action cannot be undone.')) return
+    
+    try {
+      const response = await fetch(`/api/announcements/${id}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete announcement')
+      }
+      
+      toast.success('Activity news deleted successfully')
+      await fetchAnnouncements()
+    } catch (error) {
+      logger.error('Error deleting announcement:', error)
+      toast.error('Failed to delete activity news')
+    }
   }
 
-  const handleStatusChange = (id: string, status: "active" | "cancelled" | "completed") => {
-    updateAnnouncement(id, { status })
+  async function handleStatusChange(id: string, status: "active" | "cancelled" | "completed") {
+    try {
+      const announcement = announcements.find(a => a.id === id)
+      if (!announcement) return
+
+      const response = await fetch(`/api/announcements/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...announcement,
+          status
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update status')
+      }
+      
+      const statusText = status === 'active' ? 'activated' : status === 'cancelled' ? 'cancelled' : 'completed'
+      toast.success(`Activity news ${statusText} successfully`)
+      await fetchAnnouncements()
+    } catch (error) {
+      logger.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
   }
 
   if (loading) {
@@ -166,7 +261,14 @@ export function AnnouncementManagement() {
                     <CardTitle className="text-lg">{announcement.title}</CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setViewingAnnouncement(announcement)
+                        setIsViewDialogOpen(true)
+                      }}
+                    >
                       <Eye className="w-4 h-4" />
                     </Button>
                     <Button
@@ -242,6 +344,90 @@ export function AnnouncementManagement() {
           ))
         )}
       </div>
+
+      {/* View Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Activity News Details</DialogTitle>
+          </DialogHeader>
+          {viewingAnnouncement && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{viewingAnnouncement.club}</Badge>
+                  <Badge variant="outline">{viewingAnnouncement.type}</Badge>
+                  <Badge
+                    variant={
+                      viewingAnnouncement.status === "active"
+                        ? "default"
+                        : viewingAnnouncement.status === "cancelled"
+                          ? "destructive"
+                          : "outline"
+                    }
+                  >
+                    {viewingAnnouncement.status}
+                  </Badge>
+                </div>
+                <h3 className="text-xl font-bold">{viewingAnnouncement.title}</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">{viewingAnnouncement.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Date & Time</p>
+                    <p className="text-sm font-medium">
+                      {new Date(viewingAnnouncement.date).toLocaleDateString()} at {viewingAnnouncement.time}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="text-sm font-medium">{viewingAnnouncement.location}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Attendees</p>
+                    <p className="text-sm font-medium">
+                      {viewingAnnouncement.attendees}/{viewingAnnouncement.maxAttendees}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Created</p>
+                    <p className="text-sm font-medium">
+                      {new Date(viewingAnnouncement.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {viewingAnnouncement.creator && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">Created by</p>
+                  <p className="text-sm font-medium">{viewingAnnouncement.creator.name || viewingAnnouncement.creator.email}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -265,17 +451,34 @@ function AnnouncementDialog({
     type: string
     maxAttendees: number
     status: "active" | "cancelled" | "completed"
+    isPublic: boolean
   }>({
     title: announcement?.title || "",
     club: announcement?.club || "",
-    date: announcement?.date ? (typeof announcement.date === 'string' ? announcement.date : announcement.date.toISOString().split('T')[0]) : "",
+    date: announcement?.date ? (typeof announcement.date === 'string' ? announcement.date.split('T')[0] : new Date(announcement.date).toISOString().split('T')[0]) : "",
     time: announcement?.time || "",
     location: announcement?.location || "",
     description: announcement?.description || "",
     type: announcement?.type || "Event",
     maxAttendees: announcement?.maxAttendees || 50,
     status: (announcement?.status as "active" | "cancelled" | "completed") || "active",
+    isPublic: announcement?.isPublic ?? true,
   })
+
+  useEffect(() => {
+    setFormData({
+      title: announcement?.title || "",
+      club: announcement?.club || "",
+      date: announcement?.date ? (typeof announcement.date === 'string' ? announcement.date.split('T')[0] : new Date(announcement.date).toISOString().split('T')[0]) : "",
+      time: announcement?.time || "",
+      location: announcement?.location || "",
+      description: announcement?.description || "",
+      type: announcement?.type || "Event",
+      maxAttendees: announcement?.maxAttendees || 50,
+      status: (announcement?.status as "active" | "cancelled" | "completed") || "active",
+      isPublic: announcement?.isPublic ?? true,
+    })
+  }, [announcement])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -386,18 +589,32 @@ function AnnouncementDialog({
             required
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value: "active" | "cancelled" | "completed") => setFormData({ ...formData, status: value })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select value={formData.status} onValueChange={(value: "active" | "cancelled" | "completed") => setFormData({ ...formData, status: value })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="isPublic">Visibility</Label>
+            <Select value={formData.isPublic ? "public" : "private"} onValueChange={(value) => setFormData({ ...formData, isPublic: value === "public" })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">Public</SelectItem>
+                <SelectItem value="private">Private</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onCancel}>

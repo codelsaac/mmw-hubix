@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { UserRole } from "@/lib/permissions"
+import { authenticateAdminRequest } from "@/lib/auth-server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
-import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
 import { validateInput, createErrorResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
@@ -11,17 +12,17 @@ const resourceSchema = z.object({
   name: z.string().min(2).max(100).transform(sanitizeString),
   url: z.string().url().max(2048),
   description: z.string().min(1).max(500).transform(sanitizeString),
-  category: z.string().min(1).max(100).transform(sanitizeString),
-  status: z.enum(["active", "maintenance", "inactive"]).default("active"),
+  categoryId: z.string().min(1),
 });
 
 const resourceUpdateSchema = resourceSchema.partial().extend({ id: z.string() });
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
+    const { user, response } = await authenticateAdminRequest();
+    
+    if (response) {
+      return response;
     }
     
     const resources = await prisma.resource.findMany({
@@ -30,12 +31,20 @@ export async function GET() {
         name: true,
         url: true,
         description: true,
-        category: true,
+        categoryId: true,
         status: true,
         clicks: true,
         createdAt: true,
         updatedAt: true,
         createdBy: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true
+          }
+        },
         creator: {
           select: {
             name: true,
@@ -57,9 +66,10 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return createErrorResponse("Unauthorized", 403);
+    const { user, response } = await authenticateAdminRequest();
+    
+    if (response) {
+      return response;
     }
 
     const body = await req.json();
@@ -71,15 +81,15 @@ export async function POST(req: NextRequest) {
 
     // Verify user exists in database before setting createdBy
     let createdById: string | null = null;
-    if (session.user?.id) {
+    if (user?.id) {
       const userExists = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: user.id },
         select: { id: true }
       });
       if (userExists) {
-        createdById = session.user.id;
+        createdById = user.id;
       } else {
-        logger.warn(`[ADMIN_RESOURCES_POST] Session user ID ${session.user.id} not found in database`);
+        logger.warn(`[ADMIN_RESOURCES_POST] Session user ID ${user.id} not found in database`);
       }
     }
 
@@ -88,12 +98,20 @@ export async function POST(req: NextRequest) {
         name: resourceData.name,
         url: resourceData.url,
         description: resourceData.description,
-        category: resourceData.category,
-        status: resourceData.status,
+        categoryId: resourceData.categoryId,
+        status: "active",
         clicks: 0,
         createdBy: createdById,
       },
       include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true
+          }
+        },
         creator: {
           select: {
             name: true,
@@ -137,6 +155,14 @@ export async function PATCH(req: NextRequest) {
         where: { id },
         data: cleanData,
         include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              icon: true,
+              color: true
+            }
+          },
           creator: {
             select: {
               name: true,

@@ -36,19 +36,20 @@ const addUserSchema = z.object({
 type AddUserFormValues = z.infer<typeof addUserSchema>
 
 interface AddUserFormProps {
+  user?: any
   onSuccess: (newUser: any) => void
 }
 
-export function AddUserForm({ onSuccess }: AddUserFormProps) {
+export function AddUserForm({ user, onSuccess }: AddUserFormProps) {
   const form = useForm<AddUserFormValues>({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
-      username: "",
-      name: "",
-      email: "",
+      username: user?.username || "",
+      name: user?.name || "",
+      email: user?.email || "",
       password: "",
-      role: "GUEST",
-      department: "",
+      role: user?.role || "GUEST",
+      department: user?.department || "",
     },
   });
 

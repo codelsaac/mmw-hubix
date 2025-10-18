@@ -1,0 +1,333 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Next.js 15",
+    "React 18",
+    "Tailwind CSS",
+    "shadcn/ui",
+    "Prisma ORM",
+    "NextAuth.js",
+    "MySQL/SQLite",
+    "Zod",
+    "React Hook Form",
+    "Recharts",
+    "React Data Grid"
+  ],
+  "features": [
+    {
+      "name": "Resource Hub API",
+      "description": "Public API for accessing curated school resources organized by categories with click tracking",
+      "files": ["app/api/resources/route.ts", "app/api/categories/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Resource Hub API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/resources": {
+            "get": {
+              "summary": "Get all active resources",
+              "responses": {
+                "200": {
+                  "description": "List of resources with category information"
+                }
+              }
+            }
+          },
+          "/api/categories": {
+            "get": {
+              "summary": "Get all active categories",
+              "responses": {
+                "200": {
+                  "description": "List of categories with resource counts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "AI Chat Assistant API",
+      "description": "Conversational AI support for campus navigation, schedules, and IT help",
+      "files": ["app/api/chat/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "AI Chat API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/chat": {
+            "post": {
+              "summary": "Send message to AI assistant",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "messages": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {"type": "string"},
+                              "content": {"type": "string"}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "AI response"
+                },
+                "400": {
+                  "description": "Invalid request format"
+                },
+                "503": {
+                  "description": "AI service not configured"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Training Library API",
+      "description": "Multi-format training resources with categories and difficulty levels",
+      "files": ["app/api/training/route.ts", "app/api/training/categories/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Training Library API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/training": {
+            "get": {
+              "summary": "Get all training resources",
+              "responses": {
+                "200": {
+                  "description": "List of training resources"
+                }
+              }
+            },
+            "post": {
+              "summary": "Create new training resource",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "201": {
+                  "description": "Resource created successfully"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Dashboard Tasks API",
+      "description": "Team task management with assignments and priorities",
+      "files": ["app/api/dashboard/tasks/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Dashboard Tasks API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/dashboard/tasks": {
+            "get": {
+              "summary": "Get tasks for user or all tasks for admins",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "200": {
+                  "description": "List of tasks"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            },
+            "post": {
+              "summary": "Create new task",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "201": {
+                  "description": "Task created successfully"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Admin Resources API",
+      "description": "Admin interface for managing resources and categories",
+      "files": ["app/api/admin/resources/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Admin Resources API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/admin/resources": {
+            "get": {
+              "summary": "Get all resources for admin management",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "200": {
+                  "description": "List of all resources"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            },
+            "post": {
+              "summary": "Create new resource",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "201": {
+                  "description": "Resource created successfully"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "System Health API",
+      "description": "System health monitoring and status checks",
+      "files": ["app/api/health/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Health API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/health": {
+            "get": {
+              "summary": "Get system health status",
+              "responses": {
+                "200": {
+                  "description": "System health information"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Notifications API",
+      "description": "Real-time notification system for users",
+      "files": ["app/api/notifications/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Notifications API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/notifications": {
+            "get": {
+              "summary": "Get user notifications",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "200": {
+                  "description": "List of notifications"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            },
+            "post": {
+              "summary": "Create new notification",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "201": {
+                  "description": "Notification created successfully"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "System Settings API",
+      "description": "System-wide settings and user preferences management",
+      "files": ["app/api/settings/route.ts", "app/api/admin/settings/route.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Settings API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/settings": {
+            "get": {
+              "summary": "Get system settings",
+              "responses": {
+                "200": {
+                  "description": "System settings"
+                }
+              }
+            }
+          },
+          "/api/admin/settings": {
+            "get": {
+              "summary": "Get admin settings",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "200": {
+                  "description": "Admin settings"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            },
+            "put": {
+              "summary": "Update admin settings",
+              "security": [{"bearerAuth": []}],
+              "responses": {
+                "200": {
+                  "description": "Settings updated successfully"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

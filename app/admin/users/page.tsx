@@ -1,12 +1,12 @@
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { UserManagement } from "@/components/admin/user-management-simple"
+import { UserManagementSimple } from "@/components/admin/user-management-simple"
 
 export default function UserManagementPage() {
   return (
     <ProtectedRoute requiredRole="admin">
       <DashboardLayout>
-        <UserManagement />
+        <UserManagementSimple />
       </DashboardLayout>
     </ProtectedRoute>
   )

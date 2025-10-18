@@ -62,7 +62,7 @@ Location: `/hooks/use-settings.ts`
 
 ## Database Migration Steps
 
-### For MySQL Production:
+### MySQL Workflow
 
 ```bash
 # 1. Stop development server if running
@@ -79,21 +79,6 @@ npx prisma migrate dev --name add_site_settings
 
 # 5. Restart development server
 npm run dev
-```
-
-### For SQLite Development:
-
-```bash
-# 1. Stop development server if running
-
-# 2. Generate Prisma Client
-npm run db:generate:sqlite
-
-# 3. Push schema changes
-npm run db:push:sqlite
-
-# 4. Start development server
-npm run dev:sqlite
 ```
 
 ## Security Features
@@ -212,7 +197,6 @@ enum SettingType {
 
 ### Modified Files
 - ✅ `/prisma/schema.prisma` - Added SiteSetting model and SettingType enum
-- ✅ `/prisma/schema.sqlite.prisma` - Added SiteSetting model for SQLite
 - ✅ `/hooks/use-settings.ts` - Updated to use database API
 
 ### Existing Files (No Changes Required)

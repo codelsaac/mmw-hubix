@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "get all active resources",
+    "description": "Verify that the GET /api/resources endpoint returns a list of all active resources with correct category information, supports filtering and pagination, and responds with status 200."
+  },
+  {
+    "id": "TC002",
+    "title": "get all active categories",
+    "description": "Verify that the GET /api/categories endpoint returns a list of all active categories with accurate resource counts and responds with status 200."
+  },
+  {
+    "id": "TC003",
+    "title": "send message to ai assistant",
+    "description": "Verify that the POST /api/chat endpoint accepts a valid message payload, returns an AI-generated response with status 200, handles invalid request formats with status 400, and returns status 503 if the AI service is not configured."
+  },
+  {
+    "id": "TC004",
+    "title": "get all training resources",
+    "description": "Verify that the GET /api/training endpoint returns a list of all training resources with status 200."
+  },
+  {
+    "id": "TC005",
+    "title": "create new training resource",
+    "description": "Verify that the POST /api/training endpoint allows authenticated users to create a new training resource, responds with status 201 on success, and returns status 401 for unauthorized access."
+  },
+  {
+    "id": "TC006",
+    "title": "get tasks for user or all tasks for admins",
+    "description": "Verify that the GET /api/dashboard/tasks endpoint returns tasks assigned to the authenticated user or all tasks if the user is an admin, responds with status 200, and returns status 401 for unauthorized access."
+  },
+  {
+    "id": "TC007",
+    "title": "create new task",
+    "description": "Verify that the POST /api/dashboard/tasks endpoint allows authenticated users to create a new task, responds with status 201 on success, and returns status 401 for unauthorized access."
+  },
+  {
+    "id": "TC008",
+    "title": "get all resources for admin management",
+    "description": "Verify that the GET /api/admin/resources endpoint returns a list of all resources for admin management, requires authentication, responds with status 200, and returns status 401 for unauthorized access."
+  },
+  {
+    "id": "TC009",
+    "title": "create new resource",
+    "description": "Verify that the POST /api/admin/resources endpoint allows authenticated admin users to create a new resource, responds with status 201 on success, and returns status 401 for unauthorized access."
+  },
+  {
+    "id": "TC010",
+    "title": "get system health status",
+    "description": "Verify that the GET /api/health endpoint returns the current system health status with status 200."
+  }
+]

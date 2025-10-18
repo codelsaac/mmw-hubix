@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
-
 import { logger } from "@/lib/logger"
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +10,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { messages } = await req.json()
+    
+    // Validate messages
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: "Invalid messages format" }, { status: 400 })
+    }
 
     // Add system prompt for school context
     const systemMessage = {
@@ -24,6 +28,12 @@ export async function POST(req: NextRequest) {
       - General academic assistance
       
       Keep responses concise, helpful, and school-appropriate. If you don't know something specific about the school, acknowledge it and suggest contacting the appropriate office.`,
+    }
+
+    // Check if API key is available
+    if (!process.env.OPENROUTER_API_KEY) {
+      logger.error("OpenRouter API key not configured")
+      return NextResponse.json({ error: "AI service not configured" }, { status: 503 })
     }
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {

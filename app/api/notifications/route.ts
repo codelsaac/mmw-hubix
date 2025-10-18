@@ -4,6 +4,8 @@ import { authOptions } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { logger } from "@/lib/logger"
+import { requireAuthAPI } from "@/lib/auth-server"
+import { UserRole } from "@/lib/permissions"
 
 const notificationSchema = z.object({
   title: z.string().min(1).max(200),
@@ -18,10 +20,7 @@ const notificationSchema = z.object({
 // GET /api/notifications - Get user's notifications
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const user = await requireAuthAPI();
 
     const { searchParams } = new URL(req.url);
     const unreadOnly = searchParams.get("unreadOnly") === "true";
@@ -30,7 +29,7 @@ export async function GET(req: NextRequest) {
     const notifications = await prisma.notification.findMany({
       where: {
         OR: [
-          { userId: session.user.id }, // User-specific notifications
+          { userId: user.id }, // User-specific notifications
           { userId: null }, // System-wide notifications
         ],
         ...(unreadOnly && { isRead: false }),
@@ -52,10 +51,7 @@ export async function GET(req: NextRequest) {
 // POST /api/notifications - Create notification (Admin only)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== "ADMIN") {
-      return new NextResponse("Unauthorized", { status: 403 });
-    }
+    const user = await requireAuthAPI([UserRole.ADMIN]);
 
     const body = await req.json();
     const validatedData = notificationSchema.parse(body);
@@ -77,10 +73,7 @@ export async function POST(req: NextRequest) {
 // PATCH /api/notifications - Mark notifications as read
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const user = await requireAuthAPI();
 
     const body = await req.json();
     const { notificationIds, markAll } = body;
@@ -90,7 +83,7 @@ export async function PATCH(req: NextRequest) {
       await prisma.notification.updateMany({
         where: {
           OR: [
-            { userId: session.user.id },
+            { userId: user.id },
             { userId: null },
           ],
           isRead: false,
@@ -110,7 +103,7 @@ export async function PATCH(req: NextRequest) {
         where: {
           id: { in: notificationIds },
           OR: [
-            { userId: session.user.id },
+            { userId: user.id },
             { userId: null },
           ],
         },
@@ -133,10 +126,7 @@ export async function PATCH(req: NextRequest) {
 // DELETE /api/notifications - Delete notifications
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const user = await requireAuthAPI();
 
     const body = await req.json();
     const { notificationIds, deleteAll } = body;
@@ -146,7 +136,7 @@ export async function DELETE(req: NextRequest) {
       const result = await prisma.notification.deleteMany({
         where: {
           OR: [
-            { userId: session.user.id },
+            { userId: user.id },
             { userId: null },
           ],
           isRead: true,
@@ -162,7 +152,7 @@ export async function DELETE(req: NextRequest) {
         where: {
           id: { in: notificationIds },
           OR: [
-            { userId: session.user.id },
+            { userId: user.id },
             { userId: null },
           ],
         },

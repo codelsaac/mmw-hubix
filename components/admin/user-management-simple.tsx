@@ -1,27 +1,27 @@
 "use client"
 
+import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { Search, UserPlus, Trash2 } from "lucide-react"
-import { AddUserForm } from "./add-user-form"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Search, UserPlus, Edit, Trash2 } from "lucide-react"
+import { AddUserForm } from "./add-user-form"
+import { logger } from "@/lib/logger"
 
 type RoleValue = 'ADMIN' | 'HELPER' | 'GUEST'
 
 interface UserForGrid {
   id: string
-  username: string
   name?: string | null
   email?: string | null
   role: RoleValue
@@ -30,185 +30,201 @@ interface UserForGrid {
   lastLoginAt?: string | null
 }
 
-export function UserManagement() {
+const ROLE_OPTIONS: RoleValue[] = ['ADMIN', 'HELPER', 'GUEST']
+
+export function UserManagementSimple() {
   const [users, setUsers] = useState<UserForGrid[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [editingUser, setEditingUser] = useState<UserForGrid | null>(null)
 
   useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/admin/users')
+        if (!response.ok) {
+          throw new Error('Failed to fetch users')
+        }
+        const data: any[] = await response.json()
+        const formattedUsers: UserForGrid[] = data.map((user: any) => ({
+          id: user.id,
+          name: user.name ?? null,
+          email: user.email ?? null,
+          role: user.role as RoleValue,
+          department: user.department ?? null,
+          isActive: user.isActive ?? true,
+          lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null
+        }))
+        setUsers(formattedUsers)
+      } catch (error) {
+        logger.error('Error fetching users:', error)
+      }
+    }
+
     fetchUsers()
   }, [])
 
-  async function fetchUsers() {
-    try {
-      setIsLoading(true)
-      const response = await fetch('/api/admin/users')
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
-      }
-      const data: any[] = await response.json()
-      const formattedUsers: UserForGrid[] = data.map((user: any) => ({
-        id: user.id,
-        username: user.username,
-        name: user.name ?? null,
-        email: user.email ?? null,
-        role: user.role as RoleValue,
-        department: user.department ?? null,
-        isActive: user.isActive ?? true,
-        lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null
-      }))
-      setUsers(formattedUsers)
-    } catch (error) {
-      console.error(error)
-      alert("Failed to load users")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  function handleAddUserSuccess(newUser: any) {
-    const formattedUser: UserForGrid = {
-      id: newUser.id,
-      username: newUser.username,
-      name: newUser.name ?? null,
-      email: newUser.email ?? null,
-      role: newUser.role as RoleValue,
-      department: newUser.department ?? null,
-      isActive: newUser.isActive ?? true,
-      lastLoginAt: newUser.lastLoginAt ? new Date(newUser.lastLoginAt).toISOString() : null
-    }
-    setUsers(prev => [...prev, formattedUser])
-    setIsDialogOpen(false)
-    alert("User added successfully")
-  }
-
-  async function handleDeleteUser(userId: string) {
-    if (!confirm('Are you sure you want to delete this user?')) return
-    
-    try {
-      const res = await fetch('/api/admin/users', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [userId] })
-      })
-      if (!res.ok) throw new Error('Failed to delete user')
-      setUsers(prev => prev.filter(u => u.id !== userId))
-      alert("User deleted successfully")
-    } catch (e) {
-      console.error(e)
-      alert("Failed to delete user")
-    }
-  }
-
   const filteredUsers = users.filter((user) => {
-    const username = (user.username ?? '').toLowerCase()
     const name = (user.name ?? '').toLowerCase()
     const email = (user.email ?? '').toLowerCase()
     const q = searchQuery.toLowerCase()
-    return username.includes(q) || name.includes(q) || email.includes(q)
+    return name.includes(q) || email.includes(q)
   })
+
+  const handleEditUser = (user: UserForGrid) => {
+    setEditingUser(user)
+    setIsDialogOpen(true)
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return
+    
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      })
+      if (response.ok) {
+        setUsers(users.filter(u => u.id !== userId))
+      }
+    } catch (error) {
+      logger.error('Error deleting user:', error)
+    }
+  }
+
+  const handleUpdateUser = async (updatedUser: UserForGrid) => {
+    try {
+      const response = await fetch(`/api/admin/users/${updatedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser)
+      })
+      if (response.ok) {
+        setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u))
+        setEditingUser(null)
+        setIsDialogOpen(false)
+      }
+    } catch (error) {
+      logger.error('Error updating user:', error)
+    }
+  }
 
   const getRoleBadgeVariant = (role: RoleValue) => {
     switch (role) {
-      case 'ADMIN': return 'default'
-      case 'HELPER': return 'secondary'
-      case 'GUEST': return 'outline'
+      case 'ADMIN': return 'destructive'
+      case 'HELPER': return 'default'
+      case 'GUEST': return 'secondary'
+      default: return 'outline'
     }
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-serif font-bold text-foreground">User Management</h2>
-          <p className="text-muted-foreground">Manage IT Prefect team members and their roles</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add User
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <AddUserForm onSuccess={handleAddUserSuccess} />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="flex gap-4 items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600" />
-          <Input
-            placeholder="Search users by name or email..."
-            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>All Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>User Management</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">Loading users...</div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No users found</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-mono text-sm">{user.username}</TableCell>
-                    <TableCell>{user.name || '-'}</TableCell>
-                    <TableCell>{user.email || '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{user.department || '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.isActive ? 'default' : 'secondary'}>
-                        {user.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteUser(user.id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingUser ? 'Edit User' : 'Add New User'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingUser ? 'Update user information' : 'Create a new user account'}
+                  </DialogDescription>
+                </DialogHeader>
+                <AddUserForm 
+                  user={editingUser}
+                  onSuccess={() => {
+                    setIsDialogOpen(false)
+                    setEditingUser(null)
+                    // Refresh users list
+                    window.location.reload()
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="rounded-md border">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="h-12 px-4 text-left align-middle font-medium">Name</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Email</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Role</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Department</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Last Login</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map((user) => (
+                    <tr key={user.id} className="border-b">
+                      <td className="p-4 align-middle">{user.name || 'N/A'}</td>
+                      <td className="p-4 align-middle">{user.email || 'N/A'}</td>
+                      <td className="p-4 align-middle">
+                        <Badge variant={getRoleBadgeVariant(user.role)}>
+                          {user.role}
+                        </Badge>
+                      </td>
+                      <td className="p-4 align-middle">{user.department || 'N/A'}</td>
+                      <td className="p-4 align-middle">
+                        <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                          {user.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="p-4 align-middle">
+                        {user.lastLoginAt 
+                          ? new Date(user.lastLoginAt).toLocaleDateString()
+                          : 'Never'
+                        }
+                      </td>
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditUser(user)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
   )
 }
-

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { requireAuthAPI } from "@/lib/auth-server"
 import { UserRole } from "@/lib/permissions"
 import { getAllSettings, updateSettings, initializeSettings } from "@/lib/settings-service"
+import { logger } from "@/lib/logger"
 
 /**
  * GET /api/admin/settings
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
     
     return NextResponse.json(settings)
   } catch (error) {
-    console.error("Failed to get settings:", error)
+    logger.error("Failed to get settings:", error)
     
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json(
@@ -68,7 +69,7 @@ export async function PUT(req: Request) {
     
     return NextResponse.json(updatedSettings)
   } catch (error) {
-    console.error("Failed to update settings:", error)
+    logger.error("Failed to update settings:", error)
     
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json(

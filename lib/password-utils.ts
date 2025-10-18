@@ -46,6 +46,9 @@ export function updatePassword(userId: string, newPassword: string): void {
  */
 export function verifyCurrentPassword(userId: string, currentPassword: string): boolean {
   const currentPasswordToCheck = getCurrentPassword(userId)
+  if (!currentPasswordToCheck) {
+    return false
+  }
   return currentPassword === currentPasswordToCheck
 }
 

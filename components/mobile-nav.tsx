@@ -63,7 +63,7 @@ export function MobileNav() {
                 className="flex items-center gap-2 text-foreground/60 hover:text-foreground/80 transition-colors"
                 onClick={() => setOpen(false)}
               >
-                <Icons.globe className="h-4 w-4" />
+                <Icons.school className="h-4 w-4" />
                 <span>School Website</span>
               </Link>
             </div>
