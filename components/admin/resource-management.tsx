@@ -101,19 +101,26 @@ export function ResourceManagement() {
   const filteredResources = resources.filter((resource) => {
     const matchesSearch =
       resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (resource.description?.toLowerCase() || "").includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === "all" || resource.categoryId === selectedCategory
     return matchesSearch && matchesCategory
   })
 
   async function handleSaveResource(resourceData: any) {
     try {
+      // Clean up optional fields - convert empty strings to null
+      const cleanedData = {
+        ...resourceData,
+        categoryId: resourceData.categoryId?.trim() || null,
+        description: resourceData.description?.trim() || null,
+      }
+      
       if (editingResource) {
         // Update existing resource
         const response = await fetch('/api/admin/resources', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify([{ id: editingResource.id, ...resourceData }])
+          body: JSON.stringify([{ id: editingResource.id, ...cleanedData }])
         })
         
         if (!response.ok) {
@@ -128,7 +135,7 @@ export function ResourceManagement() {
         const response = await fetch('/api/admin/resources', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(resourceData)
+          body: JSON.stringify(cleanedData)
         })
         
         if (!response.ok) {
@@ -623,7 +630,9 @@ function ResourceDialog({
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Resource Name</Label>
+          <Label htmlFor="name">
+            Resource Name <span className="text-destructive">*</span>
+          </Label>
           <Input
             id="name"
             value={formData.name}
@@ -633,7 +642,9 @@ function ResourceDialog({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="url">URL</Label>
+          <Label htmlFor="url">
+            URL <span className="text-destructive">*</span>
+          </Label>
           <Input
             id="url"
             type="url"
@@ -649,22 +660,30 @@ function ResourceDialog({
             id="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Brief description of the resource"
-            required
+            placeholder="Brief description of the resource (optional)"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
-          <Select value={formData.categoryId} onValueChange={(value) => setFormData({ ...formData, categoryId: value })}>
+          <Select 
+            value={formData.categoryId} 
+            onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder="Select category (optional)" />
             </SelectTrigger>
             <SelectContent>
-              {categories.filter(cat => cat.isActive).map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
+              {categories.filter(cat => cat.isActive).length === 0 ? (
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  No active categories. Please create one first.
+                </div>
+              ) : (
+                categories.filter(cat => cat.isActive).map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>

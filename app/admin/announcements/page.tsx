@@ -1,12 +1,12 @@
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { AnnouncementManagement } from "@/components/admin/announcement-management"
+import { ActivityNewsManagement } from "@/components/admin/activity-news-management"
 
-export default function AnnouncementManagementPage() {
+export default function ActivityNewsManagementPage() {
   return (
     <ProtectedRoute requiredRole="admin">
       <DashboardLayout>
-        <AnnouncementManagement />
+        <ActivityNewsManagement />
       </DashboardLayout>
     </ProtectedRoute>
   )

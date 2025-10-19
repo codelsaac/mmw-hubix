@@ -416,7 +416,7 @@ The application uses a comprehensive database schema with the following key mode
 - **Category**: Resource categorization with icons, colors, sorting order, and status management
 - **Resource**: External links organized by category with click tracking and status control
 - **Article**: CMS system with slug, content, status workflow (Draft → Published → Archived), and featured images
-- **Announcement**: Club events with attendees, location, scheduling, and RSVP system
+- **Activity**: Club events with attendees, location, scheduling, and RSVP system
 - **SiteSetting**: Database-backed site configuration with categories, types, and public/private visibility
 
 ### Event & Activity Models

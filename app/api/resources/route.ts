@@ -20,31 +20,46 @@ export async function GET(req: Request) {
         status: true,
         clicks: true,
         updatedAt: true,
+        categoryId: true,
         category: {
           select: {
             id: true,
             name: true,
             icon: true,
-            color: true
+            color: true,
+            sortOrder: true
           }
         }
       },
-      orderBy: [
-        { category: { sortOrder: 'asc' } },
-        { category: { name: 'asc' } }
-      ]
+      orderBy: {
+        name: 'asc'
+      }
+    })
+    
+    // Sort manually to handle null categories
+    const sortedResources = resources.sort((a, b) => {
+      // Resources without category go last
+      if (!a.category && !b.category) return 0
+      if (!a.category) return 1
+      if (!b.category) return -1
+      
+      // Sort by category sortOrder, then by category name
+      if (a.category.sortOrder !== b.category.sortOrder) {
+        return a.category.sortOrder - b.category.sortOrder
+      }
+      return a.category.name.localeCompare(b.category.name)
     })
     
     // Transform to match the expected Resource interface
-    const transformedResources = resources.map(resource => ({
+    const transformedResources = sortedResources.map(resource => ({
       id: parseInt(resource.id, 36) || 0, // Convert cuid to number
       name: resource.name,
       url: resource.url,
-      description: resource.description,
-      category: resource.category.name,
-      categoryId: resource.category.id,
-      categoryIcon: resource.category.icon,
-      categoryColor: resource.category.color,
+      description: resource.description || "",
+      category: resource.category?.name || "General",
+      categoryId: resource.category?.id || "",
+      categoryIcon: resource.category?.icon || "globe",
+      categoryColor: resource.category?.color || "#6B7280",
       status: resource.status as "active" | "maintenance" | "inactive",
       clicks: resource.clicks,
       lastUpdated: new Date(resource.updatedAt).toISOString().split("T")[0]

@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Calendar, Eye, FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { usePublicArticles, type Article } from "@/hooks/use-articles"
@@ -25,10 +24,6 @@ export default function ArticlesPage() {
     setCurrentPage(page)
     fetchArticles(page, 10, undefined, searchQuery || undefined)
   }
-
-  useEffect(() => {
-    fetchArticles(1, 10, undefined, undefined)
-  }, [fetchArticles])
 
   if (loading) {
     return (

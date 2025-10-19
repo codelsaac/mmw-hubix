@@ -1,695 +1,558 @@
 [
   {
     "id": "TC001",
-    "title": "Retrieve all active resource categories",
-    "description": "Verify that the API returns a list of all active resource categories, including resource counts, ensuring only active categories are included.",
+    "title": "Public Access to Resource Hub",
+    "description": "Verify that public users can access the Resource Hub homepage without login, use search and category filters effectively, and click tracking records interactions.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Call the GET /api/categories endpoint without authentication."
+        "description": "Navigate to the Resource Hub homepage as a public user without logging in"
       },
       {
         "type": "assertion",
-        "description": "Confirm the response status is 200 OK."
+        "description": "Verify the Resource Hub page loads successfully on supported devices and browsers"
+      },
+      {
+        "type": "action",
+        "description": "Use the search input to search for a valid keyword"
       },
       {
         "type": "assertion",
-        "description": "Verify the response body is a list containing only active categories."
+        "description": "Verify search results match the keyword and update responsively"
+      },
+      {
+        "type": "action",
+        "description": "Apply category filters from the available categories"
       },
       {
         "type": "assertion",
-        "description": "Validate each category object contains category name and resource count fields."
+        "description": "Verify results update accordingly to selected categories"
+      },
+      {
+        "type": "action",
+        "description": "Click on a resource link"
       },
       {
         "type": "assertion",
-        "description": "Ensure categories are sorted or consistent with expected ordering if applicable."
+        "description": "Verify click is tracked in backend logs or click tracking system"
       }
     ]
   },
   {
     "id": "TC002",
-    "title": "Retrieve all active resources with category info",
-    "description": "Verify that the API returns all active resources, each including associated category information and supports pagination if applicable.",
+    "title": "Public Access to Club Announcements and RSVP",
+    "description": "Ensure public users can view club announcements, RSVP to events, and attendance tracking records entries without login.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Call the GET /api/resources endpoint without authentication."
+        "description": "Navigate to the Activity News & Announcements page as a public user"
       },
       {
         "type": "assertion",
-        "description": "Confirm the response status is 200 OK."
+        "description": "Verify announcements load and display correctly with event details"
+      },
+      {
+        "type": "action",
+        "description": "Fill out RSVP form for an event with valid inputs"
       },
       {
         "type": "assertion",
-        "description": "Verify the response body contains a list of resource objects."
+        "description": "Verify RSVP submission succeeds and attendance tracking updates accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to RSVP with invalid or incomplete data"
       },
       {
         "type": "assertion",
-        "description": "Check each resource entry includes category information."
-      },
-      {
-        "type": "assertion",
-        "description": "Check the response respects any default pagination or returns all records if pagination not required."
+        "description": "Verify appropriate error messages are shown and RSVP is rejected"
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "Resource Hub click tracking increments count",
-    "description": "Ensure clicking a resource in the hub increases the resource's click count and updates correctly.",
-    "category": "functional",
+    "title": "Authentication for IT Prefects and Admins",
+    "description": "Verify that authentication via NextAuth.js with username and password enforces role-based access controls and protects admin pages.",
+    "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Fetch initial click count for a specific resource via admin or public API."
-      },
-      {
-        "type": "action",
-        "description": "Simulate clicking the resource via UI or API action triggering click tracking."
-      },
-      {
-        "type": "action",
-        "description": "Fetch the click count again for the same resource."
+        "description": "Navigate to login page and perform a successful login as an IT Prefect"
       },
       {
         "type": "assertion",
-        "description": "Validate the click count has incremented by one."
+        "description": "Verify login succeeds and user is redirected to Team Dashboard with relevant features"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to an admin-only page as IT Prefect user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied or redirected due to insufficient permissions"
+      },
+      {
+        "type": "action",
+        "description": "Log out, then log in as an Admin user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Admin user can access admin console and manage users, content, and system settings"
+      },
+      {
+        "type": "action",
+        "description": "Attempt login with incorrect password"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login is rejected with relevant error message"
       }
     ]
   },
   {
     "id": "TC004",
-    "title": "AI Assistant responds to valid queries",
-    "description": "Test the AI Assistant API responds correctly to valid user messages and returns meaningful AI-generated responses.",
+    "title": "User Profile Management and Password Change",
+    "description": "Verify authenticated users can update personal information, change passwords securely verifying current credentials, and manage preferences.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Send a POST request to /api/chat with a well-formed message payload."
+        "description": "Login as an authenticated user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to User Profile Management page"
+      },
+      {
+        "type": "action",
+        "description": "Update profile information (e.g., email, display name) and save"
       },
       {
         "type": "assertion",
-        "description": "Verify the response status is 200 OK."
+        "description": "Verify updates persist and are reflected accurately"
+      },
+      {
+        "type": "action",
+        "description": "Initiate password change by entering current password and new password"
       },
       {
         "type": "assertion",
-        "description": "Check that the response contains AI-generated text relevant to the query."
+        "description": "Verify password change is successful if current password is correct"
+      },
+      {
+        "type": "action",
+        "description": "Attempt password change with wrong current password"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify password change is rejected with appropriate error"
+      },
+      {
+        "type": "action",
+        "description": "Modify user preferences and save"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify preference changes are saved and applied"
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "AI Assistant handles invalid request format",
-    "description": "Ensure the AI Assistant API returns a 400 Bad Request status when provided invalid or malformed request body.",
-    "category": "error handling",
-    "priority": "Medium",
+    "title": "Training Library Multi-format and Filtering",
+    "description": "Ensure training library resources of different formats (video, text, file) load correctly, and filters by category and difficulty work as specified.",
+    "category": "functional",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Send a POST request to /api/chat with an invalid JSON structure or missing required fields."
+        "description": "Login as an IT Prefect and navigate to Training Library"
       },
       {
         "type": "assertion",
-        "description": "Confirm the response status is 400 Bad Request."
+        "description": "Verify various resource formats render appropriately and can be accessed"
+      },
+      {
+        "type": "action",
+        "description": "Filter training resources by category"
       },
       {
         "type": "assertion",
-        "description": "Check the error message explains the invalid request format."
+        "description": "Verify filtered results correspond to selected category"
+      },
+      {
+        "type": "action",
+        "description": "Filter training resources by difficulty level"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify filtered results correspond to chosen difficulty"
+      },
+      {
+        "type": "action",
+        "description": "Search the training library using search terms"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify search results are accurate and responsive"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to load a non-existent resource"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify system handles gracefully with informative error"
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "AI Assistant handles service unavailability",
-    "description": "Verify the API returns 503 Service Unavailable response when AI service is not configured or down.",
-    "category": "error handling",
-    "priority": "Medium",
+    "title": "Team Dashboard Features and Permissions",
+    "description": "Verify that authenticated IT Prefects can access and manage Team Dashboard including mission statements, organizational structures, calendar, tasks, and events management according to role permissions.",
+    "category": "functional",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Simulate AI backend service unavailability or misconfiguration."
+        "description": "Login as IT Prefect with task management permissions"
       },
       {
         "type": "action",
-        "description": "Send a valid POST request to /api/chat."
+        "description": "Navigate to Team Dashboard"
       },
       {
         "type": "assertion",
-        "description": "Confirm the response status is 503 Service Unavailable."
+        "description": "Verify team mission and org structure display properly"
+      },
+      {
+        "type": "action",
+        "description": "Create a new calendar event"
       },
       {
         "type": "assertion",
-        "description": "Verify the error message indicates AI service not available."
+        "description": "Verify event is added and visible on calendar"
+      },
+      {
+        "type": "action",
+        "description": "Add a new task and assign it"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify task appears in tasks list and assigned user can see it"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to perform unauthorized action (e.g. deleting a team member) with limited-role user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify action is blocked and user receives permission error"
       }
     ]
   },
   {
     "id": "TC007",
-    "title": "Login with valid Google school account",
-    "description": "Verify internal users (IT prefects and admins) can log in successfully using Google school account authentication.",
-    "category": "security",
+    "title": "Admin Console Resource Management CRUD Operations",
+    "description": "Verify admin users can perform full CRUD operations on resources and categories with validation, batch actions, inline editing, and undo/redo support.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the internal login page."
+        "description": "Login as admin user"
       },
       {
         "type": "action",
-        "description": "Select 'Login with Google' option and enter valid school Google account credentials."
+        "description": "Navigate to Resource Management console"
+      },
+      {
+        "type": "action",
+        "description": "Create a new resource with valid data"
       },
       {
         "type": "assertion",
-        "description": "Confirm user is authenticated and redirected to appropriate dashboard based on role."
+        "description": "Verify resource is created and visible in the list"
+      },
+      {
+        "type": "action",
+        "description": "Edit the resource inline to update fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify inline editing saves and updates the resource properly"
+      },
+      {
+        "type": "action",
+        "description": "Perform batch actions e.g. bulk delete multiple resources"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify batch actions execute correctly and resource list updates accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Undo the last batch delete action"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify resources are restored correctly"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to create resource with invalid or missing mandatory fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation prevents creation and errors displayed"
       }
     ]
   },
   {
     "id": "TC008",
-    "title": "Restrict access to protected admin routes for non-admin users",
-    "description": "Ensure users without ADMIN role are denied access to admin console routes and receive appropriate authorization errors.",
-    "category": "security",
+    "title": "Admin Console Article Publishing Workflow",
+    "description": "Verify full article lifecycle with draft creation, editing, publishing, and public viewing through slug-based routes.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Log in as a user with HELPER or GUEST role."
+        "description": "Login as admin"
       },
       {
         "type": "action",
-        "description": "Attempt to access admin console routes such as /api/admin/resources."
+        "description": "Create a new article draft in admin console"
       },
       {
         "type": "assertion",
-        "description": "Verify access is denied with 403 Forbidden or appropriate authorization error."
+        "description": "Verify the draft is saved and listed correctly"
+      },
+      {
+        "type": "action",
+        "description": "Edit the article and save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify updates persist in draft state"
+      },
+      {
+        "type": "action",
+        "description": "Publish the article"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify article status updates to published and visible to public users via slug URL"
+      },
+      {
+        "type": "action",
+        "description": "Access published article public page by slug"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify article content renders correctly and metadata is accurate"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access article with invalid slug"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify proper 404 or error page is shown"
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Admin can perform CRUD operations on users",
-    "description": "Test that admin users can create, read, update, and delete user accounts through the admin console and corresponding APIs, including batch editing and role assignments.",
+    "title": "Real-time Notification System Functionality and Performance",
+    "description": "Ensure notifications are delivered in real-time to users, displayed properly in notification bar and client hooks without UI glitches or performance degradation.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Log in as ADMIN and navigate to user management interface."
+        "description": "Login as any user who should receive notifications"
       },
       {
         "type": "action",
-        "description": "Create a new user with valid details."
+        "description": "Trigger notification from backend (e.g. new event announcement)"
       },
       {
         "type": "assertion",
-        "description": "Confirm user creation success with new user visible in listing."
+        "description": "Verify notification appears in real-time in notification bar UI"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify notification data is accessible via client hooks"
       },
       {
         "type": "action",
-        "description": "Edit existing user's roles and details with inline editing features."
+        "description": "Trigger multiple notifications rapidly"
       },
       {
         "type": "assertion",
-        "description": "Verify updates are saved and reflected immediately."
+        "description": "Verify UI handles multiple notifications without performance degradation or glitches"
       },
       {
         "type": "action",
-        "description": "Perform batch role assignment on multiple users."
+        "description": "Dismiss notifications and verify removal from notification bar"
       },
       {
         "type": "assertion",
-        "description": "Confirm batch updates are applied to all selected users."
-      },
-      {
-        "type": "action",
-        "description": "Delete a user and confirm deletion."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify user no longer exists in the system."
+        "description": "Verify dismissed notifications are not shown again"
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "Admin resource categories CRUD with visual customization",
-    "description": "Validate that admin can create, update, delete, and sort resource categories with color and icon customization through the admin interface.",
+    "title": "Database-backed System Settings and Maintenance Mode",
+    "description": "Verify system settings stored in database apply immediately upon change from admin console, including activating maintenance mode with public fallback UI.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Log in as ADMIN and navigate to category management."
+        "description": "Login as admin"
       },
       {
         "type": "action",
-        "description": "Create a new category with name, color code, and icon."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm new category appears in the list with applied customizations."
+        "description": "Navigate to System Settings console"
       },
       {
         "type": "action",
-        "description": "Edit category properties including name, color, and icon using inline editing."
+        "description": "Modify a system setting (e.g. enable maintenance mode)"
       },
       {
         "type": "assertion",
-        "description": "Verify changes persist and UI updates accordingly."
+        "description": "Verify setting change is saved in database with no errors"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify maintenance mode activates immediately and public users see maintenance fallback UI"
       },
       {
         "type": "action",
-        "description": "Reorder categories using drag-and-drop or sort feature."
+        "description": "Disable maintenance mode"
       },
       {
         "type": "assertion",
-        "description": "Validate the new order is saved and reflected."
-      },
-      {
-        "type": "action",
-        "description": "Delete an existing category."
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure category is removed and resources linked are handled appropriately."
+        "description": "Verify normal site functionality resumes for public users"
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "User profile update and secure password change",
-    "description": "Validate authenticated users can update their profile information and change passwords securely with all validations enforced.",
-    "category": "functional",
+    "title": "Security and Unauthorized Data Access Prevention",
+    "description": "Verify security enforcement that unauthorized users cannot access restricted data or perform actions outside their role permissions, including password change verification.",
+    "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Log in as a user (IT Prefect or Admin)."
-      },
-      {
-        "type": "action",
-        "description": "Access profile management page."
-      },
-      {
-        "type": "action",
-        "description": "Update editable profile fields and save."
+        "description": "Attempt to directly access admin APIs without authentication"
       },
       {
         "type": "assertion",
-        "description": "Confirm updated information is saved and displayed."
+        "description": "Verify access is denied with appropriate 401 or 403 errors"
       },
       {
         "type": "action",
-        "description": "Attempt to change password providing correct current password and valid new password."
+        "description": "Login as IT Prefect and attempt to access another user's private data"
       },
       {
         "type": "assertion",
-        "description": "Verify password change success and subsequent login works with new password."
+        "description": "Verify access is blocked due to permission restrictions"
       },
       {
         "type": "action",
-        "description": "Attempt password change with invalid inputs (e.g., wrong current password, weak new password)."
+        "description": "Attempt password change via user profile with incorrect current password"
       },
       {
         "type": "assertion",
-        "description": "Confirm validation errors are shown and password is not changed."
+        "description": "Verify password change request is rejected and error returned"
+      },
+      {
+        "type": "action",
+        "description": "Inspect API responses to confirm no sensitive data leakage"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm only authorized fields are exposed per role"
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "Validate role-based access for API endpoints",
-    "description": "Check all protected API endpoints enforce role-based access control according to user roles ADMIN, HELPER, GUEST, and public access where applicable.",
-    "category": "security",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Attempt accessing admin-only endpoints as a HELPER or GUEST user via API."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm access is denied with 403 status."
-      },
-      {
-        "type": "action",
-        "description": "Attempt accessing task and notification endpoints as unauthenticated user."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify 401 Unauthorized errors returned."
-      },
-      {
-        "type": "action",
-        "description": "Access public endpoints like /api/resources and /api/categories without login."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm data is returned successfully with no authentication required."
-      }
-    ]
-  },
-  {
-    "id": "TC013",
-    "title": "Admin can manage system settings securely",
-    "description": "Test that only admin users can retrieve and update system settings via secure API, and changes persist consistently.",
-    "category": "security",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Attempt GET /api/admin/settings as ADMIN user."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify successful retrieval of current system settings."
-      },
-      {
-        "type": "action",
-        "description": "Update system settings via PUT /api/admin/settings with valid new values."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm settings updated response and new values persist."
-      },
-      {
-        "type": "action",
-        "description": "Attempt GET and PUT on admin settings endpoints as HELPER or unauthenticated user."
-      },
-      {
-        "type": "assertion",
-        "description": "Check access denied with 401 or 403 error codes."
-      }
-    ]
-  },
-  {
-    "id": "TC014",
-    "title": "Frontend responsiveness and accessibility",
-    "description": "Verify the web portal UI renders correctly and is fully functional across desktop, tablet, and mobile screen sizes while meeting accessibility standards including keyboard navigation and ARIA roles.",
+    "title": "UI Responsiveness, Accessibility, and Design Compliance",
+    "description": "Ensure the site UI components adhere to responsive design, accessibility guidelines, and design standards including smooth animations and intuitive navigation.",
     "category": "ui",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Load the portal on desktop browser with standard resolution."
+        "description": "Open the site on multiple screen sizes and devices including mobile, tablet, and desktop"
       },
       {
         "type": "assertion",
-        "description": "Verify layout correctness, navigation, and UI animations function smoothly."
+        "description": "Verify layout adapts fluidly with no broken elements or overflow"
       },
       {
         "type": "action",
-        "description": "Resize the browser or test on tablet and mobile devices."
+        "description": "Navigate through all main site pages using keyboard only"
       },
       {
         "type": "assertion",
-        "description": "Confirm UI rearranges properly, controls are usable without overflow or overlap."
+        "description": "Verify focus states, tab order, and keyboard operability conform to accessibility standards"
       },
       {
         "type": "action",
-        "description": "Navigate the portal using keyboard only."
+        "description": "Use screen reader tool to navigate pages"
       },
       {
         "type": "assertion",
-        "description": "Ensure all interactive elements are reachable and labeled for screen readers."
+        "description": "Verify content is properly read with appropriate ARIA attributes"
+      },
+      {
+        "type": "action",
+        "description": "Observe animations and transitions during interactions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify animations are smooth and do not cause visual glitches"
       }
     ]
   },
   {
-    "id": "TC015",
-    "title": "Data grid inline editing, bulk actions, and undo/redo in admin UI",
-    "description": "Validate admin interfaces with advanced data grids support inline edits, batch actions on multiple rows, and undo/redo functionality preserving data integrity during resource and user management.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Admin opens resource or user management grid."
-      },
-      {
-        "type": "action",
-        "description": "Edit fields inline for one or more rows and save changes."
-      },
-      {
-        "type": "assertion",
-        "description": "Check that changes persist on refresh and API data is updated."
-      },
-      {
-        "type": "action",
-        "description": "Select multiple rows and apply bulk delete or role assignment."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify bulk actions apply correctly to all selected entries."
-      },
-      {
-        "type": "action",
-        "description": "Use undo button to revert last change or bulk action."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm data returns to previous state and UI updates accordingly."
-      },
-      {
-        "type": "action",
-        "description": "Use redo button to reapply undone change."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify changes are reapplied successfully."
-      }
-    ]
-  },
-  {
-    "id": "TC016",
-    "title": "Public access to club announcements with RSVP and progress tracking",
-    "description": "Verify that public users can view club announcements without login, RSVP to events, and see RSVP progress updates.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Access the public announcements page."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify all current announcements are displayed correctly."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to RSVP to an announcement event."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm RSVP action is accepted and reflected in UI progress indicators."
-      }
-    ]
-  },
-  {
-    "id": "TC017",
-    "title": "Training library resource CRUD and category filtering",
-    "description": "Ensure training resources can be created by authenticated users, listed, and filtered by categories and difficulty level.",
+    "id": "TC013",
+    "title": "Database Migration for MySQL Environment",
+    "description": "Ensure database migrations apply cleanly on MySQL setups, maintaining schema consistency and preventing data loss.",
     "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Log in as authenticated user."
+        "description": "Backup current MySQL database"
       },
       {
         "type": "action",
-        "description": "Call POST /api/training to create a new training resource with valid data."
+        "description": "Apply latest Prisma migrations using CLI or migration scripts"
       },
       {
         "type": "assertion",
-        "description": "Verify resource creation success with 201 response and new resource listed."
-      },
-      {
-        "type": "action",
-        "description": "Call GET /api/training to retrieve all resources."
+        "description": "Verify migration completes without errors or warnings"
       },
       {
         "type": "assertion",
-        "description": "Confirm retrieved list includes the new training resource."
-      },
-      {
-        "type": "action",
-        "description": "Filter resources by category or difficulty using query parameters if supported."
+        "description": "Verify data integrity post migration by validating key tables and relationships"
       },
       {
         "type": "assertion",
-        "description": "Validate returned results comply with filter criteria."
-      },
-      {
-        "type": "action",
-        "description": "Attempt resource creation as unauthenticated user."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify 401 Unauthorized response."
-      }
-    ]
-  },
-  {
-    "id": "TC018",
-    "title": "Task management with user-specific and admin views",
-    "description": "Verify that users can retrieve tasks assigned to them while admins can retrieve all tasks, create new tasks, and unauthorized users are rejected.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Log in as a regular user."
-      },
-      {
-        "type": "action",
-        "description": "Call GET /api/dashboard/tasks."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm response lists only tasks assigned to the logged-in user."
-      },
-      {
-        "type": "action",
-        "description": "Log in as ADMIN user."
-      },
-      {
-        "type": "action",
-        "description": "Call GET /api/dashboard/tasks."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify response lists all tasks for the organization."
-      },
-      {
-        "type": "action",
-        "description": "Create a new task via POST /api/dashboard/tasks as ADMIN."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify creation succeeds with 201 response."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to access tasks endpoints without authentication."
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure 401 Unauthorized is returned."
-      }
-    ]
-  },
-  {
-    "id": "TC019",
-    "title": "Notifications API retrieves and sends user notifications",
-    "description": "Validate that authenticated users can retrieve their notifications and create new notifications via the API.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Log in as authenticated user."
-      },
-      {
-        "type": "action",
-        "description": "Call GET /api/notifications to retrieve notifications."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify notifications list is returned with 200 status."
-      },
-      {
-        "type": "action",
-        "description": "Create a new notification by POST /api/notifications."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm notification creation success with 201 response."
-      },
-      {
-        "type": "action",
-        "description": "Attempt API access for notifications without login."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify 401 Unauthorized response."
-      }
-    ]
-  },
-  {
-    "id": "TC020",
-    "title": "System health endpoint returns accurate status",
-    "description": "Verify the system health endpoint is accessible publicly and returns up-to-date system health and availability status.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Call GET /api/health without authentication."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm response status is 200 OK."
-      },
-      {
-        "type": "assertion",
-        "description": "Validate returned data contains system health metrics and status indicators."
-      }
-    ]
-  },
-  {
-    "id": "TC021",
-    "title": "Database migrations apply correctly on MySQL and SQLite",
-    "description": "Test that all database schema migrations apply successfully and maintain data consistency across both MySQL production and SQLite development environments.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Run database migrations on a clean MySQL instance."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify migration completes without errors and schema matches specifications."
-      },
-      {
-        "type": "action",
-        "description": "Run database migrations on a clean SQLite instance."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm migration succeeds with no data integrity issues."
-      }
-    ]
-  },
-  {
-    "id": "TC022",
-    "title": "Code quality validation before deployment",
-    "description": "Ensure that all code passes TypeScript validation and linting checks before deployment without any errors or warnings.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Run TypeScript type checks on the entire code base."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm no type errors are reported."
-      },
-      {
-        "type": "action",
-        "description": "Run linter on entire project code."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify no linting errors or warnings are present."
+        "description": "Verify application functions normally connecting to migrated database"
       }
     ]
   }

@@ -25,7 +25,7 @@ const navigationItems: NavItem[] = [
   },
   {
     title: "Activity News", 
-    href: "/#activity-news",
+    href: "/activity-news",
     description: "學校最新消息",
     requiredPermissions: [Permission.VIEW_RESOURCES]
   },

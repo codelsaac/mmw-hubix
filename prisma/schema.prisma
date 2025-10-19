@@ -107,16 +107,16 @@ model Resource {
   id          String   @id @default(cuid())
   name        String
   url         String   @db.VarChar(2048)
-  description String   @db.Text
-  categoryId  String
+  description String?  @db.Text
+  categoryId  String?
   status      String   @default("active")
   clicks      Int      @default(0)
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  category Category @relation(fields: [categoryId], references: [id])
-  creator  User?    @relation(fields: [createdBy], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+  creator  User?     @relation(fields: [createdBy], references: [id])
 }
 
 model PublicEvent {
@@ -233,7 +233,27 @@ model Announcement {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  creator User? @relation(fields: [createdBy], references: [id])
+  creator       User?                   @relation(fields: [createdBy], references: [id])
+  registrations ActivityRegistration[]
+}
+
+model ActivityRegistration {
+  id             String       @id @default(cuid())
+  announcementId String
+  studentName    String
+  studentEmail   String?
+  studentPhone   String?
+  studentClass   String?      // e.g., "Form 1A", "F.2B"
+  studentNumber  String?      // Student ID number
+  message        String?      @db.Text
+  status         String       @default("pending") // pending, approved, rejected
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@index([announcementId])
+  @@index([status])
 }
 
 model Article {

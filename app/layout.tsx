@@ -44,14 +44,14 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      className={cn(sourceSans.variable, playfairDisplay.variable)}
+    >
       <head />
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          sourceSans.variable
-        )}
-      >
+      <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

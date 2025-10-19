@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { ResourceHub } from "@/components/resource-hub"
-import { ClubAnnouncements } from "@/components/club-announcements"
 import { MaintenancePage } from "@/components/maintenance-page"
 import { useSettings } from "@/hooks/use-settings"
 import { Button } from "@/components/ui/button"
@@ -21,7 +20,6 @@ export default function HomePage() {
         <main className="flex-1 p-6">
           <div className="max-w-6xl mx-auto space-y-8">
             <ResourceHub />
-            <ClubAnnouncements />
           </div>
         </main>
       </div>
@@ -38,7 +36,6 @@ export default function HomePage() {
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
           <ResourceHub />
-          <ClubAnnouncements />
         </div>
       </main>
 

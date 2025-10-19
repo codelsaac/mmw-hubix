@@ -34,7 +34,7 @@ const navigation = [
 const adminNavigation = [
   { name: "Admin Panel", href: "/admin", icon: Shield },
   { name: "Resources", href: "/admin/resources", icon: LinkIcon },
-  { name: "Announcements", href: "/admin/announcements", icon: FileText },
+  { name: "Activity", href: "/admin/announcements", icon: FileText },
   { name: "Articles", href: "/admin/articles", icon: BookOpen },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Settings", href: "/admin/settings", icon: Settings },

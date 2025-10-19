@@ -29,7 +29,7 @@ const useAdminStats = () => {
       href: "/admin/categories",
     },
     {
-      title: "Announcements",
+      title: "Activity",
       value: "0",
       description: "Published club events",
       icon: FileText,
@@ -45,12 +45,12 @@ const useAdminStats = () => {
       href: "/admin/articles",
     },
     {
-      title: "Team Members",
+      title: "History",
       value: "6",
-      description: "Active IT Prefects",
+      description: "Milestones recorded",
       icon: Users,
-      trend: "Demo accounts active",
-      href: "/admin/users",
+      trend: "Explore our IT Prefect journey",
+      href: "/dashboard/team",
     },
     {
       title: "Training Resources",

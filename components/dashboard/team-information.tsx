@@ -60,7 +60,7 @@ export function TeamInformation() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-serif font-bold text-foreground">Team Information</h2>
-        <p className="text-muted-foreground">Learn about our mission, structure, and team members</p>
+        <p className="text-muted-foreground">Learn about our mission, history, and milestones</p>
       </div>
 
       {/* Mission & Goals */}
@@ -131,14 +131,14 @@ export function TeamInformation() {
         </Card>
       </div>
 
-      {/* Team Members */}
+      {/* History */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
-            Team Members
+            History
           </CardTitle>
-          <CardDescription>Meet our dedicated IT Prefect team</CardDescription>
+          <CardDescription>Explore milestones and stories that shaped the IT Prefects</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -152,7 +152,7 @@ export function TeamInformation() {
                 onChange={(event) => setTeamNotes(event.target.value)}
                 rows={18}
                 className="min-h-[320px]"
-                placeholder="請在此輸入隊伍資訊或備註。"
+                placeholder="請在此輸入歷史記錄或重要里程碑。"
                 disabled={isSaving}
               />
               <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export function TeamInformation() {
             </div>
           ) : (
             <div className="min-h-[160px] whitespace-pre-wrap rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm leading-6">
-              {teamNotes || "暫時未有隊伍資訊。"}
+              {teamNotes || "暫時未有歷史記錄。"}
             </div>
           )}
         </CardContent>

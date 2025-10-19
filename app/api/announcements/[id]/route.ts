@@ -5,14 +5,14 @@ import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { logger } from "@/lib/logger"
 
-// GET /api/announcements/[id] - Get single announcement
+// GET /api/activity-news/[id] - Get single activity news
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const announcement = await prisma.announcement.findUnique({
+    const activityNews = await prisma.activityNews.findUnique({
       where: { id: id },
       include: {
         creator: {
@@ -25,24 +25,24 @@ export async function GET(
       },
     })
 
-    if (!announcement) {
+    if (!activityNews) {
       return NextResponse.json(
-        { error: "Announcement not found" },
+        { error: "Activity News not found" },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(announcement)
+    return NextResponse.json(activityNews)
   } catch (error) {
-    logger.error("Error fetching announcement:", error)
+    logger.error("Error fetching activity news:", error)
     return NextResponse.json(
-      { error: "Failed to fetch announcement" },
+      { error: "Failed to fetch activity news" },
       { status: 500 }
     )
   }
 }
 
-// PUT /api/announcements/[id] - Update announcement
+// PUT /api/activity-news/[id] - Update activity news
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -69,7 +69,7 @@ export async function PUT(
       isPublic,
     } = body
 
-    const announcement = await prisma.announcement.update({
+    const activityNews = await prisma.activityNews.update({
       where: { id: id },
       data: {
         title,
@@ -94,9 +94,9 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(announcement)
+    return NextResponse.json(activityNews)
   } catch (error) {
-    logger.error("Error updating announcement:", error)
+    logger.error("Error updating activity news:", error)
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
@@ -104,13 +104,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     return NextResponse.json(
-      { error: "Failed to update announcement" },
+      { error: "Failed to update activity news" },
       { status: 500 }
     )
   }
 }
 
-// DELETE /api/announcements/[id] - Delete announcement
+// DELETE /api/activity-news/[id] - Delete activity news
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -119,25 +119,20 @@ export async function DELETE(
     const { id } = await params
     const session = await getServerSession(authOptions)
     
-    if (!session?.user || session.user.role !== UserRole.ADMIN) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    if (!session?.user || (session.user.role !== UserRole.ADMIN && session.user.role !== UserRole.HELPER)) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    await prisma.announcement.delete({
-      where: { id: id },
-    })
+    await prisma.activityNews.delete({ where: { id: id } })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ message: "Activity News deleted successfully" })
   } catch (error) {
-    logger.error("Error deleting announcement:", error)
+    logger.error("Error deleting activity news:", error)
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
-    if (error instanceof Error && error.message === 'Insufficient permissions') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
     return NextResponse.json(
-      { error: "Failed to delete announcement" },
+      { error: "Failed to delete activity news" },
       { status: 500 }
     )
   }

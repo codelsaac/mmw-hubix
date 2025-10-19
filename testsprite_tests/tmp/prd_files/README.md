@@ -10,17 +10,19 @@
 
 ## Recent Updates
 
-### Latest Improvements (October 2025)
+### Latest Improvements (December 2024)
 - **Categories Management System**: Complete admin interface for managing resource categories with icons, colors, and sorting
 - **Enhanced Resource Hub**: Resources now properly organized by dynamic categories with visual indicators
-- **Database Schema Updates**: New Category model with full CRUD operations and proper relationships
+- **Database-Backed Settings System**: Comprehensive site configuration with categories (General, Security, Notifications, Backup)
+- **Database Schema Updates**: New Category and SiteSetting models with full CRUD operations and proper relationships
 - **Enhanced UI & Animations**: Smooth transitions, hover effects, staggered animations across all components
 - **Bug Fixes**: Resolved TypeScript errors in admin users route and database schema issues
-- **Dual Database Support**: Seamless SQLite (dev) and MySQL (production) setup
+- **Database Support**: MySQL-first workflow for development and production
 - **Documentation**: Added comprehensive database setup guide
 - **Quality Assurance**: Implemented mandatory bug checking procedures
 - **User Profile**: Enhanced profile management with modern UI
 - **AI Chat**: Polished floating button with pulsing animation
+- **System Settings**: Admin interface for site configuration with real-time updates
 
 ### Coming Soon
 - Advanced analytics dashboard
@@ -59,8 +61,8 @@ MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform tha
 ### Requirements
 - Node.js 18.0 or higher
 - npm or pnpm (recommended)
-- MySQL 8.0+ (for production); SQLite can be used locally for development (no MySQL installation required)
-- XAMPP (optional, for local MySQL server)
+- MySQL 8.0+ (required for both development and production)
+- XAMPP (recommended, for local MySQL server)
 
 ### Installation
 
@@ -80,7 +82,7 @@ pnpm install
 
 3. Set up the database
 ```bash
-# Create tables and indexes (MySQL)
+# Create tables and indexes
 npm run db:migrate
 
 # or with pnpm
@@ -91,6 +93,8 @@ pnpm db:migrate
 ```bash
 # using npm
 npm run dev
+# or with MySQL setup
+npm run dev:mysql
 # or using pnpm
 pnpm dev
 ```
@@ -98,25 +102,15 @@ pnpm dev
 5. Open the browser
 Visit http://localhost:3000 to view the site.
 
-### Local Development (MySQL Workflow)
-**Quick Start:**
-```bash
-npx prisma db push
-npm run db:seed
-npm run dev
-```
+### Development Notes
 
-This sequence will:
-- Push the schema to your MySQL database defined in `DATABASE_URL`
-- Generate/refresh the Prisma Client
-- Seed demo data (optional)
-- Start the development server
+The project now uses MySQL for both development and production, providing a consistent environment and eliminating the complexity of dual database configurations.
 
-**Database Guide:**
+**For MySQL Setup:**
 See the comprehensive guide: **[DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)**
 
 **Key Files:**
-- `.env.local` - MySQL connection string
+- `.env.local` - MySQL configuration
 - `setup-mysql.sql` - MySQL database creation script
 
 ## Project Structure
@@ -200,27 +194,27 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 ### Admin Console (Admin Only)
 - **User Management**: Account permissions, role assignment, and access control
   - **Batch Operations**: Multi-select and bulk actions
-- **Category Management**: Full control over resource categories, including:
-  - **CRUD Operations**: Create, read, update, and delete categories.
-  - **Customization**: Assign custom icons and colors.
-  - **Sorting**: Define the display order of categories.
-  - **Status Control**: Toggle categories between active and inactive states.
   - **Inline Editing**: Edit users directly in the data grid
   - **Undo/Redo**: Roll back changes with ease
   - **Add Users**: Create new accounts with form validation
-- **Categories Management**: Organize resources with dynamic categories
-  - **CRUD Operations**: Create, read, update, delete categories
+- **Category Management**: Full control over resource categories, including:
+  - **CRUD Operations**: Create, read, update, and delete categories
   - **Visual Customization**: Icons, colors, and sorting order
   - **Resource Integration**: Categories automatically link to resources
   - **Status Control**: Active/inactive category management
+  - **Meta API**: Dynamic icon and color options for customization
 - **Article Management**: Full CMS for articles with rich content
   - **CRUD Operations**: Create, read, update, delete articles
   - **Status Workflow**: Draft → Published → Archived
   - **SEO Friendly**: Automatic slug generation
   - **Creator Tracking**: Articles linked to admin users
-- **Content Management**: Update homepage links, club announcements, and internal pages
-- **System Settings**: Site configuration, maintenance, and customization
-- **Analytics**: Usage statistics and system monitoring
+- **System Settings**: Database-backed site configuration with categories:
+  - **General Settings**: Site name, description, file upload limits
+  - **Security Settings**: Session timeout, login attempts, access control
+  - **Notification Settings**: Email notifications and alert preferences
+  - **Backup Settings**: Automatic backup configuration
+  - **Real-time Updates**: Changes apply immediately across the site
+  - **Export/Import**: Settings backup and restore functionality
 
 #### User Management (/admin/users)
 - Data grid (react-data-grid) for all users
@@ -328,6 +322,22 @@ GET /api/categories
 ```
 - Fetch active categories for public use (no authentication required)
 
+```http
+GET /api/admin/categories/meta
+```
+- Fetch available icon and color options for category customization (requires ADMIN)
+
+#### System Settings (/admin/settings)
+- Database-backed site configuration with categorized settings
+- Permission guard: only ADMIN can access
+- Features:
+  - **General Settings**: Site name, description, file upload limits, maintenance mode
+  - **Security Settings**: Session timeout, login attempts, access control
+  - **Notification Settings**: Email notifications and alert preferences
+  - **Backup Settings**: Automatic backup configuration and frequency
+  - **Real-time Updates**: Changes apply immediately across the site
+  - **Export/Import**: Settings backup and restore functionality
+
 #### User Profile & Settings (/dashboard/profile)
 - Profile management page with three tabs: Profile, Password, Preferences
 - Permission guard: any authenticated user can access their own profile
@@ -376,23 +386,21 @@ Content-Type: application/json
 - **React Hook Form** — Form validation and management
 - **Zod** — Schema validation
 - **Recharts** — Data visualization
-- **React Data Grid** — Advanced data tables
+- **Simple Tables** — Native HTML tables with Tailwind styling
+- **CSS Animations** — Native Tailwind animations
 
 ### Backend
 - **Next.js API Routes** — RESTful API endpoints
 - **NextAuth.js 4** — Authentication and session management
 - **Prisma 6.14** — Type-safe ORM with migrations
-- **MySQL 8+** — Primary production database
-- **SQLite** — Development database (no setup required)
+- **MySQL 8+** — Production database
 
 ### Database Features
-- ✅ **Dual Database Support**: MySQL for production, SQLite for development
 - ✅ **Type Safety**: Full TypeScript integration with Prisma
 - ✅ **Migrations**: Version-controlled schema changes
 - ✅ **Relations**: User ↔ Article, User ↔ Announcement, etc.
 - ✅ **Indexes**: Optimized queries for performance
-
-**Note:** Local SQLite uses `prisma/schema.sqlite.prisma` with `file:./prisma/dev.db` hard-coded.
+- ✅ **Simplified Setup**: Single database configuration
 
 ### Dev Tools
 - ESLint — Linting
@@ -408,7 +416,8 @@ The application uses a comprehensive database schema with the following key mode
 - **Category**: Resource categorization with icons, colors, sorting order, and status management
 - **Resource**: External links organized by category with click tracking and status control
 - **Article**: CMS system with slug, content, status workflow (Draft → Published → Archived), and featured images
-- **Announcement**: Club events with attendees, location, scheduling, and RSVP system
+- **Activity**: Club events with attendees, location, scheduling, and RSVP system
+- **SiteSetting**: Database-backed site configuration with categories, types, and public/private visibility
 
 ### Event & Activity Models
 - **PublicEvent**: Public calendar events with visibility controls
@@ -443,19 +452,13 @@ npm run lint           # run linter
 npm run db:migrate     # run database migrations
 npm run db:seed        # seed database with demo data
 
-# Local (SQLite) - Recommended for Development
-npm run dev:sqlite           # push SQLite schema and start dev server (all-in-one)
-npm run db:push:sqlite       # only push SQLite schema (create/update prisma/dev.db)
-npm run db:generate:sqlite   # generate Prisma Client for SQLite
-npm run db:seed:sqlite       # seed SQLite (creates admin account only)
-
 # Quality Assurance
 npm run quality-check   # run TypeScript, ESLint, and build checks
 npm run pre-deploy      # quality-check + build (run before deployment)
 
-# Equivalent Prisma commands (for reference)
-# npx prisma db push --schema prisma/schema.sqlite.prisma
-# npx prisma generate --schema prisma/schema.sqlite.prisma
+# MySQL Reference Commands
+npx prisma db push
+npx prisma generate
 ```
 
 ## 🌐 Deployment
@@ -581,19 +584,14 @@ export const siteConfig = {
    taskkill /F /IM node.exe
    ```
 
-2. Edit **both** schema files:
+2. Edit schema file:
    - `prisma/schema.prisma` (MySQL)
-   - `prisma/schema.sqlite.prisma` (SQLite)
 
 3. Run migration commands:
    ```bash
    # MySQL
    npx prisma generate
    npx prisma migrate dev
-   
-   # SQLite
-   npm run db:generate:sqlite
-   npm run db:push:sqlite
    ```
 
 4. Update related APIs and components
@@ -666,9 +664,6 @@ taskkill /PID <PID> /F
 **Cause:** Schema changes not applied  
 **Solution:**
 ```powershell
-# For SQLite
-npm run db:push:sqlite
-
 # For MySQL
 npx prisma db push
 ```

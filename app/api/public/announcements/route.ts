@@ -1,14 +1,27 @@
-import { NextResponse } from 'next/server'
-import { AnnouncementDB } from '@/lib/database'
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger"
-// GET /api/public/announcements - Get all public announcements for students
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const announcements = await AnnouncementDB.getPublicAnnouncements()
-    return NextResponse.json(announcements)
+    const activityNews = await prisma.activityNews.findMany({
+      where: {
+        isPublic: true,
+        status: "active",
+      },
+      orderBy: { date: "desc" },
+      include: {
+        creator: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    return NextResponse.json(activityNews);
   } catch (error) {
-    logger.error('Error fetching public announcements:', error)
-    return NextResponse.json({ error: 'Failed to fetch announcements' }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to fetch public activity news" },
+      { status: 500 }
+    );
   }
 }

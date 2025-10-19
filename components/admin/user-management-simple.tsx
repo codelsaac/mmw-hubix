@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+
 import {
   Dialog,
   DialogContent,
@@ -22,15 +23,13 @@ type RoleValue = 'ADMIN' | 'HELPER' | 'GUEST'
 
 interface UserForGrid {
   id: string
+  username: string
   name?: string | null
   email?: string | null
   role: RoleValue
   department?: string | null
-  isActive?: boolean
   lastLoginAt?: string | null
 }
-
-const ROLE_OPTIONS: RoleValue[] = ['ADMIN', 'HELPER', 'GUEST']
 
 export function UserManagementSimple() {
   const [users, setUsers] = useState<UserForGrid[]>([])
@@ -48,11 +47,11 @@ export function UserManagementSimple() {
         const data: any[] = await response.json()
         const formattedUsers: UserForGrid[] = data.map((user: any) => ({
           id: user.id,
+          username: user.username,
           name: user.name ?? null,
           email: user.email ?? null,
           role: user.role as RoleValue,
           department: user.department ?? null,
-          isActive: user.isActive ?? true,
           lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null
         }))
         setUsers(formattedUsers)
@@ -67,14 +66,25 @@ export function UserManagementSimple() {
   const filteredUsers = users.filter((user) => {
     const name = (user.name ?? '').toLowerCase()
     const email = (user.email ?? '').toLowerCase()
+    const username = user.username.toLowerCase()
     const q = searchQuery.toLowerCase()
-    return name.includes(q) || email.includes(q)
+    return name.includes(q) || email.includes(q) || username.includes(q)
   })
 
   const handleEditUser = (user: UserForGrid) => {
     setEditingUser(user)
     setIsDialogOpen(true)
   }
+
+  const mapToGridUser = (user: any): UserForGrid => ({
+    id: user.id,
+    username: user.username,
+    name: user.name ?? null,
+    email: user.email ?? null,
+    role: user.role as RoleValue,
+    department: user.department ?? null,
+    lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null,
+  })
 
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user?')) return
@@ -88,23 +98,6 @@ export function UserManagementSimple() {
       }
     } catch (error) {
       logger.error('Error deleting user:', error)
-    }
-  }
-
-  const handleUpdateUser = async (updatedUser: UserForGrid) => {
-    try {
-      const response = await fetch(`/api/admin/users/${updatedUser.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedUser)
-      })
-      if (response.ok) {
-        setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u))
-        setEditingUser(null)
-        setIsDialogOpen(false)
-      }
-    } catch (error) {
-      logger.error('Error updating user:', error)
     }
   }
 
@@ -152,11 +145,16 @@ export function UserManagementSimple() {
                 </DialogHeader>
                 <AddUserForm 
                   user={editingUser}
-                  onSuccess={() => {
+                  onSuccess={(savedUser) => {
+                    const formattedUser = mapToGridUser(savedUser)
+                    setUsers(prev => {
+                      const exists = prev.some(u => u.id === formattedUser.id)
+                      return exists
+                        ? prev.map(u => (u.id === formattedUser.id ? formattedUser : u))
+                        : [formattedUser, ...prev]
+                    })
                     setIsDialogOpen(false)
                     setEditingUser(null)
-                    // Refresh users list
-                    window.location.reload()
                   }}
                 />
               </DialogContent>
@@ -169,10 +167,10 @@ export function UserManagementSimple() {
                 <thead>
                   <tr className="border-b bg-muted/50">
                     <th className="h-12 px-4 text-left align-middle font-medium">Name</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">Username</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">Email</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">Role</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">Department</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">Last Login</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">Actions</th>
                   </tr>
@@ -181,6 +179,7 @@ export function UserManagementSimple() {
                   {filteredUsers.map((user) => (
                     <tr key={user.id} className="border-b">
                       <td className="p-4 align-middle">{user.name || 'N/A'}</td>
+                      <td className="p-4 align-middle">{user.username}</td>
                       <td className="p-4 align-middle">{user.email || 'N/A'}</td>
                       <td className="p-4 align-middle">
                         <Badge variant={getRoleBadgeVariant(user.role)}>
@@ -188,11 +187,6 @@ export function UserManagementSimple() {
                         </Badge>
                       </td>
                       <td className="p-4 align-middle">{user.department || 'N/A'}</td>
-                      <td className="p-4 align-middle">
-                        <Badge variant={user.isActive ? 'default' : 'secondary'}>
-                          {user.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </td>
                       <td className="p-4 align-middle">
                         {user.lastLoginAt 
                           ? new Date(user.lastLoginAt).toLocaleDateString()

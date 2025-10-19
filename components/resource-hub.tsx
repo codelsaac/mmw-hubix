@@ -137,7 +137,7 @@ export function ResourceHub() {
     (resource) =>
       resource.status === "active" &&
       (resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        resource.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (resource.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
       (selectedCategory === "all" || resource.category === selectedCategory),
   )
 

@@ -1,19 +1,18 @@
 {
-  "status": "commited",
-  "type": "backend",
+  "status": "init",
+  "type": "frontend",
   "scope": "codebase",
   "localEndpoint": "http://localhost:3000",
-  "backendAuthType": "basic token",
-  "backendUsername": "admin",
-  "backendPassword": "admin123",
+  "loginUser": "admin",
+  "loginPassword": "admin123",
   "executionArgs": {
     "projectName": "mmw-hubix",
-    "projectPath": "C:\\Users\\user\\Documents\\IT perfect\\mmw-hubix",
+    "projectPath": "c:/Users/user/Documents/IT perfect/mmw-hubix",
     "testIds": [],
-    "additionalInstruction": "Re-run the tests to verify that the authentication fixes have resolved the 401 and 403 errors. Focus on testing the API endpoints that were previously failing.",
+    "additionalInstruction": "",
     "envs": {
-      "API_KEY": "sk-user-rle6Rz8njhXsm8jeLWF2htVq6EQOOnhvTYgxr4twKNiETwbw6QZQaIi2-iPSYvW3vmRjnshs2Q-ErmqibV0I49MClQZqqNCYk88vk_ACbS1_W2YuzE7XYwWJwf0Nle53OuQ"
+      "API_KEY": "sk-user-y3h0nGuAsxE7OrbuzQCpvPVrkD1vlOsAu-TDCeYHOBO43Ffd8uqnFLRdrCURJ1sl60XYFWeL3lH4NwN9_USA2EbnWuABLCvcwsD9TghSlABnqfXN2M09B3IYLg8DFaGe2MI"
     }
   },
-  "proxy": "http://c7a4397a-4a9b-47c7-a47a-09db4a5778e9:rnTz2RpXsKQ7sGZZThwelHTaGWNbiHaO@tun.testsprite.com:8080"
+  "proxy": "http://6588c76c-d711-4214-b614-1e357037d835:9FyjCXaI1OB0adVPOwyVou9ohoVfFeao@tun.testsprite.com:8080"
 }

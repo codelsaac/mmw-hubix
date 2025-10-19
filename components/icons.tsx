@@ -10,28 +10,31 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 export const Icons = {
-  logo: ({ className, ...props }: LucideProps) => {
-    const { fill, ...imageProps } = props as any
+  logo: ({ className, ...props }: LucideProps & { sizes?: string; priority?: boolean }) => {
+    const { sizes, priority, fill, ...imageProps } = props as any
     return (
       <div className={cn("relative", className)}>
         <Image
           src="/icon2.png"
           alt="logo"
-          fill={true}
+          fill
+          sizes={sizes ?? "(max-width: 768px) 120px, 160px"}
+          priority={priority ?? true}
           style={{ objectFit: "contain" }}
           {...imageProps}
         />
       </div>
     )
   },
-  school: ({ className, ...props }: LucideProps) => {
-    const { fill, ...imageProps } = props as any
+  school: ({ className, ...props }: LucideProps & { sizes?: string }) => {
+    const { sizes, fill, ...imageProps } = props as any
     return (
       <div className={cn("relative", className)}>
         <Image
           src="/mmwc_favicon.png"
           alt="School Website"
-          fill={true}
+          fill
+          sizes={sizes ?? "(max-width: 768px) 96px, 128px"}
           style={{ objectFit: "contain" }}
           {...imageProps}
         />

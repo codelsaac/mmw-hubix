@@ -4,12 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, Users, ChevronRight } from "lucide-react"
-import { useAnnouncements } from "@/hooks/use-announcements"
+import { useActivityNews } from "@/hooks/use-activity-news"
 
 export function ClubAnnouncements() {
-  const { announcements, loading, joinEvent } = useAnnouncements()
+  const { activityNews, loading, joinEvent } = useActivityNews()
 
-  const activeAnnouncements = announcements.filter((a) => a.status === "active")
+  const activeActivityNews = activityNews.filter((a) => a.status === "active")
 
   if (loading) {
     return (
@@ -41,44 +41,44 @@ export function ClubAnnouncements() {
       </div>
 
       <div className="grid gap-4" suppressHydrationWarning>
-        {activeAnnouncements.length === 0 ? (
+        {activeActivityNews.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground" suppressHydrationWarning>No active activity news at the moment.</div>
         ) : (
-          activeAnnouncements.map((announcement, index) => (
-            <Card key={announcement.id} className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${index * 100}ms` }} suppressHydrationWarning>
+          activeActivityNews.map((activityNews, index) => (
+            <Card key={activityNews.id} className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${index * 100}ms` }} suppressHydrationWarning>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between" suppressHydrationWarning>
                   <div className="space-y-1" suppressHydrationWarning>
                     <div className="flex items-center gap-2" suppressHydrationWarning>
                       <Badge variant="secondary" className="text-xs">
-                        {announcement.club}
+                        {activityNews.club}
                       </Badge>
-                      <Badge variant={announcement.type === "Workshop" ? "default" : "outline"} className="text-xs">
-                        {announcement.type}
+                      <Badge variant={activityNews.type === "Workshop" ? "default" : "outline"} className="text-xs">
+                        {activityNews.type}
                       </Badge>
                     </div>
-                    <CardTitle className="text-lg font-semibold">{announcement.title}</CardTitle>
+                    <CardTitle className="text-lg font-semibold">{activityNews.title}</CardTitle>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CardDescription className="text-sm leading-relaxed">{announcement.description}</CardDescription>
+                <CardDescription className="text-sm leading-relaxed">{activityNews.description}</CardDescription>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground" suppressHydrationWarning>
                   <div className="flex items-center gap-1" suppressHydrationWarning>
                     <Calendar className="w-4 h-4" />
                     <span suppressHydrationWarning>
-                      {new Date(announcement.date).toLocaleDateString()} at {announcement.time}
+                      {new Date(activityNews.date).toLocaleDateString()} at {activityNews.time}
                     </span>
                   </div>
                   <div className="flex items-center gap-1" suppressHydrationWarning>
                     <MapPin className="w-4 h-4" />
-                    <span>{announcement.location}</span>
+                    <span>{activityNews.location}</span>
                   </div>
                   <div className="flex items-center gap-1" suppressHydrationWarning>
                     <Users className="w-4 h-4" />
                     <span suppressHydrationWarning>
-                      {announcement.attendees}/{announcement.maxAttendees} attending
+                      {activityNews.attendees}/{activityNews.maxAttendees} attending
                     </span>
                   </div>
                 </div>
@@ -87,17 +87,17 @@ export function ClubAnnouncements() {
                   <div className="w-full bg-muted rounded-full h-2" suppressHydrationWarning>
                     <div
                       className="bg-primary h-2 rounded-full transition-all"
-                      style={{ width: `${(announcement.attendees / announcement.maxAttendees) * 100}%` }}
+                      style={{ width: `${(activityNews.attendees / activityNews.maxAttendees) * 100}%` }}
                       suppressHydrationWarning
                     />
                   </div>
                   <Button
                     size="sm"
                     className="ml-4 transition-all duration-300 hover:scale-105"
-                    disabled={announcement.attendees >= announcement.maxAttendees}
-                    onClick={() => joinEvent(announcement.id)}
+                    disabled={activityNews.attendees >= activityNews.maxAttendees}
+                    onClick={() => joinEvent(activityNews.id)}
                   >
-                    {announcement.attendees >= announcement.maxAttendees ? "Full" : "Join Event"}
+                    {activityNews.attendees >= activityNews.maxAttendees ? "Full" : "Join Event"}
                   </Button>
                 </div>
               </CardContent>

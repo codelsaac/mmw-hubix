@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Bell, Check, CheckCheck, X, Trash2, AlertCircle, Info, CheckCircle, AlertTriangle, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -137,6 +138,7 @@ function NotificationItem({ notification, onMarkRead, onDelete }: {
 }
 
 export function NotificationBar() {
+  const { status } = useSession()
   const {
     notifications,
     unreadCount,
@@ -148,6 +150,11 @@ export function NotificationBar() {
   } = useNotifications()
 
   const [isOpen, setIsOpen] = useState(false)
+
+  // Don't render notification bell if user is not authenticated
+  if (status !== 'authenticated') {
+    return null
+  }
 
   const handleMarkRead = async (id: string) => {
     const success = await markAsRead([id])

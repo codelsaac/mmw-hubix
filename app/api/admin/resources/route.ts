@@ -11,8 +11,8 @@ import { prisma } from "@/lib/prisma"
 const resourceSchema = z.object({
   name: z.string().min(2).max(100).transform(sanitizeString),
   url: z.string().url().max(2048),
-  description: z.string().min(1).max(500).transform(sanitizeString),
-  categoryId: z.string().min(1),
+  description: z.string().min(1).max(500).transform(sanitizeString).nullable().optional(),
+  categoryId: z.string().min(1).nullable().optional(),
 });
 
 const resourceUpdateSchema = resourceSchema.partial().extend({ id: z.string() });

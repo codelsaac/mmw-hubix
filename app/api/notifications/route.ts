@@ -43,6 +43,14 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(notifications);
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+      if (error.message === "Insufficient permissions") {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
     logger.error("[NOTIFICATIONS_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
@@ -62,6 +70,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(notification, { status: 201 });
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+      if (error.message === "Insufficient permissions") {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
     logger.error("[NOTIFICATIONS_POST]", error);
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
@@ -118,6 +134,14 @@ export async function PATCH(req: NextRequest) {
 
     return new NextResponse("Invalid request", { status: 400 });
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+      if (error.message === "Insufficient permissions") {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
     logger.error("[NOTIFICATIONS_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
@@ -163,6 +187,14 @@ export async function DELETE(req: NextRequest) {
 
     return new NextResponse("Invalid request", { status: 400 });
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+      if (error.message === "Insufficient permissions") {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
     logger.error("[NOTIFICATIONS_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }

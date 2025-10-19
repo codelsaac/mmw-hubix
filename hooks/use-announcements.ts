@@ -1,68 +1,68 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { announcementService, type Announcement } from "@/lib/announcements"
+import { activityNewsService, type ActivityNews } from "@/lib/activity-news"
 
 import { logger } from "@/lib/logger"
-export function useAnnouncements() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+export function useActivityNews() {
+  const [activityNews, setActivityNews] = useState<ActivityNews[]>([])
   const [loading, setLoading] = useState(true)
 
-  const loadAnnouncements = async () => {
+  const loadActivityNews = async () => {
     try {
       setLoading(true)
-      const data = await announcementService.getAnnouncements()
-      setAnnouncements(data)
+      const data = await activityNewsService.getActivityNews()
+      setActivityNews(data)
     } catch (error) {
-      logger.error("Error loading announcements:", error)
+      logger.error("Error loading activity news:", error)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadAnnouncements()
+    loadActivityNews()
   }, [])
 
-  const addAnnouncement = async (announcement: Omit<Announcement, "id" | "createdAt" | "updatedAt" | "creator" | "createdBy">) => {
-    const newAnnouncement = await announcementService.addAnnouncement(announcement)
-    if (newAnnouncement) {
-      await loadAnnouncements()
+  const addActivityNews = async (activityNews: Omit<ActivityNews, "id" | "createdAt" | "updatedAt" | "creator" | "createdBy">) => {
+    const newActivityNews = await activityNewsService.addActivityNews(activityNews)
+    if (newActivityNews) {
+      await loadActivityNews()
     }
-    return newAnnouncement
+    return newActivityNews
   }
 
-  const updateAnnouncement = async (id: string, updates: Partial<Announcement>) => {
-    const updated = await announcementService.updateAnnouncement(id, updates)
+  const updateActivityNews = async (id: string, updates: Partial<ActivityNews>) => {
+    const updated = await activityNewsService.updateActivityNews(id, updates)
     if (updated) {
-      await loadAnnouncements()
+      await loadActivityNews()
     }
     return updated
   }
 
-  const deleteAnnouncement = async (id: string) => {
-    const success = await announcementService.deleteAnnouncement(id)
+  const deleteActivityNews = async (id: string) => {
+    const success = await activityNewsService.deleteActivityNews(id)
     if (success) {
-      await loadAnnouncements()
+      await loadActivityNews()
     }
     return success
   }
 
   const joinEvent = async (id: string) => {
-    const success = await announcementService.joinEvent(id)
+    const success = await activityNewsService.joinEvent(id)
     if (success) {
-      await loadAnnouncements()
+      await loadActivityNews()
     }
     return success
   }
 
   return {
-    announcements,
+    activityNews,
     loading,
-    addAnnouncement,
-    updateAnnouncement,
-    deleteAnnouncement,
+    addActivityNews,
+    updateActivityNews,
+    deleteActivityNews,
     joinEvent,
-    refresh: loadAnnouncements,
+    refresh: loadActivityNews,
   }
 }

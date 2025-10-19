@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 import { logger } from '@/lib/logger'
 
 export interface Notification {
@@ -18,12 +19,22 @@ export interface Notification {
 }
 
 export function useNotifications() {
+  const { data: session, status } = useSession()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchNotifications = useCallback(async (unreadOnly: boolean = false) => {
+    // Don't fetch if user is not authenticated
+    if (status !== 'authenticated' || !session?.user) {
+      setIsLoading(false)
+      setNotifications([])
+      setUnreadCount(0)
+      setError(null)
+      return
+    }
+
     try {
       setIsLoading(true)
       setError(null)
@@ -32,6 +43,12 @@ export function useNotifications() {
       const response = await fetch(url)
       
       if (!response.ok) {
+        // Silently fail for 401/403 errors (authentication/authorization issues)
+        if (response.status === 401 || response.status === 403) {
+          setNotifications([])
+          setUnreadCount(0)
+          return
+        }
         throw new Error('Failed to fetch notifications')
       }
       
@@ -43,12 +60,15 @@ export function useNotifications() {
       setUnreadCount(unread)
       
     } catch (err) {
+      // Only log errors that are not authentication related
       logger.error('Error fetching notifications:', err)
       setError(err instanceof Error ? err.message : 'Failed to load notifications')
+      setNotifications([])
+      setUnreadCount(0)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [session, status])
 
   const markAsRead = useCallback(async (notificationIds: string[]) => {
     try {
