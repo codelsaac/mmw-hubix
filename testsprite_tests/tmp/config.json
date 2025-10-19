@@ -1,18 +1,8 @@
 {
-  "status": "init",
+  "status": "commited",
   "type": "frontend",
   "scope": "codebase",
   "localEndpoint": "http://localhost:3000",
   "loginUser": "admin",
-  "loginPassword": "admin123",
-  "executionArgs": {
-    "projectName": "mmw-hubix",
-    "projectPath": "c:/Users/user/Documents/IT perfect/mmw-hubix",
-    "testIds": [],
-    "additionalInstruction": "",
-    "envs": {
-      "API_KEY": "sk-user-y3h0nGuAsxE7OrbuzQCpvPVrkD1vlOsAu-TDCeYHOBO43Ffd8uqnFLRdrCURJ1sl60XYFWeL3lH4NwN9_USA2EbnWuABLCvcwsD9TghSlABnqfXN2M09B3IYLg8DFaGe2MI"
-    }
-  },
-  "proxy": "http://6588c76c-d711-4214-b614-1e357037d835:9FyjCXaI1OB0adVPOwyVou9ohoVfFeao@tun.testsprite.com:8080"
+  "loginPassword": "admin123"
 }
