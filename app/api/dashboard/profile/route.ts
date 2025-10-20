@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { z } from 'zod'
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { handleApiError } from '@/lib/error-handler'
 
 // For demo purposes, we'll store updated user data in a simple in-memory store
 // In a real application, this would be stored in the database
@@ -20,8 +22,11 @@ const profileUpdateSchema = z.object({
   ),
 })
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
@@ -42,12 +47,16 @@ export async function GET() {
     })
   } catch (error) {
     logger.error('[PROFILE_GET]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {

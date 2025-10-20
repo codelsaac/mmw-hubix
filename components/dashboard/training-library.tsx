@@ -2,11 +2,12 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Dialog,
   DialogContent,
@@ -71,7 +72,7 @@ const contentTypes = [
 ]
 
 export function TrainingLibrary() {
-  const { resources, addResource, updateViews, deleteResource } = useTraining()
+  const { resources, loading, addResource, updateViews, deleteResource } = useTraining()
   const { user } = useAuth()
   const canManageResources = user?.role && PermissionService.hasPermission(user.role as UserRole, Permission.MANAGE_TRAINING_VIDEOS)
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -81,14 +82,15 @@ export function TrainingLibrary() {
   const [selectedContentType, setSelectedContentType] = useState<ResourceContentType>("VIDEO")
   const [watchedResources, setWatchedResources] = useState<Set<number>>(new Set())
   const [isUploading, setIsUploading] = useState(false)
-  const [availableCategories, setAvailableCategories] = useState(defaultCategories)
+  const [availableCategories, setAvailableCategories] = useState<typeof defaultCategories>([])
   const [newCategoryName, setNewCategoryName] = useState("")
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [editingCategory, setEditingCategory] = useState<string | null>(null)
   const [editingCategoryName, setEditingCategoryName] = useState("")
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false)
 
-  // Get all unique categories from resources
-  const getAllCategories = () => {
+  // Memoize categories from resources to avoid recalculation on every render
+  const allCategories = useMemo(() => {
     const categorySet = new Set<string>()
     resources.forEach(resource => {
       if (resource.tags && Array.isArray(resource.tags)) {
@@ -96,54 +98,40 @@ export function TrainingLibrary() {
       }
     })
     return Array.from(categorySet)
-  }
+  }, [resources])
 
-  const allCategories = getAllCategories()
-
-  // Load categories from database on mount
+  // Load categories from database only
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const response = await fetch('/api/training/categories')
-        if (response.ok) {
-          const dbCategories = await response.json()
-          const existingCategories = dbCategories.map((categoryName: string) => {
-            const defaultCategory = defaultCategories.find(dc => dc.name.toLowerCase() === categoryName.toLowerCase())
-            if (defaultCategory) return defaultCategory
-            return {
-              id: categoryName.toLowerCase().replace(/\s+/g, '-'),
-              name: categoryName,
-              icon: Tag,
-              color: "bg-gray-100 text-gray-800"
-            }
-          })
-          setAvailableCategories([...defaultCategories, ...existingCategories.filter((ec: any) => !defaultCategories.find(dc => dc.id === ec.id))])
-        }
+        const dbCategories = response.ok ? await response.json() : []
+        
+        // Map database categories to category objects with icons and colors
+        const categories = dbCategories.map((name: string) => {
+          // Check if it matches a default category (for icon and color)
+          const defaultCat = defaultCategories.find(
+            dc => dc.name.toLowerCase() === name.toLowerCase()
+          )
+          return defaultCat || {
+            id: name.toLowerCase().replace(/\s+/g, '-'),
+            name,
+            icon: Tag,
+            color: "bg-gray-100 text-gray-800"
+          }
+        })
+        
+        setAvailableCategories(categories)
       } catch (error) {
         logger.error('Error loading categories:', error)
+        // If API fails, show empty array (don't force defaults back)
+        setAvailableCategories([])
       }
     }
     
     loadCategories()
-  }, [])
-
-  // Update available categories when resources change
-  useEffect(() => {
-    const existingCategories = allCategories.map(categoryName => {
-      const defaultCategory = defaultCategories.find(dc => dc.name.toLowerCase() === categoryName.toLowerCase())
-      if (defaultCategory) return defaultCategory
-      return {
-        id: categoryName.toLowerCase().replace(/\s+/g, '-'),
-        name: categoryName,
-        icon: Tag,
-        color: "bg-gray-100 text-gray-800"
-      }
-    })
-    setAvailableCategories(prev => {
-      const newCategories = existingCategories.filter(ec => !prev.find(pc => pc.id === ec.id))
-      return [...prev, ...newCategories]
-    })
-  }, [resources])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])  // Only run once on mount to avoid constant refetching
 
   const filteredResources = resources.filter((resource) => {
     const matchesCategory = selectedCategory === "all" || (resource.tags && resource.tags.includes(selectedCategory))
@@ -314,7 +302,7 @@ export function TrainingLibrary() {
   }
 
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
+    if (!newCategoryName.trim() || isCategoryLoading) return;
 
     const newCategory = {
       id: newCategoryName.toLowerCase().replace(/\s+/g, '-'),
@@ -328,13 +316,14 @@ export function TrainingLibrary() {
       return;
     }
 
+    setIsCategoryLoading(true);
     try {
       const response = await fetch('/api/training/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'add',
-          categoryName: newCategory.name
+          newCategoryName: newCategory.name  // Fix: API expects newCategoryName
         })
       });
 
@@ -348,34 +337,12 @@ export function TrainingLibrary() {
     } catch (error) {
       logger.error('Error adding category:', error);
       alert('Failed to add category. Please try again.');
+    } finally {
+      setIsCategoryLoading(false);
     }
   };
 
-  const handleDeleteAllCategories = async () => {
-    if (!confirm('Are you sure you want to delete all categories? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/training/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'deleteAll'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete all categories');
-      }
-
-      setAvailableCategories(defaultCategories);
-      setSelectedCategory("all");
-    } catch (error) {
-      logger.error('Error deleting all categories:', error);
-      alert('Failed to delete all categories. Please try again.');
-    }
-  };
+  // Removed handleDeleteAllCategories - not needed
 
   const handleEditCategory = (categoryName: string) => {
     setEditingCategory(categoryName)
@@ -383,7 +350,7 @@ export function TrainingLibrary() {
   }
 
   const handleSaveCategoryEdit = async () => {
-    if (!editingCategory || !editingCategoryName.trim()) return
+    if (!editingCategory || !editingCategoryName.trim() || isCategoryLoading) return
     
     const newName = editingCategoryName.trim()
     const oldName = editingCategory
@@ -406,6 +373,7 @@ export function TrainingLibrary() {
       }
     }
     
+    setIsCategoryLoading(true);
     try {
       // Update the category in the database
       const response = await fetch('/api/training/categories', {
@@ -438,6 +406,8 @@ export function TrainingLibrary() {
     } catch (error) {
       logger.error('Error updating category:', error)
       alert('Failed to update category. Please try again.')
+    } finally {
+      setIsCategoryLoading(false);
     }
   }
 
@@ -447,6 +417,8 @@ export function TrainingLibrary() {
   }
 
   const handleRemoveCategory = async (categoryName: string) => {
+    if (isCategoryLoading) return;
+    
     // Check if any resources are using this category
     const resourcesUsingCategory = resources.filter(resource => 
       resource.tags && resource.tags.includes(categoryName)
@@ -463,6 +435,7 @@ export function TrainingLibrary() {
       }
     }
 
+    setIsCategoryLoading(true);
     try {
       // Remove the category from the database
       const response = await fetch('/api/training/categories', {
@@ -494,6 +467,8 @@ export function TrainingLibrary() {
       logger.error('Error removing category:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove category. Please try again.'
       alert(errorMessage)
+    } finally {
+      setIsCategoryLoading(false);
     }
   }
 
@@ -685,16 +660,7 @@ export function TrainingLibrary() {
                       <Plus className="w-4 h-4" />
                     </Button>
                   )}
-                  {canManageResources && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleDeleteAllCategories}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+                  {/* Removed Delete All Categories button */}
                 </div>
               </div>
             </CardHeader>
@@ -707,8 +673,8 @@ export function TrainingLibrary() {
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
                   />
-                  <Button size="sm" onClick={handleAddCategory}>
-                    Add
+                  <Button size="sm" onClick={handleAddCategory} disabled={isCategoryLoading}>
+                    {isCategoryLoading ? 'Adding...' : 'Add'}
                   </Button>
                 </div>
               )}
@@ -746,6 +712,7 @@ export function TrainingLibrary() {
                           className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                           onClick={handleSaveCategoryEdit}
                           title="Save changes"
+                          disabled={isCategoryLoading}
                         >
                           <Check className="w-4 h-4" />
                         </Button>
@@ -755,6 +722,7 @@ export function TrainingLibrary() {
                           className="h-8 w-8 p-0 text-gray-600 hover:text-gray-700 hover:bg-gray-50"
                           onClick={handleCancelCategoryEdit}
                           title="Cancel editing"
+                          disabled={isCategoryLoading}
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -783,6 +751,7 @@ export function TrainingLibrary() {
                                 handleEditCategory(category.name)
                               }}
                               title={`Edit category "${category.name}"`}
+                              disabled={isCategoryLoading}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -795,6 +764,7 @@ export function TrainingLibrary() {
                                 handleRemoveCategory(category.name)
                               }}
                               title={`Remove category "${category.name}"`}
+                              disabled={isCategoryLoading}
                             >
                               <XCircle className="w-4 h-4" />
                             </Button>
@@ -833,8 +803,29 @@ export function TrainingLibrary() {
 
         <div className="lg:col-span-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredResources.map((resource) => (
-              <Card key={resource.id} className="hover:shadow-md transition-shadow cursor-pointer group">
+            {loading ? (
+              // Skeleton loaders for loading state
+              Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                  <Skeleton className="w-full h-32 rounded-t-lg" shimmer />
+                  <CardContent className="pt-4 space-y-3">
+                    <Skeleton className="h-5 w-3/4" shimmer />
+                    <Skeleton className="h-4 w-full" shimmer />
+                    <Skeleton className="h-4 w-5/6" shimmer />
+                    <div className="flex items-center justify-between pt-2">
+                      <Skeleton className="h-4 w-20" shimmer />
+                      <Skeleton className="h-4 w-16" shimmer />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              filteredResources.map((resource, index) => (
+              <Card 
+                key={resource.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer group animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
                 <div className="relative">
                   {resource.contentType === 'VIDEO' ? (
                     <img
@@ -879,15 +870,16 @@ export function TrainingLibrary() {
                       </Badge>
                     )}
                   </div>
-                  {resource.isPublic && (
-                    <div className="absolute top-2 left-2">
+                  {canManageResources && (
+                    <div className="absolute bottom-2 right-2">
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         onClick={(e) => handleDeleteResource(resource.id, e)}
+                        title="Delete resource"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   )}
@@ -938,16 +930,15 @@ export function TrainingLibrary() {
                     ) : (
                       <Download className="w-3 h-3 mr-2" />
                     )}
-                    {watchedResources.has(resource.id) ? "View Again" : 
-                     resource.contentType === 'VIDEO' ? "Watch Now" :
-                     resource.contentType === 'TEXT' ? "Read Now" : "Download"}
+                    {watchedResources.has(resource.id) ? "View Again" : "View"}
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+            ))
+            )}
           </div>
 
-          {filteredResources.length === 0 && (
+          {!loading && filteredResources.length === 0 && (
             <Card>
               <CardContent className="text-center py-12">
                 <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />

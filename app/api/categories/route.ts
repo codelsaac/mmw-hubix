@@ -1,13 +1,18 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 
 /**
  * GET /api/categories
  * Get all active categories (public endpoint - no authentication required)
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
     const categories = await prisma.category.findMany({
       where: {
         isActive: true
@@ -38,7 +43,11 @@ export async function GET() {
     return NextResponse.json(categories)
   } catch (error) {
     logger.error("[CATEGORIES_GET]", error)
-    // Return empty array on error to prevent breaking the homepage
-    return NextResponse.json([])
+    const { message, statusCode } = handleApiError(error)
+    // Return empty array on client errors to prevent breaking the homepage
+    if (statusCode >= 400 && statusCode < 500) {
+      return NextResponse.json([])
+    }
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

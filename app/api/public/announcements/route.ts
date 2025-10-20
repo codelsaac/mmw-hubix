@@ -1,9 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
+import { handleApiError } from "@/lib/error-handler";
+import { logger } from "@/lib/logger";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const activityNews = await prisma.activityNews.findMany({
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
+    const announcements = await prisma.announcement.findMany({
       where: {
         isPublic: true,
         status: "active",
@@ -17,11 +23,10 @@ export async function GET(req: Request) {
         },
       },
     });
-    return NextResponse.json(activityNews);
+    return NextResponse.json(announcements);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch public activity news" },
-      { status: 500 }
-    );
+    logger.error("[PUBLIC_ANNOUNCEMENTS_GET]", error)
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }

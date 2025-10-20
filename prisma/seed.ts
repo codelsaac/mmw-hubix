@@ -1,30 +1,51 @@
-import { PrismaClient, UserRole } from '@prisma/client'
+import { PrismaClient, UserRole, ArticleStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
 async function main() {
+  console.log('🌱 Starting database seeding...\n')
+
+  // Clear existing data (optional - comment out to keep existing data)
+  console.log('🗑️  Clearing existing data...')
+  await prisma.resource.deleteMany({})
+  await prisma.article.deleteMany({})
+  await prisma.announcement.deleteMany({})
+  await prisma.trainingResource.deleteMany({})
+  await prisma.category.deleteMany({})
+  console.log('✓ Data cleared\n')
+
   // Demo accounts matching auth.ts configuration
+  console.log('👥 Creating users...')
   const demoUsers = [
     {
       username: 'guest',
       name: 'Guest User',
+      email: 'guest@cccmmw.edu.hk',
+      password: 'guest123',
       role: UserRole.GUEST,
       department: 'Public',
       isActive: true,
+      image: '/abstract-profile.png',
     },
     {
       username: 'admin',
       name: 'System Administrator',
+      email: 'admin@cccmmw.edu.hk',
+      password: 'mmw2025',
       role: UserRole.ADMIN,
-      department: 'Admin',
+      department: 'Administration',
       isActive: true,
+      image: '/abstract-profile.png',
     },
     {
       username: 'helper',
-      name: 'IT Assistant',
+      name: 'IT Helper',
+      email: 'helper@cccmmw.edu.hk',
+      password: 'helper123',
       role: UserRole.HELPER,
-      department: 'IT',
+      department: 'IT Department',
       isActive: true,
+      image: '/abstract-profile.png',
     },
   ]
 
@@ -172,14 +193,153 @@ async function main() {
     },
   ]
 
+  const createdCategories = []
   for (const category of categories) {
-    await prisma.category.create({
+    const created = await prisma.category.create({
       data: category,
     })
+    createdCategories.push(created)
     console.log(`✓ Category "${category.name}" seeded`)
   }
 
+  // Create resources with actual useful links
+  console.log('\n🔗 Creating resources...')
+  const resources = [
+    {
+      name: 'Google Classroom',
+      url: 'https://classroom.google.com',
+      description: 'Online learning management system for assignments and grades',
+      categoryId: createdCategories[0].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'School Email',
+      url: 'https://mail.google.com',
+      description: 'Access your school Gmail account',
+      categoryId: createdCategories[0].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'IT Support Form',
+      url: 'https://forms.google.com',
+      description: 'Submit IT support requests and technical issues',
+      categoryId: createdCategories[0].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'Network Troubleshooting Guide',
+      url: 'https://support.google.com/wifi',
+      description: 'Comprehensive guide for diagnosing network problems',
+      categoryId: createdCategories[1].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'Password Manager Guide',
+      url: 'https://support.google.com/accounts/answer/6208650',
+      description: 'Learn how to use Google Password Manager securely',
+      categoryId: createdCategories[2].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'PC Hardware Guide',
+      url: 'https://www.intel.com/content/www/us/en/support.html',
+      description: 'Intel support documentation for computer hardware',
+      categoryId: createdCategories[3].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'Windows Update Center',
+      url: 'https://support.microsoft.com/windows',
+      description: 'Microsoft Windows update and troubleshooting center',
+      categoryId: createdCategories[4].id,
+      status: 'active',
+      clicks: 0,
+    },
+    {
+      name: 'Chrome Web Store',
+      url: 'https://chrome.google.com/webstore',
+      description: 'Browse and install Chrome extensions and apps',
+      categoryId: createdCategories[4].id,
+      status: 'active',
+      clicks: 0,
+    },
+  ]
+
+  for (const resource of resources) {
+    await prisma.resource.create({
+      data: resource,
+    })
+    console.log(`✓ Resource "${resource.name}" seeded`)
+  }
+
+  // Create sample articles
+  console.log('\n📝 Creating articles...')
+  const adminUser = await prisma.user.findUnique({ where: { username: 'admin' } })
+  
+  let articlesCreated = 0
+  if (adminUser) {
+    const articles = [
+      {
+        title: 'Welcome to MMW Hubix',
+        slug: 'welcome-to-mmw-hubix',
+        content: `# Welcome to MMW Hubix\n\nMMW Hubix is your central hub for IT resources, training materials, and school announcements.\n\n## Features\n\n- **Resource Hub**: Quick access to all essential school resources\n- **Training Library**: Comprehensive IT training materials\n- **Activity News**: Stay updated with school events\n- **Admin Dashboard**: Manage content and users (Admin only)\n\nWe're excited to have you here!`,
+        excerpt: 'Your central hub for IT resources and school information',
+        status: ArticleStatus.PUBLISHED,
+        isPublic: true,
+        publishedAt: new Date(),
+        tags: 'welcome,getting-started,information',
+        createdBy: adminUser.id,
+      },
+      {
+        title: 'IT Prefect Responsibilities',
+        slug: 'it-prefect-responsibilities',
+        content: `# IT Prefect Responsibilities\n\nAs an IT Prefect at MMW, you play a crucial role in maintaining our school's technology infrastructure.\n\n## Core Duties\n\n1. **Technical Support**: Assist teachers and students with technical issues\n2. **Equipment Maintenance**: Ensure all IT equipment is in good working condition\n3. **Training**: Help train other students on using school technology\n4. **Documentation**: Keep records of technical issues and solutions\n\n## Weekly Tasks\n\n- Check all computer labs\n- Update inventory\n- Respond to support tickets\n- Attend team meetings\n\nThank you for your dedication!`,
+        excerpt: 'Learn about the duties and responsibilities of IT Prefects',
+        status: ArticleStatus.PUBLISHED,
+        isPublic: true,
+        publishedAt: new Date(),
+        tags: 'it-prefect,responsibilities,duties',
+        createdBy: adminUser.id,
+      },
+      {
+        title: 'Network Safety Tips',
+        slug: 'network-safety-tips',
+        content: `# Network Safety Tips\n\nStay safe online with these essential cybersecurity practices.\n\n## Password Security\n\n- Use strong, unique passwords for each account\n- Enable two-factor authentication\n- Never share your passwords\n\n## Email Safety\n\n- Be cautious of suspicious emails\n- Don't click unknown links\n- Verify sender identity\n\n## Social Media\n\n- Keep personal information private\n- Check privacy settings\n- Think before you post\n\nStay safe online!`,
+        excerpt: 'Essential cybersecurity tips for students',
+        status: ArticleStatus.PUBLISHED,
+        isPublic: true,
+        publishedAt: new Date(),
+        tags: 'cybersecurity,safety,tips',
+        createdBy: adminUser.id,
+      },
+    ]
+
+    for (const article of articles) {
+      await prisma.article.create({
+        data: article,
+      })
+      articlesCreated++
+      console.log(`✓ Article "${article.title}" seeded`)
+    }
+  } else {
+    console.log('⚠ Skipping articles - admin user not found')
+  }
+
   console.log('\n✅ All demo data seeded successfully!')
+  console.log('\n📊 Summary:')
+  console.log(`   - ${demoUsers.length} users`)
+  console.log(`   - ${categories.length} categories`)
+  console.log(`   - ${resources.length} resources`)
+  console.log(`   - ${trainingResources.length} training resources`)
+  console.log(`   - ${announcements.length} announcements`)
+  console.log(`   - ${articlesCreated} articles`)
+  console.log('\n🚀 Your database is ready to use!')
 }
 
 main()

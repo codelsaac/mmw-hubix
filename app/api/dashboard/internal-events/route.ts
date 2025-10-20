@@ -4,11 +4,15 @@ import { authOptions } from "@/auth"
 import { InternalEventDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@/lib/permissions'
-
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { handleApiError } from '@/lib/error-handler'
 // GET /api/dashboard/internal-events - Get internal events for current user
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
     
     // Only allow authenticated IT Prefects and Admins
@@ -25,13 +29,17 @@ export async function GET() {
     return NextResponse.json(events)
   } catch (error) {
     logger.error('Error fetching internal events:', error)
-    return NextResponse.json({ error: 'Failed to fetch internal events' }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
 // POST /api/dashboard/internal-events - Create new internal event
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     logger.log('POST /api/dashboard/internal-events - Starting request')
     const session = await getServerSession(authOptions)
     logger.log('Internal Event Session:', { 
@@ -92,7 +100,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
     logger.error('Error creating internal event:', error)
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json({ error: `Failed to create internal event: ${message}` }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

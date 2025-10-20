@@ -6,6 +6,8 @@ import { z } from "zod"
 import { logger } from "@/lib/logger"
 import { requireAuthAPI } from "@/lib/auth-server"
 import { UserRole } from "@/lib/permissions"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 
 const notificationSchema = z.object({
   title: z.string().min(1).max(200),
@@ -20,6 +22,9 @@ const notificationSchema = z.object({
 // GET /api/notifications - Get user's notifications
 export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const user = await requireAuthAPI();
 
     const { searchParams } = new URL(req.url);
@@ -52,13 +57,17 @@ export async function GET(req: NextRequest) {
       }
     }
     logger.error("[NOTIFICATIONS_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
 // POST /api/notifications - Create notification (Admin only)
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
+    if (rateLimitResult) return rateLimitResult
+
     const user = await requireAuthAPI([UserRole.ADMIN]);
 
     const body = await req.json();
@@ -82,13 +91,17 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
 // PATCH /api/notifications - Mark notifications as read
 export async function PATCH(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const user = await requireAuthAPI();
 
     const body = await req.json();
@@ -143,13 +156,17 @@ export async function PATCH(req: NextRequest) {
       }
     }
     logger.error("[NOTIFICATIONS_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
 // DELETE /api/notifications - Delete notifications
 export async function DELETE(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const user = await requireAuthAPI();
 
     const body = await req.json();
@@ -196,6 +213,7 @@ export async function DELETE(req: NextRequest) {
       }
     }
     logger.error("[NOTIFICATIONS_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }

@@ -103,16 +103,16 @@ const rateLimiter = new RateLimiter()
 
 // Rate limit configurations
 export const RATE_LIMITS = {
-  // General API requests
+  // General API requests (public endpoints)
   GENERAL: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 60 * 1000, // 1 minute
     maxRequests: 100
   },
   
-  // Authentication requests
+  // Authenticated user requests (dashboard, profile, etc)
   AUTH: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 60
   },
   
   // File uploads

@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { handleApiError } from '@/lib/error-handler'
 
 // GET /api/public/articles - Get all published public articles
 export async function GET(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
@@ -58,9 +63,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     logger.error('Error fetching public articles:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch articles' },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

@@ -3,11 +3,15 @@ import { TaskDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@/lib/permissions'
 import { authenticateRequest } from '@/lib/auth-server'
-
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { handleApiError } from '@/lib/error-handler'
 // GET /api/dashboard/tasks - Get all tasks or user-specific tasks
 export async function GET(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const { user, response } = await authenticateRequest()
     
     if (response) {
@@ -31,13 +35,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(tasks)
   } catch (error) {
     logger.error('Error fetching tasks:', error)
-    return NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
 // POST /api/dashboard/tasks - Create new task
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const { user, response } = await authenticateRequest()
     
     if (response) {

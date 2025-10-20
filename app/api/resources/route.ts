@@ -1,13 +1,18 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 
 /**
  * GET /api/resources
  * Get all active resources (public endpoint - no authentication required)
  */
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
     const resources = await prisma.resource.findMany({
       where: {
         status: "active"
@@ -68,8 +73,12 @@ export async function GET(req: Request) {
     return NextResponse.json(transformedResources)
   } catch (error) {
     logger.error("[RESOURCES_GET]", error)
-    // Return empty array on error to prevent breaking the homepage
-    return NextResponse.json([])
+    const { message, statusCode } = handleApiError(error)
+    // Return empty array on client errors to prevent breaking the homepage
+    if (statusCode >= 400 && statusCode < 500) {
+      return NextResponse.json([])
+    }
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
@@ -77,8 +86,11 @@ export async function GET(req: Request) {
  * POST /api/resources/[id]/click
  * Increment click count for a resource
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
     const { id } = await req.json()
     
     if (!id) {
@@ -97,6 +109,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     logger.error("[RESOURCES_CLICK]", error)
-    return NextResponse.json({ error: "Failed to update click count" }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

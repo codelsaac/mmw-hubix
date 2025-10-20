@@ -7,29 +7,22 @@ import { logger } from "@/lib/logger"
 
 export async function GET() {
   try {
-    // Get all unique categories from existing resources
-    const resources = await prisma.trainingResource.findMany({
+    // Get all active categories from database
+    const categories = await prisma.category.findMany({
+      where: {
+        isActive: true
+      },
+      orderBy: {
+        sortOrder: 'asc'
+      },
       select: {
-        tags: true
+        name: true
       }
     })
 
-    const categorySet = new Set<string>()
-    resources.forEach(resource => {
-      if (resource.tags) {
-        try {
-          const tags = JSON.parse(resource.tags)
-          if (Array.isArray(tags)) {
-            tags.forEach(tag => categorySet.add(tag))
-          }
-        } catch (error) {
-          logger.error('Error parsing tags:', error)
-        }
-      }
-    })
-
-    const categories = Array.from(categorySet)
-    return NextResponse.json(categories)
+    // Return just the category names
+    const categoryNames = categories.map(c => c.name)
+    return NextResponse.json(categoryNames)
   } catch (error) {
     logger.error('Error fetching categories:', error)
     return NextResponse.json(
@@ -91,27 +84,40 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      // Since categories are just tags, we don't need to do anything here.
-      // The category will be created when a resource is created with it.
-      return NextResponse.json({ success: true, message: 'Category will be created when used in a resource' })
-    }
-
-    if (action === 'deleteAll') {
+      
       try {
-        await prisma.trainingResource.updateMany({
+        // Check if category already exists
+        const existing = await prisma.category.findUnique({
+          where: { name: newCategoryName }
+        })
+        
+        if (existing) {
+          return NextResponse.json(
+            { error: 'Category already exists' },
+            { status: 400 }
+          )
+        }
+        
+        // Create new category in database
+        await prisma.category.create({
           data: {
-            tags: '[]'
+            name: newCategoryName,
+            createdBy: user.id,
+            isActive: true
           }
         })
-        return NextResponse.json({ success: true, message: 'All categories have been deleted.' })
+        
+        return NextResponse.json({ success: true, message: 'Category created successfully' })
       } catch (error) {
-        logger.error('Error deleting all categories:', error)
+        logger.error('Error creating category:', error)
         return NextResponse.json(
-          { error: 'Failed to delete all categories' },
+          { error: 'Failed to create category' },
           { status: 500 }
         )
       }
     }
+
+    // Removed deleteAll action - not needed
 
     if (action === 'edit') {
       if (!categoryName || !newCategoryName) {
@@ -122,6 +128,21 @@ export async function POST(request: NextRequest) {
       }
 
       try {
+        // Update category in database if it exists
+        const existingCategory = await prisma.category.findUnique({
+          where: { name: categoryName }
+        })
+        
+        if (existingCategory) {
+          await prisma.category.update({
+            where: { name: categoryName },
+            data: { name: newCategoryName }
+          })
+          logger.log(`Updated category "${categoryName}" to "${newCategoryName}" in database`)
+        } else {
+          logger.log(`Category "${categoryName}" doesn't exist in database, skipping database update`)
+        }
+        
         // Update all resources that use this category
         const allResources = await prisma.trainingResource.findMany({
           where: {
@@ -185,6 +206,22 @@ export async function POST(request: NextRequest) {
       logger.log(`Starting category removal for: "${categoryName}"`)
 
       try {
+        // Delete category from database (soft delete by setting isActive = false)
+        // Check if category exists first
+        const existingCategory = await prisma.category.findUnique({
+          where: { name: categoryName }
+        })
+        
+        if (existingCategory) {
+          await prisma.category.update({
+            where: { name: categoryName },
+            data: { isActive: false }
+          })
+          logger.log(`Soft deleted category "${categoryName}" from database`)
+        } else {
+          logger.log(`Category "${categoryName}" doesn't exist in database, skipping database deletion`)
+        }
+        
         // Remove category from all resources that use it
         const allResources = await prisma.trainingResource.findMany({
           where: {

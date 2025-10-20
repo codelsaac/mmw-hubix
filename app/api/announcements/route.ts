@@ -3,13 +3,18 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
-
 import { logger } from "@/lib/logger"
-// GET /api/announcements - Get all announcements
-export async function GET() {
-  const session = await getServerSession(authOptions)
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 
+// GET /api/announcements - Get all announcements
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
+    const session = await getServerSession(authOptions)
+
     // If the user is not authenticated, only return public announcements
     const whereClause = session?.user?.email ? {} : { isPublic: true };
 
@@ -32,18 +37,19 @@ export async function GET() {
     return NextResponse.json(announcements)
   } catch (error) {
     logger.error("Error fetching announcements:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch announcements" },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
 // POST /api/announcements - Create new announcement
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
@@ -119,9 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(announcement, { status: 201 })
   } catch (error) {
     logger.error("Error creating announcement:", error)
-    return NextResponse.json(
-      { error: "Failed to create announcement" },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

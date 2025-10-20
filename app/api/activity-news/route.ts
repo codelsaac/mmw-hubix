@@ -3,13 +3,16 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
-
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 // GET /api/activity-news - Get all activity news
-export async function GET() {
-  const session = await getServerSession(authOptions)
-
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
+    const session = await getServerSession(authOptions)
     // If the user is not authenticated, only return public activity news
     const whereClause = session?.user?.email ? {} : { isPublic: true };
 
@@ -32,16 +35,17 @@ export async function GET() {
     return NextResponse.json(activityNews)
   } catch (error) {
     logger.error("Error fetching activity news:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch activity news" },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
 // POST /api/activity-news - Create new activity news
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
@@ -119,9 +123,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(activityNews, { status: 201 })
   } catch (error) {
     logger.error("Error creating activity news:", error)
-    return NextResponse.json(
-      { error: "Failed to create activity news" },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

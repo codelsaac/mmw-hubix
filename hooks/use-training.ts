@@ -1,47 +1,36 @@
-// Consolidated Training Hook
-import { useState, useEffect, useCallback } from 'react'
+// Consolidated Training Hook with SWR for better performance
+import useSWR from 'swr'
 import { TrainingResource, TrainingService, CreateResourceRequest } from '@/lib/training'
-
 import { logger } from "@/lib/logger"
+
+// Fetcher function for SWR
+const fetcher = () => TrainingService.getResources()
+
 export function useTraining() {
-  const [resources, setResources] = useState<TrainingResource[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
-
-  // Load resources on mount with lazy initialization
-  useEffect(() => {
-    // Only load if not already initialized
-    if (!isInitialized) {
-      loadResources()
-      setIsInitialized(true)
+  // Use SWR for automatic caching, deduplication, and revalidation
+  const { data, error, isLoading, mutate } = useSWR<TrainingResource[]>(
+    '/api/training',
+    fetcher,
+    {
+      revalidateOnFocus: false, // Don't refetch when tab gains focus
+      revalidateOnReconnect: true, // Refetch when connection restored
+      dedupingInterval: 2000, // Dedupe requests within 2 seconds
+      errorRetryCount: 2, // Retry failed requests twice
     }
-  }, [isInitialized])
+  )
 
-  const loadResources = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await TrainingService.getResources()
-      setResources(data)
-    } catch (err) {
-      setError('Failed to load training resources')
-      logger.error('Error loading resources:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const resources = data || []
 
   const addResource = async (data: CreateResourceRequest): Promise<TrainingResource | null> => {
     try {
       const newResource = await TrainingService.createResource(data)
       if (newResource) {
-        setResources(prev => [newResource, ...prev])
+        // Optimistic update: immediately show new resource
+        await mutate([newResource, ...resources], false)
         return newResource
       }
       return null
     } catch (err) {
-      setError('Failed to create resource')
       logger.error('Error creating resource:', err)
       return null
     }
@@ -51,12 +40,12 @@ export function useTraining() {
     try {
       const success = await TrainingService.deleteResource(id)
       if (success) {
-        setResources(prev => prev.filter(r => r.id !== id))
+        // Optimistic update: immediately remove resource
+        await mutate(resources.filter(r => r.id !== id), false)
         return true
       }
       return false
     } catch (err) {
-      setError('Failed to delete resource')
       logger.error('Error deleting resource:', err)
       return false
     }
@@ -65,28 +54,28 @@ export function useTraining() {
   const updateViews = async (id: number) => {
     try {
       await TrainingService.updateViews(id)
-      setResources(prev =>
-        prev.map(r =>
-          r.id === id ? { ...r, views: r.views + 1 } : r
-        )
+      // Optimistic update: immediately update view count
+      await mutate(
+        resources.map(r => (r.id === id ? { ...r, views: r.views + 1 } : r)),
+        false
       )
     } catch (err) {
       logger.error('Error updating views:', err)
     }
   }
 
-  const clearAllResources = () => {
-    setResources([])
+  const clearAllResources = async () => {
+    await mutate([], false)
   }
 
   return {
     resources,
-    loading,
-    error,
+    loading: isLoading,
+    error: error ? 'Failed to load training resources' : null,
     addResource,
     deleteResource,
     updateViews,
     clearAllResources,
-    refresh: loadResources
+    refresh: mutate // SWR's mutate function revalidates data
   }
 }

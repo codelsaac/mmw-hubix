@@ -1,11 +1,16 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAuthAPI } from "@/lib/auth-server"
 import { UserRole } from "@/lib/permissions"
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     // Allow all authenticated users to read team notes
     await requireAuthAPI()
 
@@ -26,12 +31,16 @@ export async function GET() {
     return NextResponse.json(teamNotes)
   } catch (error) {
     logger.error("Failed to fetch team notes:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     // Only admins can update team notes
     const user = await requireAuthAPI([UserRole.ADMIN])
 
@@ -66,6 +75,7 @@ export async function PUT(req: Request) {
     return NextResponse.json(teamNotes)
   } catch (error) {
     logger.error("Failed to update team notes:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

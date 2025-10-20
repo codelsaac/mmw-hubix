@@ -44,13 +44,13 @@ export function TeamInformation() {
       })
 
       if (response.ok) {
-        toast.success("團隊資訊已儲存")
+        toast.success("Team information saved")
       } else {
-        toast.error("儲存失敗，請重試")
+        toast.error("Save failed, please try again")
       }
     } catch (error) {
       console.error("Failed to save team notes:", error)
-      toast.error("儲存失敗，請重試")
+      toast.error("Save failed, please try again")
     } finally {
       setIsSaving(false)
     }
@@ -143,7 +143,7 @@ export function TeamInformation() {
         <CardContent>
           {isLoading ? (
             <div className="min-h-[160px] flex items-center justify-center text-muted-foreground">
-              載入中...
+              Loading...
             </div>
           ) : user?.role === "ADMIN" ? (
             <div className="space-y-3">
@@ -152,19 +152,19 @@ export function TeamInformation() {
                 onChange={(event) => setTeamNotes(event.target.value)}
                 rows={18}
                 className="min-h-[320px]"
-                placeholder="請在此輸入歷史記錄或重要里程碑。"
+                placeholder="Enter history notes or key milestones here."
                 disabled={isSaving}
               />
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">內容儲存在資料庫，所有成員皆可查看。</p>
+                <p className="text-xs text-muted-foreground">Content is stored in the database and visible to all members.</p>
                 <Button onClick={handleSave} disabled={isSaving}>
-                  {isSaving ? "儲存中..." : "儲存"}
+                  {isSaving ? "Saving..." : "Save"}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="min-h-[160px] whitespace-pre-wrap rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm leading-6">
-              {teamNotes || "暫時未有歷史記錄。"}
+              {teamNotes || "No history records yet."}
             </div>
           )}
         </CardContent>

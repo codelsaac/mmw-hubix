@@ -4,7 +4,8 @@ import { Source_Sans_3, Playfair_Display } from "next/font/google"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
 import { cn } from "@/lib/utils"
-import { Providers } from "./providers";
+import { Providers } from "./providers"
+import { TopLoadingBar } from "@/components/top-loading-bar"
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     >
       <head />
       <body className="min-h-screen bg-background font-sans antialiased">
+        <TopLoadingBar />
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -4,11 +4,15 @@ import { authOptions } from "@/auth"
 import { ActivityDB } from '@/lib/database'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@/lib/permissions'
-
 import { logger } from "@/lib/logger"
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { handleApiError } from '@/lib/error-handler'
 // GET /api/dashboard/activities - Get recent IT Prefect activities
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
@@ -19,13 +23,17 @@ export async function GET() {
     return NextResponse.json(activities)
   } catch (error) {
     logger.error('Error fetching activities:', error)
-    return NextResponse.json({ error: 'Failed to fetch activities' }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
 // POST /api/dashboard/activities - Create new activity
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions)
     
     // Allow admins and IT department users to create activities
@@ -67,6 +75,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(activity, { status: 201 })
   } catch (error) {
     logger.error('Error creating activity:', error)
-    return NextResponse.json({ error: 'Failed to create activity' }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

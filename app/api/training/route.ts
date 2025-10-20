@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 import { authenticateRequest } from "@/lib/auth-server"
-
 import { logger } from "@/lib/logger"
-export async function GET() {
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
+export async function GET(req: NextRequest) {
   try {
+    // Use GENERAL rate limit for training resources (frequently accessed)
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
+    if (rateLimitResult) return rateLimitResult
+
     const resources = await prisma.trainingResource.findMany({
       include: {
         creator: {
@@ -30,15 +35,16 @@ export async function GET() {
     return NextResponse.json(processedResources)
   } catch (error) {
     logger.error('Error fetching training resources:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch training resources' },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
+    if (rateLimitResult) return rateLimitResult
+
     const { user, response } = await authenticateRequest()
     
     if (response) {
@@ -139,9 +145,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(resource, { status: 201 })
   } catch (error) {
     logger.error('Error creating training resource:', error)
-    return NextResponse.json(
-      { error: 'Failed to create training resource' },
-      { status: 500 }
-    )
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }

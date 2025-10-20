@@ -11,5 +11,6 @@
     "files.autoSave": "onWindowChange",
     "editor.experimentalGpuAcceleration": "on",
     "files.autoGuessEncoding": true,
-    "files.autoSaveWhenNoErrors": true
+    "files.autoSaveWhenNoErrors": true,
+    "markdown.validate.enabled": true
 }

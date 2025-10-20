@@ -6,6 +6,8 @@ import { z } from "zod"
 import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
 import { prisma } from "@/lib/prisma"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
+import { handleApiError } from "@/lib/error-handler"
 
 const userSchema = z.object({
   username: z.string().min(2).max(50).transform(sanitizeString),
@@ -19,8 +21,12 @@ const userSchema = z.object({
 
 const userUpdateSchema = userSchema.partial().extend({ id: z.string() });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
@@ -46,12 +52,17 @@ export async function GET() {
     return NextResponse.json(users);
   } catch (error) {
     logger.error("[ADMIN_USERS_GET]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
       return createErrorResponse("Unauthorized", 403);
@@ -114,15 +125,17 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     logger.error("[ADMIN_USERS_POST]", error);
-    if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify(error.issues), { status: 400 });
-    }
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
 export async function PATCH(req: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
@@ -161,15 +174,17 @@ export async function PATCH(req: NextRequest) {
 
   } catch (error) {
     logger.error("[ADMIN_USERS_PATCH]", error);
-    if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify(error.issues), { status: 400 });
-    }
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
+    if (rateLimitResult) return rateLimitResult
+
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
@@ -201,9 +216,7 @@ export async function DELETE(req: NextRequest) {
 
   } catch (error) {
     logger.error("[ADMIN_USERS_DELETE]", error);
-    if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify(error.issues), { status: 400 });
-    }
-    return new NextResponse("Internal Error", { status: 500 });
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }

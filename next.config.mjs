@@ -99,7 +99,14 @@ const nextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+  },
+  
+  // Performance optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
   
   // Compression
@@ -107,6 +114,12 @@ const nextConfig = {
   
   // PoweredByHeader removal
   poweredByHeader: false,
+  
+  // Optimize fonts
+  optimizeFonts: true,
+  
+  // Enable SWC minification
+  swcMinify: true,
 }
 
 export default nextConfig
