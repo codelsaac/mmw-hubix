@@ -217,15 +217,13 @@ This project uses NextAuth.js with **username-based** authentication (not email)
   - **Export/Import**: Settings backup and restore functionality
 
 #### User Management (/admin/users)
-- Data grid (react-data-grid) for all users
 - Permission guard: only ADMIN can access
-- Inline editing: edit name, email, role, department, and isActive
-- Multi-select & batch actions:
-  - After selecting rows, you can “Batch change role” and “Batch delete”
-- Sorting & filtering:
-  - Sort by columns; filter by name, email, role, etc.
-- Undo/Redo:
-  - Basic undo/redo buttons; supports rolling back edits and batch operations
+- Simple table view with role badges, last login, and department info
+- Quick search input filters by name, username, or email in real time
+- Dialog-driven create/edit form with validation via `AddUserForm`
+- Per-user actions:
+  - Edit user details
+  - Delete user with confirmation prompt
 
 API:
 ```http
