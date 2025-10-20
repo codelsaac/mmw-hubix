@@ -131,8 +131,8 @@ async function main() {
   // Create some categories for resources
   const categories = [
     {
-      name: 'General',
-      description: 'General IT support and administration resources',
+      name: 'Uncategorized',
+      description: 'Miscellaneous IT support and administration resources',
       icon: 'Settings',
       color: '#3B82F6',
       sortOrder: 1,

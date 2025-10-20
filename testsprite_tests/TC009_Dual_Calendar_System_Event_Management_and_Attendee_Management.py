@@ -46,45 +46,12 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click on the Login button to log in as event organizer.
-        frame = context.pages[-1]
-        # Click the Login button to start login process as event organizer
-        elem = frame.locator('xpath=html/body/div[2]/header/div/nav/button[2]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
-        # -> Input username and password for event organizer and click login.
-        frame = context.pages[-1]
-        # Input username 'admin' for event organizer login
-        elem = frame.locator('xpath=html/body/div[4]/div[2]/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('admin')
-        
-
-        frame = context.pages[-1]
-        # Input password 'admin123' for event organizer login
-        elem = frame.locator('xpath=html/body/div[4]/div[2]/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('admin123')
-        
-
-        frame = context.pages[-1]
-        # Click Login button to submit credentials
-        elem = frame.locator('xpath=html/body/div[4]/div[2]/form/button').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
-        # -> Navigate to the Events & Activities section to create a new event.
-        frame = context.pages[-1]
-        # Click on Events & Activities to access event management and calendar interface
-        elem = frame.locator('xpath=html/body/div[2]/main/div/div/main/div/section/div[2]/div[2]/div/div/button[13]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Event Creation Successful').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Event Successfully Created').first).to_be_visible(timeout=30000)
         except AssertionError:
-            raise AssertionError("Test case failed: The test plan execution has failed. Unable to verify event creation and RSVP functionality as per the test plan requirements.")
+            raise AssertionError("Test case failed: The test plan execution has failed. The calendar events are not displaying correctly, or event management actions (add, edit, delete) and attendee synchronization are not functioning as expected.")
         await asyncio.sleep(5)
     
     finally:

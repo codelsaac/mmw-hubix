@@ -46,45 +46,12 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click the Login button to start authentication.
-        frame = context.pages[-1]
-        # Click the Login button to start authentication
-        elem = frame.locator('xpath=html/body/div[2]/header/div/nav/button[2]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
-        # -> Input username and password, then click Login button.
-        frame = context.pages[-1]
-        # Input username admin
-        elem = frame.locator('xpath=html/body/div[4]/div[2]/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('admin')
-        
-
-        frame = context.pages[-1]
-        # Input password admin123
-        elem = frame.locator('xpath=html/body/div[4]/div[2]/form/div[2]/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('admin123')
-        
-
-        frame = context.pages[-1]
-        # Click Login button to authenticate
-        elem = frame.locator('xpath=html/body/div[4]/div[2]/form/button').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
-        # -> Navigate to Training Library page by clicking the Library category button.
-        frame = context.pages[-1]
-        # Click Library category button to navigate to Training Library page
-        elem = frame.locator('xpath=html/body/div[2]/main/div/div/main/div/section/div[2]/div[2]/div/div/button[6]').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=Exclusive Training Content for Admins Only').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=Task Creation Successful').first).to_be_visible(timeout=30000)
         except AssertionError:
-            raise AssertionError("Test plan execution failed: Authenticated user's ability to access training resources and verify filtering and content rendering could not be validated.")
+            raise AssertionError("Test case failed: The IT Prefect dashboard test plan execution failed. Task creation, assignment, priority setting, status updates, and tracking functionalities did not perform as expected, or the changes were not reflected on the shared calendars and team notes.")
         await asyncio.sleep(5)
     
     finally:

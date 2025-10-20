@@ -97,8 +97,8 @@ export async function POST(req: NextRequest) {
       data: {
         name: resourceData.name,
         url: resourceData.url,
-        description: resourceData.description,
-        categoryId: resourceData.categoryId,
+        description: resourceData.description ?? null,
+        categoryId: resourceData.categoryId ?? null,
         status: "active",
         clicks: 0,
         createdBy: createdById,

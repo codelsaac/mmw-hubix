@@ -46,39 +46,12 @@ async def run_test():
                 pass
         
         # Interact with the page elements to simulate user flow
-        # -> Click the floating AI Chat button to open the chat interface.
-        frame = context.pages[-1]
-        # Click the floating AI Chat button to open the chat assistant interface.
-        elem = frame.locator('xpath=html/body/div[2]/main/div/div/button').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
-        # -> Type a query related to campus navigation into the chat input box and send it.
-        frame = context.pages[-1]
-        # Type a campus navigation query into the AI Chat input box.
-        elem = frame.locator('xpath=html/body/div[2]/main/div/div/div/div[2]/div/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('How do I get to the library from the main entrance?')
-        
-
-        # -> Ask the AI assistant questions about school schedules and IT assistance.
-        frame = context.pages[-1]
-        # Ask the AI assistant about school schedules.
-        elem = frame.locator('xpath=html/body/div[2]/main/div/div/div/div[2]/div/form/div/input').nth(0)
-        await page.wait_for_timeout(3000); await elem.fill('What are the school schedules for weekdays?')
-        
-
-        frame = context.pages[-1]
-        # Send the school schedules query to the AI Chat assistant.
-        elem = frame.locator('xpath=html/body/div[2]/main/div/div/div/div[2]/div/form/div/button').nth(0)
-        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
-        
-
         # --> Assertions to verify final state
         frame = context.pages[-1]
         try:
-            await expect(frame.locator('text=AI Chat Assistant is unavailable').first).to_be_visible(timeout=1000)
+            await expect(frame.locator('text=File upload completed successfully').first).to_be_visible(timeout=30000)
         except AssertionError:
-            raise AssertionError('Test case failed: The AI Chat Assistant did not respond as expected during the test plan execution, indicating a failure in accessing or interacting with the AI Chat Assistant.')
+            raise AssertionError("Test case failed: The file upload system did not enforce validation rules or provide appropriate feedback as expected in the test plan. Upload success confirmation was not found, indicating failure in file validation, storage, or error handling.")
         await asyncio.sleep(5)
     
     finally:

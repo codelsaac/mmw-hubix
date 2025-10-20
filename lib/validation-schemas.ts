@@ -128,11 +128,33 @@ export const EventSchemas = {
   })
 }
 
+// Helper function to validate external URLs
+const isExternalUrl = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url)
+    // Block localhost and internal admin routes
+    if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+      return false
+    }
+    // Block relative URLs and internal paths containing /admin/, /api/, /dashboard/
+    const blockedPaths = ['/admin', '/api', '/dashboard', '/auth']
+    if (blockedPaths.some(path => urlObj.pathname.includes(path))) {
+      return false
+    }
+    return true
+  } catch {
+    return false
+  }
+}
+
 // Resource schemas
 export const ResourceSchemas = {
   create: z.object({
     name: z.string().min(1, 'Name is required').max(200, 'Name too long'),
-    url: BaseSchemas.url,
+    url: BaseSchemas.url.refine(
+      (url) => isExternalUrl(url),
+      { message: 'URL must be an external link (not localhost, admin, or internal routes)' }
+    ),
     description: BaseSchemas.longText,
     category: z.string().min(1, 'Category is required').max(100, 'Category too long'),
     status: z.enum(['active', 'inactive', 'archived']).default('active')
@@ -140,7 +162,10 @@ export const ResourceSchemas = {
 
   update: z.object({
     name: z.string().min(1).max(200).optional(),
-    url: BaseSchemas.url.optional(),
+    url: BaseSchemas.url.refine(
+      (url) => isExternalUrl(url),
+      { message: 'URL must be an external link (not localhost, admin, or internal routes)' }
+    ).optional(),
     description: BaseSchemas.longText.optional(),
     category: z.string().min(1).max(100).optional(),
     status: z.enum(['active', 'inactive', 'archived']).optional()

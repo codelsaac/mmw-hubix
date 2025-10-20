@@ -1,116 +1,354 @@
 {
   "tech_stack": [
     "TypeScript",
-    "Next.js 15",
+    "Next.js 15 (App Router)",
     "React 18",
-    "Tailwind CSS",
+    "MySQL 8",
+    "Prisma 6.14",
+    "NextAuth.js 4",
+    "Tailwind CSS 4",
     "shadcn/ui",
-    "Prisma ORM",
-    "NextAuth.js (username auth)",
-    "MySQL",
     "Zod",
     "React Hook Form",
+    "Lucide React",
     "Recharts",
-    "React Data Grid"
+    "Playwright"
   ],
   "features": [
     {
-      "name": "Resource Hub",
-      "description": "Homepage experience displaying dynamic school resources with search, category filters, and click tracking integrated with backend APIs.",
+      "name": "Authentication System",
+      "description": "Username-based authentication with role-based access control (ADMIN, HELPER, GUEST) using NextAuth.js",
       "files": [
-        "app/page.tsx",
+        "auth.ts",
+        "lib/auth-server.ts",
+        "lib/permissions.ts",
+        "lib/password-utils.ts",
+        "hooks/use-auth.ts",
+        "components/auth/session-provider.tsx",
+        "components/auth/simple-login-dialog.tsx",
+        "components/auth/user-menu.tsx",
+        "app/api/auth/[...nextauth]/route.ts"
+      ]
+    },
+    {
+      "name": "Resource Hub (Public)",
+      "description": "Public resource management system with dynamic categories, search, click tracking, and visual indicators",
+      "files": [
         "components/resource-hub.tsx",
+        "lib/resources.ts",
         "app/api/resources/route.ts",
         "app/api/categories/route.ts",
-        "lib/resources.ts"
+        "prisma/schema.prisma"
       ]
     },
     {
-      "name": "Activity News & Announcements",
-      "description": "Public-facing activity news listings backed by Prisma queries and admin-managed announcements with RSVP capabilities.",
+      "name": "Category Management",
+      "description": "Admin system for managing resource categories with icons, colors, sorting, and status control",
       "files": [
-        "app/activity-news/page.tsx",
+        "components/admin/category-management.tsx",
+        "app/admin/categories/page.tsx",
+        "app/api/admin/categories/route.ts",
+        "app/api/admin/categories/meta/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Activity News / Announcements",
+      "description": "Public club announcement system with RSVP registration, attendee management, and activity tracking",
+      "files": [
         "components/activity-news-public.tsx",
-        "app/api/activity-news/route.ts",
+        "components/admin/activity-news-management.tsx",
+        "components/admin/activity-registrations.tsx",
         "lib/activity-news.ts",
-        "components/admin/activity-news-management.tsx"
-      ]
-    },
-    {
-      "name": "Training Library",
-      "description": "Multi-format training resources (video, text, file) with category filters, difficulty levels, and admin CRUD endpoints.",
-      "files": [
-        "components/dashboard/training-library.tsx",
-        "hooks/use-training-resources.ts",
-        "app/api/training/route.ts",
-        "app/api/training/categories/route.ts",
-        "lib/training.ts"
-      ]
-    },
-    {
-      "name": "Admin Resource Management",
-      "description": "Admin dashboard for managing resource catalog, including CRUD operations and category assignments.",
-      "files": [
-        "app/admin/resources/page.tsx",
-        "components/admin/resource-management.tsx",
-        "app/api/admin/resources/route.ts",
-        "hooks/use-resources.ts",
-        "lib/resources.ts"
+        "hooks/use-activity-news.ts",
+        "app/activity-news/page.tsx",
+        "app/api/activity-news/route.ts",
+        "app/api/activity-news/[id]/route.ts",
+        "app/api/activity-news/[id]/register/route.ts",
+        "app/api/admin/activity-registrations/route.ts",
+        "prisma/schema.prisma"
       ]
     },
     {
       "name": "Article CMS",
-      "description": "Full article publishing workflow with drafts, publishing, and public article rendering via slug routes.",
+      "description": "Content management system with draft/published/archived workflow, slug generation, and SEO features",
       "files": [
-        "app/admin/articles/page.tsx",
         "components/admin/article-management.tsx",
-        "app/api/admin/articles/route.ts",
+        "hooks/use-articles.ts",
+        "app/admin/articles/page.tsx",
+        "app/articles/page.tsx",
         "app/articles/[slug]/page.tsx",
-        "lib/validation-schemas.ts"
+        "app/api/admin/articles/route.ts",
+        "app/api/admin/articles/[id]/route.ts",
+        "prisma/schema.prisma"
       ]
     },
     {
-      "name": "Authentication & Authorization",
-      "description": "Username-based NextAuth setup with role enforcement, permission middleware, and protected admin pages.",
+      "name": "Training Library",
+      "description": "Multi-format training resource system supporting videos, text articles, and file uploads with categorization",
       "files": [
-        "app/api/auth/[...nextauth]/route.ts",
-        "lib/auth-server.ts",
-        "lib/permissions.ts",
-        "app/admin/page.tsx",
-        "hooks/use-auth.ts"
+        "components/dashboard/training-library.tsx",
+        "lib/training.ts",
+        "hooks/use-training.ts",
+        "app/api/training/route.ts",
+        "app/api/training/[id]/route.ts",
+        "app/api/training/[id]/view/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "User Management",
+      "description": "Admin interface for managing users with inline editing, batch operations, and role assignment",
+      "files": [
+        "components/admin/add-user-form.tsx",
+        "components/admin/user-management.tsx",
+        "app/admin/users/page.tsx",
+        "app/api/admin/users/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "User Profile & Settings",
+      "description": "User profile management with password change, preferences, and personal information editing",
+      "files": [
+        "components/dashboard/user-profile.tsx",
+        "app/dashboard/profile/page.tsx",
+        "app/api/dashboard/profile/route.ts",
+        "app/api/dashboard/profile/password/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "System Settings",
+      "description": "Database-backed site configuration with categories (General, Security, Notifications, Backup)",
+      "files": [
+        "components/admin/settings-management.tsx",
+        "lib/settings-service.ts",
+        "hooks/use-settings.ts",
+        "app/admin/settings/page.tsx",
+        "app/api/settings/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Calendar System",
+      "description": "Dual calendar system for public events and internal team events with attendee management",
+      "files": [
+        "components/dashboard/internal-calendar.tsx",
+        "hooks/use-calendar.ts",
+        "app/dashboard/calendar/page.tsx",
+        "app/api/dashboard/calendar/route.ts",
+        "app/api/public/events/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Task Management",
+      "description": "Task assignment and tracking system with priorities, due dates, and status management",
+      "files": [
+        "components/dashboard/task-management.tsx",
+        "app/dashboard/tasks/page.tsx",
+        "app/api/dashboard/tasks/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Activity Management",
+      "description": "Team activity tracking with assignment, priority levels, and status workflow",
+      "files": [
+        "components/dashboard/activities.tsx",
+        "app/dashboard/activities/page.tsx",
+        "app/api/dashboard/activities/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Team Information",
+      "description": "Team dashboard with mission statement, organizational structure, and collaborative notes",
+      "files": [
+        "components/dashboard/team-information.tsx",
+        "lib/team-data.ts",
+        "app/dashboard/team/page.tsx",
+        "app/api/dashboard/team-notes/route.ts",
+        "prisma/schema.prisma"
       ]
     },
     {
       "name": "Notification System",
-      "description": "User notification APIs and real-time client updates with hooks and UI banner integration.",
+      "description": "Real-time notification system with types, priorities, read status, and user targeting",
       "files": [
-        "app/api/notifications/route.ts",
+        "components/notification-bar.tsx",
         "lib/notification-service.ts",
         "hooks/use-notifications.ts",
-        "components/notification-bar.tsx",
-        "docs/NOTIFICATIONS.md"
+        "app/api/notifications/route.ts",
+        "app/api/test-notification/route.ts",
+        "prisma/schema.prisma"
       ]
     },
     {
-      "name": "System Settings & Maintenance",
-      "description": "Database-backed settings service powering maintenance mode, admin configuration panels, and public fallback UI.",
+      "name": "AI Chat Assistant",
+      "description": "Floating chatbot for campus navigation, schedules, policies, and IT support",
       "files": [
-        "components/admin/system-settings.tsx",
-        "hooks/use-settings.ts",
-        "lib/settings-service.ts",
-        "app/api/admin/settings/route.ts",
-        "components/maintenance-page.tsx"
+        "components/ai-chat.tsx",
+        "app/api/chat/route.ts"
       ]
     },
     {
-      "name": "Dashboard & Team Management",
-      "description": "Internal dashboard widgets covering tasks, calendar, and team info with corresponding APIs and hooks.",
+      "name": "File Upload System",
+      "description": "Secure file upload handling with validation, type checking, and organized storage",
+      "files": [
+        "lib/video-storage.ts",
+        "app/api/upload/route.ts",
+        "public/uploads/"
+      ]
+    },
+    {
+      "name": "Dashboard Layout",
+      "description": "Main dashboard layout with role-based navigation and sidebar",
       "files": [
         "components/dashboard/dashboard-layout.tsx",
-        "components/dashboard/internal-calendar.tsx",
-        "hooks/use-dashboard-data.ts",
-        "app/api/dashboard/tasks/route.ts",
-        "lib/dashboard-data.ts"
+        "lib/dashboard-data.ts",
+        "hooks/use-dashboard.ts",
+        "app/dashboard/layout.tsx",
+        "app/dashboard/page.tsx"
+      ]
+    },
+    {
+      "name": "Navigation System",
+      "description": "Main and mobile navigation with role-based visibility and authentication state",
+      "files": [
+        "components/main-nav.tsx",
+        "components/mobile-nav.tsx",
+        "components/role-based-nav.tsx",
+        "components/sidebar.tsx",
+        "components/header.tsx"
+      ]
+    },
+    {
+      "name": "Footer Sitemap",
+      "description": "Comprehensive footer with organized links, accessibility features, and social media integration",
+      "files": [
+        "components/footer-sitemap.tsx"
+      ]
+    },
+    {
+      "name": "Form Validation",
+      "description": "Centralized Zod schemas for input validation across all forms and API endpoints",
+      "files": [
+        "lib/validation-schemas.ts"
+      ]
+    },
+    {
+      "name": "Security & Rate Limiting",
+      "description": "Security headers, rate limiting, and CSRF protection for API endpoints",
+      "files": [
+        "lib/rate-limiter.ts",
+        "lib/security-headers.ts"
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "description": "Centralized error handling, logging, and error boundary components",
+      "files": [
+        "lib/error-handler.ts",
+        "lib/logger.ts",
+        "components/error-boundary.tsx"
+      ]
+    },
+    {
+      "name": "Database Management",
+      "description": "Prisma ORM configuration with MySQL, migrations, seeding, and connection pooling",
+      "files": [
+        "lib/prisma.ts",
+        "lib/database.ts",
+        "lib/database-lock.ts",
+        "prisma/schema.prisma",
+        "prisma/seed.ts"
+      ]
+    },
+    {
+      "name": "UI Components Library",
+      "description": "shadcn/ui component library with customized components for consistent design",
+      "files": [
+        "components/ui/accordion.tsx",
+        "components/ui/alert.tsx",
+        "components/ui/alert-dialog.tsx",
+        "components/ui/avatar.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/button.tsx",
+        "components/ui/calendar.tsx",
+        "components/ui/card.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/collapsible.tsx",
+        "components/ui/command.tsx",
+        "components/ui/context-menu.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/dropdown-menu.tsx",
+        "components/ui/form.tsx",
+        "components/ui/hover-card.tsx",
+        "components/ui/input.tsx",
+        "components/ui/label.tsx",
+        "components/ui/menubar.tsx",
+        "components/ui/navigation-menu.tsx",
+        "components/ui/popover.tsx",
+        "components/ui/progress.tsx",
+        "components/ui/radio-group.tsx",
+        "components/ui/scroll-area.tsx",
+        "components/ui/select.tsx",
+        "components/ui/separator.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/skeleton.tsx",
+        "components/ui/slider.tsx",
+        "components/ui/sonner.tsx",
+        "components/ui/switch.tsx",
+        "components/ui/table.tsx",
+        "components/ui/tabs.tsx",
+        "components/ui/textarea.tsx",
+        "components/ui/toast.tsx",
+        "components/ui/toaster.tsx",
+        "components/ui/toggle.tsx",
+        "components/ui/toggle-group.tsx",
+        "components/ui/tooltip.tsx"
+      ]
+    },
+    {
+      "name": "Utility Components",
+      "description": "Reusable utility components for loading states, hydration, and browser compatibility",
+      "files": [
+        "components/loading-spinner.tsx",
+        "components/skeleton-loader.tsx",
+        "components/hydration-safe-wrapper.tsx",
+        "components/browser-extension-cleanup.tsx",
+        "components/page-transition.tsx",
+        "components/protected-route.tsx",
+        "components/maintenance-page.tsx",
+        "hooks/use-hydration.ts",
+        "hooks/use-mobile.ts",
+        "hooks/use-browser-extension-safe.ts",
+        "lib/browser-extension-cleanup.ts"
+      ]
+    },
+    {
+      "name": "Theme System",
+      "description": "Dark/light theme support with next-themes integration",
+      "files": [
+        "components/theme-provider.tsx",
+        "app/providers.tsx"
+      ]
+    },
+    {
+      "name": "Admin Console",
+      "description": "Centralized admin dashboard for managing all site content and settings",
+      "files": [
+        "app/admin/page.tsx",
+        "app/admin/layout.tsx"
+      ]
+    },
+    {
+      "name": "API Health Check",
+      "description": "Health monitoring endpoint for system status and database connectivity",
+      "files": [
+        "app/api/health/route.ts"
       ]
     }
   ]

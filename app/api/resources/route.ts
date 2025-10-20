@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       name: resource.name,
       url: resource.url,
       description: resource.description || "",
-      category: resource.category?.name || "General",
+      category: resource.category?.name || "Uncategorized",
       categoryId: resource.category?.id || "",
       categoryIcon: resource.category?.icon || "globe",
       categoryColor: resource.category?.color || "#6B7280",

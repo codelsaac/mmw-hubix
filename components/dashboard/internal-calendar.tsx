@@ -22,7 +22,7 @@ const eventTypes = {
   training: { color: "bg-green-500", label: "Training" },
   maintenance: { color: "bg-orange-500", label: "Maintenance" },
   orientation: { color: "bg-purple-500", label: "Orientation" },
-  general: { color: "bg-gray-500", label: "General" },
+  general: { color: "bg-gray-500", label: "Uncategorized" },
 }
 
 export function InternalCalendar() {

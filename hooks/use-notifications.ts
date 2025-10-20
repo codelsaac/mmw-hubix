@@ -26,7 +26,12 @@ export function useNotifications() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchNotifications = useCallback(async (unreadOnly: boolean = false) => {
-    // Don't fetch if user is not authenticated
+    // Don't fetch if user is not authenticated or still loading
+    if (status === 'loading') {
+      setIsLoading(true)
+      return
+    }
+    
     if (status !== 'authenticated' || !session?.user) {
       setIsLoading(false)
       setNotifications([])
@@ -40,13 +45,19 @@ export function useNotifications() {
       setError(null)
       
       const url = `/api/notifications?unreadOnly=${unreadOnly}&limit=50`
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
       
       if (!response.ok) {
         // Silently fail for 401/403 errors (authentication/authorization issues)
         if (response.status === 401 || response.status === 403) {
           setNotifications([])
           setUnreadCount(0)
+          setError(null) // Don't set error for auth issues
           return
         }
         throw new Error('Failed to fetch notifications')
@@ -60,9 +71,11 @@ export function useNotifications() {
       setUnreadCount(unread)
       
     } catch (err) {
-      // Only log errors that are not authentication related
-      logger.error('Error fetching notifications:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load notifications')
+      // Silently fail - don't log errors for unauthenticated users
+      if (status === 'authenticated') {
+        logger.error('Error fetching notifications:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load notifications')
+      }
       setNotifications([])
       setUnreadCount(0)
     } finally {
@@ -172,16 +185,25 @@ export function useNotifications() {
     }
   }, [])
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 30 seconds (only for authenticated users)
   useEffect(() => {
-    fetchNotifications()
-    
-    const interval = setInterval(() => {
+    // Only fetch and refresh for authenticated users
+    if (status === 'authenticated' && session?.user) {
       fetchNotifications()
-    }, 30000) // 30 seconds
+      
+      const interval = setInterval(() => {
+        fetchNotifications()
+      }, 30000) // 30 seconds
 
-    return () => clearInterval(interval)
-  }, [fetchNotifications])
+      return () => clearInterval(interval)
+    } else if (status === 'unauthenticated') {
+      // Clear notifications for unauthenticated users
+      setNotifications([])
+      setUnreadCount(0)
+      setIsLoading(false)
+      setError(null)
+    }
+  }, [fetchNotifications, status, session])
 
   return {
     notifications,
