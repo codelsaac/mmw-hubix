@@ -1,0 +1,237 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Next.js 15 (App Router)",
+    "React 18",
+    "Prisma ORM",
+    "MySQL",
+    "NextAuth.js",
+    "Tailwind CSS",
+    "shadcn/ui",
+    "Zod",
+    "React Hook Form",
+    "Recharts",
+    "Lucide React"
+  ],
+  "features": [
+    {
+      "name": "Authentication System",
+      "description": "Username-based authentication with NextAuth.js, supports demo accounts and role-based login",
+      "files": [
+        "auth.ts",
+        "lib/auth-server.ts",
+        "components/auth/session-provider.tsx",
+        "components/auth/simple-login-dialog.tsx",
+        "components/auth/user-menu.tsx",
+        "hooks/use-auth.ts",
+        "app/api/auth/[...nextauth]/route.ts"
+      ]
+    },
+    {
+      "name": "Role-Based Access Control",
+      "description": "Three-tier permission system (ADMIN, HELPER, GUEST) with server and client-side validation",
+      "files": [
+        "lib/permissions.ts",
+        "lib/auth-middleware.ts",
+        "hooks/use-auth-permissions.ts",
+        "components/role-based-nav.tsx",
+        "components/user-role-display.tsx",
+        "app/unauthorized/page.tsx"
+      ]
+    },
+    {
+      "name": "Articles & CMS",
+      "description": "Full content management system with drafts, publishing, SEO, and featured images",
+      "files": [
+        "app/articles/page.tsx",
+        "app/articles/[slug]/page.tsx",
+        "app/admin/articles/page.tsx",
+        "app/api/articles/route.ts",
+        "app/api/admin/articles/route.ts",
+        "components/admin/article-management.tsx",
+        "components/article-card.tsx",
+        "components/article-list.tsx",
+        "hooks/use-articles.ts",
+        "lib/articles.ts"
+      ]
+    },
+    {
+      "name": "Activity News & Announcements",
+      "description": "Club event management system with RSVP, attendees tracking, and public/admin views",
+      "files": [
+        "app/activity-news/page.tsx",
+        "app/admin/announcements/page.tsx",
+        "app/api/announcements/route.ts",
+        "app/api/activity-news/route.ts",
+        "app/api/activity-news/[id]/register/route.ts",
+        "components/admin/announcements-management.tsx",
+        "components/admin/activity-news-management.tsx",
+        "components/admin/activity-registrations.tsx",
+        "components/activity-news-list.tsx",
+        "hooks/use-announcements.ts",
+        "hooks/use-activity-news.ts",
+        "lib/activity-news.ts"
+      ]
+    },
+    {
+      "name": "Training Resources Library",
+      "description": "Multi-format training resources (VIDEO, TEXT, FILE) with categories, difficulty levels, and search",
+      "files": [
+        "components/dashboard/training-library.tsx",
+        "app/api/training-resources/route.ts",
+        "hooks/use-training-resources.ts",
+        "lib/training-resources.ts"
+      ]
+    },
+    {
+      "name": "Resource Hub",
+      "description": "Curated external links organized by category with click tracking and management",
+      "files": [
+        "app/api/resources/route.ts",
+        "app/api/admin/resources/route.ts",
+        "components/admin/resource-management.tsx",
+        "components/resource-grid.tsx",
+        "components/resource-hub.tsx",
+        "hooks/use-resources.ts",
+        "lib/resources.ts"
+      ]
+    },
+    {
+      "name": "Dashboard System",
+      "description": "User dashboard with internal calendar, team information, and activity tracking",
+      "files": [
+        "app/dashboard/page.tsx",
+        "components/dashboard/dashboard-layout.tsx",
+        "components/dashboard/internal-calendar.tsx",
+        "components/dashboard/team-information.tsx",
+        "components/dashboard/user-activity-log.tsx",
+        "components/dashboard/user-tasks.tsx",
+        "lib/dashboard-data.ts"
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "description": "Comprehensive admin interface for managing users, content, categories, and settings",
+      "files": [
+        "app/admin/page.tsx",
+        "app/admin/users/page.tsx",
+        "app/admin/categories/page.tsx",
+        "app/admin/settings/page.tsx",
+        "components/admin/add-user-form.tsx",
+        "components/admin/category-management.tsx",
+        "components/admin/user-management.tsx",
+        "components/admin/admin-overview.tsx",
+        "app/api/admin/users/route.ts",
+        "app/api/admin/categories/route.ts"
+      ]
+    },
+    {
+      "name": "User Management",
+      "description": "User profile management, password changes, role assignments, and activity tracking",
+      "files": [
+        "app/api/users/route.ts",
+        "app/api/users/[id]/route.ts",
+        "app/api/admin/users/route.ts",
+        "components/admin/user-management.tsx",
+        "components/admin/add-user-form.tsx",
+        "hooks/use-users.ts",
+        "lib/users.ts"
+      ]
+    },
+    {
+      "name": "Notifications System",
+      "description": "Real-time notification system with badge counts, read/unread status, and user preferences",
+      "files": [
+        "app/api/notifications/route.ts",
+        "app/api/notifications/unread-count/route.ts",
+        "app/api/notifications/mark-read/route.ts",
+        "components/notification-bell.tsx",
+        "hooks/use-notifications.ts",
+        "lib/notifications.ts"
+      ]
+    },
+    {
+      "name": "File Upload System",
+      "description": "Secure file upload with validation for images, documents, and videos up to 50MB",
+      "files": [
+        "app/api/upload/route.ts",
+        "lib/upload.ts",
+        "components/file-upload.tsx"
+      ]
+    },
+    {
+      "name": "Categories Management",
+      "description": "Hierarchical category system for organizing resources, articles, and training materials",
+      "files": [
+        "app/api/categories/route.ts",
+        "app/api/admin/categories/route.ts",
+        "app/admin/categories/page.tsx",
+        "components/admin/category-management.tsx",
+        "hooks/use-categories.ts",
+        "lib/categories.ts"
+      ]
+    },
+    {
+      "name": "Events & Calendar",
+      "description": "Public and internal event management with attendee tracking and scheduling",
+      "files": [
+        "app/api/events/route.ts",
+        "app/api/internal-events/route.ts",
+        "components/dashboard/internal-calendar.tsx",
+        "components/calendar-view.tsx",
+        "hooks/use-events.ts",
+        "lib/events.ts"
+      ]
+    },
+    {
+      "name": "Tasks & Activities",
+      "description": "Team task management with assignments, priorities, and completion tracking",
+      "files": [
+        "app/api/tasks/route.ts",
+        "app/api/activities/route.ts",
+        "components/dashboard/user-tasks.tsx",
+        "components/dashboard/user-activity-log.tsx",
+        "hooks/use-tasks.ts",
+        "lib/tasks.ts"
+      ]
+    },
+    {
+      "name": "UI Component Library",
+      "description": "Comprehensive shadcn/ui based component library with 47+ reusable components",
+      "files": [
+        "components/ui/accordion.tsx",
+        "components/ui/alert-dialog.tsx",
+        "components/ui/button.tsx",
+        "components/ui/card.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/form.tsx",
+        "components/ui/input.tsx",
+        "components/ui/select.tsx",
+        "components/ui/table.tsx",
+        "components/ui/tabs.tsx",
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "Navigation & Layout",
+      "description": "Responsive navigation with role-based menu items, footer sitemap, and breadcrumbs",
+      "files": [
+        "components/main-nav.tsx",
+        "components/mobile-nav.tsx",
+        "components/footer-sitemap.tsx",
+        "components/breadcrumbs.tsx",
+        "components/site-header.tsx",
+        "app/layout.tsx"
+      ]
+    },
+    {
+      "name": "Database & Prisma",
+      "description": "MySQL database with Prisma ORM, migrations, seeding, and type-safe queries",
+      "files": [
+        "prisma/schema.prisma",
+        "prisma/seed.ts",
+        "lib/prisma.ts"
+      ]
+    }
+  ]
+}
