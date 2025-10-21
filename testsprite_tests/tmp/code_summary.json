@@ -4,234 +4,388 @@
     "Next.js 15 (App Router)",
     "React 18",
     "Prisma ORM",
-    "MySQL",
-    "NextAuth.js",
+    "MySQL Database",
+    "NextAuth.js (Username-based)",
     "Tailwind CSS",
     "shadcn/ui",
-    "Zod",
+    "Zod Validation",
     "React Hook Form",
     "Recharts",
-    "Lucide React"
+    "SWR",
+    "Framer Motion",
+    "Playwright (Testing)"
   ],
   "features": [
     {
       "name": "Authentication System",
-      "description": "Username-based authentication with NextAuth.js, supports demo accounts and role-based login",
+      "description": "Username-based authentication with role-based access control (ADMIN, HELPER, GUEST). Includes login, logout, session management, and protected routes.",
       "files": [
         "auth.ts",
+        "components/auth/login-form.tsx",
+        "components/auth/logout-button.tsx",
+        "components/auth/protected-route.tsx",
+        "app/api/auth/[...nextauth]/route.ts",
         "lib/auth-server.ts",
-        "components/auth/session-provider.tsx",
-        "components/auth/simple-login-dialog.tsx",
-        "components/auth/user-menu.tsx",
+        "lib/password-utils.ts",
         "hooks/use-auth.ts",
-        "app/api/auth/[...nextauth]/route.ts"
+        "types/auth.ts",
+        "types/next-auth.d.ts"
       ]
     },
     {
-      "name": "Role-Based Access Control",
-      "description": "Three-tier permission system (ADMIN, HELPER, GUEST) with server and client-side validation",
-      "files": [
-        "lib/permissions.ts",
-        "lib/auth-middleware.ts",
-        "hooks/use-auth-permissions.ts",
-        "components/role-based-nav.tsx",
-        "components/user-role-display.tsx",
-        "app/unauthorized/page.tsx"
-      ]
-    },
-    {
-      "name": "Articles & CMS",
-      "description": "Full content management system with drafts, publishing, SEO, and featured images",
+      "name": "Articles/CMS System",
+      "description": "Full content management system with article creation, editing, publishing, slug-based routing, SEO support, and featured images.",
       "files": [
         "app/articles/page.tsx",
         "app/articles/[slug]/page.tsx",
         "app/admin/articles/page.tsx",
-        "app/api/articles/route.ts",
-        "app/api/admin/articles/route.ts",
         "components/admin/article-management.tsx",
-        "components/article-card.tsx",
-        "components/article-list.tsx",
         "hooks/use-articles.ts",
-        "lib/articles.ts"
+        "app/api/admin/articles/route.ts",
+        "app/api/admin/articles/[id]/route.ts"
       ]
     },
     {
-      "name": "Activity News & Announcements",
-      "description": "Club event management system with RSVP, attendees tracking, and public/admin views",
+      "name": "Announcements System",
+      "description": "Club event announcements with RSVP system, attendee management, location tracking, and scheduling.",
       "files": [
-        "app/activity-news/page.tsx",
         "app/admin/announcements/page.tsx",
-        "app/api/announcements/route.ts",
-        "app/api/activity-news/route.ts",
-        "app/api/activity-news/[id]/register/route.ts",
-        "components/admin/announcements-management.tsx",
-        "components/admin/activity-news-management.tsx",
-        "components/admin/activity-registrations.tsx",
-        "components/activity-news-list.tsx",
+        "components/admin/announcement-management.tsx",
+        "components/club-announcements.tsx",
         "hooks/use-announcements.ts",
-        "hooks/use-activity-news.ts",
-        "lib/activity-news.ts"
+        "app/api/announcements/route.ts",
+        "app/api/announcements/[id]/route.ts",
+        "app/api/announcements/[id]/attend/route.ts"
       ]
     },
     {
       "name": "Training Resources Library",
-      "description": "Multi-format training resources (VIDEO, TEXT, FILE) with categories, difficulty levels, and search",
+      "description": "Multi-format training resources (video, text, files) with categories, difficulty levels, search functionality, and progress tracking.",
       "files": [
-        "components/dashboard/training-library.tsx",
-        "app/api/training-resources/route.ts",
-        "hooks/use-training-resources.ts",
-        "lib/training-resources.ts"
+        "app/dashboard/training/page.tsx",
+        "hooks/use-training.ts",
+        "lib/training.ts",
+        "app/api/training/route.ts",
+        "app/api/training/[id]/route.ts",
+        "app/api/training/[id]/complete/route.ts",
+        "app/api/training/[id]/progress/route.ts",
+        "app/api/training/search/route.ts",
+        "components/video-player.tsx",
+        "lib/video-storage.ts"
       ]
     },
     {
-      "name": "Resource Hub",
-      "description": "Curated external links organized by category with click tracking and management",
+      "name": "Calendar System",
+      "description": "Event calendar with public and internal events, attendee management, RSVP functionality, and event scheduling.",
       "files": [
-        "app/api/resources/route.ts",
-        "app/api/admin/resources/route.ts",
-        "components/admin/resource-management.tsx",
-        "components/resource-grid.tsx",
-        "components/resource-hub.tsx",
-        "hooks/use-resources.ts",
-        "lib/resources.ts"
+        "app/dashboard/calendar/page.tsx",
+        "hooks/use-calendar.ts",
+        "app/api/dashboard/calendar/route.ts",
+        "app/api/dashboard/calendar/[id]/route.ts",
+        "app/api/dashboard/calendar/[id]/attend/route.ts"
       ]
     },
     {
-      "name": "Dashboard System",
-      "description": "User dashboard with internal calendar, team information, and activity tracking",
+      "name": "Activity News System",
+      "description": "News feed for club activities with creation, viewing, and management capabilities.",
       "files": [
-        "app/dashboard/page.tsx",
-        "components/dashboard/dashboard-layout.tsx",
-        "components/dashboard/internal-calendar.tsx",
-        "components/dashboard/team-information.tsx",
-        "components/dashboard/user-activity-log.tsx",
-        "components/dashboard/user-tasks.tsx",
-        "lib/dashboard-data.ts"
+        "app/activity-news/page.tsx",
+        "components/activity-news-public.tsx",
+        "hooks/use-activity-news.ts",
+        "lib/activity-news.ts",
+        "app/api/activity-news/route.ts",
+        "app/api/activity-news/[id]/route.ts",
+        "app/api/activity-news/[id]/publish/route.ts"
       ]
     },
     {
-      "name": "Admin Panel",
-      "description": "Comprehensive admin interface for managing users, content, categories, and settings",
+      "name": "AI Chat Assistant",
+      "description": "Conversational AI support widget for campus navigation and information assistance.",
       "files": [
-        "app/admin/page.tsx",
-        "app/admin/users/page.tsx",
-        "app/admin/categories/page.tsx",
-        "app/admin/settings/page.tsx",
-        "components/admin/add-user-form.tsx",
-        "components/admin/category-management.tsx",
-        "components/admin/user-management.tsx",
-        "components/admin/admin-overview.tsx",
-        "app/api/admin/users/route.ts",
-        "app/api/admin/categories/route.ts"
+        "components/ai-chat.tsx",
+        "components/ai-chat-widget.tsx",
+        "app/api/chat/route.ts"
       ]
     },
     {
       "name": "User Management",
-      "description": "User profile management, password changes, role assignments, and activity tracking",
+      "description": "Admin panel for user creation, role assignment, permission management, and user profile management.",
       "files": [
-        "app/api/users/route.ts",
-        "app/api/users/[id]/route.ts",
-        "app/api/admin/users/route.ts",
+        "app/admin/users/page.tsx",
         "components/admin/user-management.tsx",
-        "components/admin/add-user-form.tsx",
-        "hooks/use-users.ts",
-        "lib/users.ts"
+        "app/api/admin/users/route.ts",
+        "app/api/admin/users/[id]/route.ts",
+        "components/user-role-display.tsx",
+        "lib/permissions.ts"
       ]
     },
     {
-      "name": "Notifications System",
-      "description": "Real-time notification system with badge counts, read/unread status, and user preferences",
+      "name": "Dashboard",
+      "description": "User dashboard with quick stats, recent activities, calendar overview, and personalized information.",
       "files": [
-        "app/api/notifications/route.ts",
-        "app/api/notifications/unread-count/route.ts",
-        "app/api/notifications/mark-read/route.ts",
-        "components/notification-bell.tsx",
-        "hooks/use-notifications.ts",
-        "lib/notifications.ts"
+        "app/dashboard/page.tsx",
+        "hooks/use-dashboard.ts",
+        "lib/dashboard-data.ts",
+        "app/api/dashboard/stats/route.ts",
+        "app/api/dashboard/activities/route.ts",
+        "app/api/dashboard/events/route.ts"
+      ]
+    },
+    {
+      "name": "Team Management",
+      "description": "Team member directory with roles, contact information, and team activity tracking.",
+      "files": [
+        "app/dashboard/team/page.tsx",
+        "lib/team-data.ts",
+        "app/api/dashboard/team/route.ts",
+        "app/api/dashboard/team/members/route.ts"
+      ]
+    },
+    {
+      "name": "Resource Hub",
+      "description": "Curated external links organized by category with click tracking and resource management.",
+      "files": [
+        "app/admin/resources/page.tsx",
+        "components/admin/resource-management.tsx",
+        "components/resource-hub.tsx",
+        "lib/resources.ts",
+        "app/api/resources/route.ts"
+      ]
+    },
+    {
+      "name": "Categories System",
+      "description": "Category management for organizing articles, resources, and training materials.",
+      "files": [
+        "app/admin/categories/page.tsx",
+        "components/admin/category-management.tsx",
+        "app/api/categories/route.ts",
+        "prisma/seed-categories.ts"
       ]
     },
     {
       "name": "File Upload System",
-      "description": "Secure file upload with validation for images, documents, and videos up to 50MB",
+      "description": "Secure file upload handling with validation, type checking, and storage management for documents, images, and videos.",
       "files": [
         "app/api/upload/route.ts",
-        "lib/upload.ts",
-        "components/file-upload.tsx"
+        "lib/video-storage.ts"
       ]
     },
     {
-      "name": "Categories Management",
-      "description": "Hierarchical category system for organizing resources, articles, and training materials",
+      "name": "Notifications System",
+      "description": "Real-time notification system for user alerts, announcements, and activity updates.",
       "files": [
-        "app/api/categories/route.ts",
-        "app/api/admin/categories/route.ts",
-        "app/admin/categories/page.tsx",
-        "components/admin/category-management.tsx",
-        "hooks/use-categories.ts",
-        "lib/categories.ts"
+        "hooks/use-notifications.ts",
+        "lib/notification-service.ts",
+        "app/api/notifications/route.ts",
+        "components/notification-bar.tsx",
+        "docs/NOTIFICATIONS.md"
       ]
     },
     {
-      "name": "Events & Calendar",
-      "description": "Public and internal event management with attendee tracking and scheduling",
+      "name": "Settings Management",
+      "description": "Application-wide settings configuration and management system.",
       "files": [
-        "app/api/events/route.ts",
-        "app/api/internal-events/route.ts",
-        "components/dashboard/internal-calendar.tsx",
-        "components/calendar-view.tsx",
-        "hooks/use-events.ts",
-        "lib/events.ts"
+        "app/admin/settings/page.tsx",
+        "components/admin/settings-management.tsx",
+        "hooks/use-settings.ts",
+        "lib/settings-service.ts",
+        "app/api/settings/route.ts",
+        "docs/SETTINGS_IMPLEMENTATION.md"
       ]
     },
     {
-      "name": "Tasks & Activities",
-      "description": "Team task management with assignments, priorities, and completion tracking",
+      "name": "IT System Management",
+      "description": "IT infrastructure and system configuration management for administrators.",
       "files": [
-        "app/api/tasks/route.ts",
-        "app/api/activities/route.ts",
-        "components/dashboard/user-tasks.tsx",
-        "components/dashboard/user-activity-log.tsx",
-        "hooks/use-tasks.ts",
-        "lib/tasks.ts"
+        "app/admin/it-system/page.tsx",
+        "components/admin/it-system-management.tsx"
       ]
     },
     {
-      "name": "UI Component Library",
-      "description": "Comprehensive shadcn/ui based component library with 47+ reusable components",
+      "name": "User Profile",
+      "description": "User profile management with personal information, activity history, and preferences.",
       "files": [
-        "components/ui/accordion.tsx",
-        "components/ui/alert-dialog.tsx",
+        "app/dashboard/profile/page.tsx"
+      ]
+    },
+    {
+      "name": "Navigation System",
+      "description": "Responsive navigation with role-based menu items, mobile support, and sidebar navigation.",
+      "files": [
+        "components/header.tsx",
+        "components/main-nav.tsx",
+        "components/mobile-nav.tsx",
+        "components/sidebar.tsx",
+        "components/role-based-nav.tsx"
+      ]
+    },
+    {
+      "name": "Admin Console",
+      "description": "Comprehensive admin dashboard for managing all aspects of the application.",
+      "files": [
+        "app/admin/page.tsx",
+        "app/admin/loading.tsx",
+        "app/admin/error.tsx",
+        "components/admin/admin-sidebar.tsx",
+        "components/admin/admin-stats.tsx"
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "description": "Global error handling with error boundaries, logging, and user-friendly error pages.",
+      "files": [
+        "components/error-boundary.tsx",
+        "app/error.tsx",
+        "app/not-found.tsx",
+        "app/unauthorized/page.tsx",
+        "lib/error-handler.ts",
+        "lib/logger.ts"
+      ]
+    },
+    {
+      "name": "Loading States",
+      "description": "Loading indicators and skeleton screens for improved user experience.",
+      "files": [
+        "components/loading-spinner.tsx",
+        "components/skeleton-loader.tsx",
+        "components/top-loading-bar.tsx",
+        "components/loading-link.tsx",
+        "app/loading.tsx"
+      ]
+    },
+    {
+      "name": "Theme System",
+      "description": "Dark/light mode support with theme persistence and system preference detection.",
+      "files": [
+        "components/theme-provider.tsx",
+        "app/providers.tsx"
+      ]
+    },
+    {
+      "name": "Security Features",
+      "description": "Security headers, rate limiting, CSRF protection, input validation, and SQL injection prevention.",
+      "files": [
+        "lib/security-headers.ts",
+        "lib/rate-limiter.ts",
+        "lib/validation-schemas.ts",
+        "next.config.mjs"
+      ]
+    },
+    {
+      "name": "Database Layer",
+      "description": "Prisma ORM integration with MySQL, connection pooling, migrations, and seeding.",
+      "files": [
+        "lib/prisma.ts",
+        "lib/database.ts",
+        "lib/database-lock.ts",
+        "prisma/schema.prisma",
+        "prisma/seed.ts",
+        "prisma/migrations/20250114053607_init/migration.sql"
+      ]
+    },
+    {
+      "name": "Performance Optimization",
+      "description": "Performance monitoring, caching strategies, and optimization utilities.",
+      "files": [
+        "lib/performance.ts",
+        "next.config.mjs"
+      ]
+    },
+    {
+      "name": "UI Components Library",
+      "description": "Comprehensive set of reusable UI components based on shadcn/ui and Radix UI.",
+      "files": [
         "components/ui/button.tsx",
         "components/ui/card.tsx",
         "components/ui/dialog.tsx",
+        "components/ui/dropdown-menu.tsx",
         "components/ui/form.tsx",
         "components/ui/input.tsx",
         "components/ui/select.tsx",
         "components/ui/table.tsx",
         "components/ui/tabs.tsx",
-        "lib/utils.ts"
+        "components/ui/toast.tsx",
+        "components/ui/alert.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/avatar.tsx",
+        "components/ui/calendar.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/label.tsx",
+        "components/ui/progress.tsx",
+        "components/ui/separator.tsx",
+        "components/ui/switch.tsx",
+        "components/ui/textarea.tsx",
+        "components/ui/tooltip.tsx"
       ]
     },
     {
-      "name": "Navigation & Layout",
-      "description": "Responsive navigation with role-based menu items, footer sitemap, and breadcrumbs",
+      "name": "Utility Functions",
+      "description": "Common utility functions for string manipulation, date formatting, and class name management.",
       "files": [
-        "components/main-nav.tsx",
-        "components/mobile-nav.tsx",
-        "components/footer-sitemap.tsx",
-        "components/breadcrumbs.tsx",
-        "components/site-header.tsx",
-        "app/layout.tsx"
+        "lib/utils.ts",
+        "components/icons.tsx"
       ]
     },
     {
-      "name": "Database & Prisma",
-      "description": "MySQL database with Prisma ORM, migrations, seeding, and type-safe queries",
+      "name": "Browser Extension Cleanup",
+      "description": "Utility to clean up browser extension artifacts for better performance.",
       "files": [
-        "prisma/schema.prisma",
-        "prisma/seed.ts",
-        "lib/prisma.ts"
+        "components/browser-extension-cleanup.tsx",
+        "lib/browser-extension-cleanup.ts",
+        "hooks/use-browser-extension-safe.ts"
+      ]
+    },
+    {
+      "name": "Hydration Safety",
+      "description": "Client-side hydration safety mechanisms to prevent hydration mismatches.",
+      "files": [
+        "components/hydration-safe-wrapper.tsx",
+        "hooks/use-hydration.ts"
+      ]
+    },
+    {
+      "name": "Page Transitions",
+      "description": "Smooth page transition animations using Framer Motion.",
+      "files": [
+        "components/page-transition.tsx"
+      ]
+    },
+    {
+      "name": "Footer Sitemap",
+      "description": "Site navigation footer with organized links and information.",
+      "files": [
+        "components/footer-sitemap.tsx"
+      ]
+    },
+    {
+      "name": "Maintenance Mode",
+      "description": "Maintenance page for scheduled downtime and system updates.",
+      "files": [
+        "components/maintenance-page.tsx"
+      ]
+    },
+    {
+      "name": "Homepage",
+      "description": "Main landing page with hero section, features overview, and call-to-action.",
+      "files": [
+        "app/page.tsx"
+      ]
+    },
+    {
+      "name": "Mobile Responsiveness",
+      "description": "Mobile-first responsive design with device detection and adaptive UI.",
+      "files": [
+        "hooks/use-mobile.ts"
+      ]
+    },
+    {
+      "name": "Toast Notifications",
+      "description": "Toast notification system for user feedback and alerts.",
+      "files": [
+        "hooks/use-toast.ts",
+        "components/ui/toaster.tsx"
       ]
     }
   ]
 }
+

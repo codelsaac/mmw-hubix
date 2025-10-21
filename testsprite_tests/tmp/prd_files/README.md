@@ -6,7 +6,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-6.14-2D3748.svg)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-**Status:** Production Ready | Enhanced UI | Bug-Free
+**Status:** Production Ready | Enhanced UI | Actively Maintained
 
 ## Recent Updates
 
@@ -59,10 +59,11 @@ MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform tha
 ## Getting Started
 
 ### Requirements
-- Node.js 18.0 or higher
-- npm or pnpm (recommended)
-- MySQL 8.0+ (required for both development and production)
-- XAMPP (recommended, for local MySQL server)
+- **Node.js** 18.0 or higher
+- **Package Manager**: npm (included with Node.js) or pnpm (faster, recommended)
+  - Install pnpm: `npm install -g pnpm`
+- **MySQL** 8.0+ (required for both development and production)
+- **XAMPP** (recommended for Windows users, provides MySQL + phpMyAdmin)
 
 ### Installation
 
@@ -74,28 +75,43 @@ cd mmw-hubix
 
 2. Install dependencies
 ```bash
-# using npm
+# Using npm
 npm install
-# or using pnpm (recommended)
+
+# OR using pnpm (faster, recommended)
 pnpm install
 ```
 
-3. Set up the database
+3. Configure environment variables
 ```bash
-# Create tables and indexes
-npm run db:migrate
+# Create .env.local file in project root
+# Add your MySQL connection string:
+DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 
-# or with pnpm
-pnpm db:migrate
+# See DATABASE-SETUP-GUIDE.md for detailed configuration
 ```
 
-4. Start the development server
+4. Set up the database
 ```bash
-# using npm
+# Method 1: Using Prisma db push (faster, for development)
+npx prisma generate
+npx prisma db push
+npm run db:seed
+
+# Method 2: Using migrations (for production)
+npm run db:migrate
+```
+
+> **💡 Quick Explanation:**  
+> - `npx prisma db push` - Quick sync for development (no migration files)  
+> - `npm run db:migrate` - Creates migration files for version control (production)
+
+5. Start the development server
+```bash
+# Using npm
 npm run dev
-# or with MySQL setup
-npm run dev:mysql
-# or using pnpm
+
+# OR using pnpm
 pnpm dev
 ```
 
@@ -104,14 +120,48 @@ Visit http://localhost:3000 to view the site.
 
 ### Development Notes
 
-The project now uses MySQL for both development and production, providing a consistent environment and eliminating the complexity of dual database configurations.
+#### Database Configuration
+The project uses **MySQL** for both development and production, providing a consistent environment.
 
-**For MySQL Setup:**
-See the comprehensive guide: **[DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)**
+**📚 Detailed Setup Guide:** [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)
 
-**Key Files:**
-- `.env.local` - MySQL configuration
-- `setup-mysql.sql` - MySQL database creation script
+**Key Configuration Files:**
+- **`.env`** - Base configuration (committed to Git, placeholder values)
+- **`.env.local`** - Local overrides (NOT committed, contains real credentials)
+- **`setup-mysql.sql`** - Database creation script
+- **`prisma/schema.prisma`** - Database schema definition
+
+**Environment File Priority:**
+```
+.env.local (highest priority, local development)
+    ↓
+.env (base configuration, committed to Git)
+```
+
+> ⚠️ **Important:** Always use `.env.local` for local development with real credentials.  
+> The `.env.local` file is gitignored and will not be committed.
+
+#### Database Commands Quick Reference
+
+**For Development (Quick Sync):**
+```bash
+npx prisma generate      # Generate Prisma Client
+npx prisma db push       # Sync schema to database (no migrations)
+npm run db:seed          # Seed database with demo data
+```
+
+**For Production (With Migrations):**
+```bash
+npm run db:migrate       # Create and apply migrations
+npm run db:seed          # Seed database
+```
+
+**Useful Commands:**
+```bash
+npx prisma studio        # Open database GUI
+npx prisma format        # Format schema file
+npx prisma validate      # Validate schema
+```
 
 ## Project Structure
 ```text
@@ -447,32 +497,111 @@ npm run start          # start production server
 npm run lint           # run linter
 
 # Database (MySQL)
-npm run db:migrate     # run database migrations
-npm run db:seed        # seed database with demo data
+npm run db:migrate     # Create and apply migrations (production)
+npx prisma db push     # Quick sync schema to DB (development)
+npx prisma generate    # Generate Prisma Client after schema changes
+npm run db:seed        # Seed database with demo data
+npx prisma studio      # Open database GUI browser
 
 # Quality Assurance
-npm run quality-check   # run TypeScript, ESLint, and build checks
+npm run quality-check   # Run TypeScript, ESLint, and build checks
 npm run pre-deploy      # quality-check + build (run before deployment)
-
-# MySQL Reference Commands
-npx prisma db push
-npx prisma generate
 ```
 
 ## 🌐 Deployment
 
-### Deploy to Vercel (Recommended)
-1. Push code to GitHub
-2. Connect your Vercel account
-3. Import the project
-4. Set environment variables
-5. Deploy
+### Prerequisites
+- MySQL database (production instance)
+- Node.js 18+ installed on server
+- Environment variables configured
 
-### Manual Deployment
-1. Build: npm run build
-2. Upload the .next/ folder to your server
-3. Configure Node.js environment
-4. Start: npm start
+### Deploy to Vercel (Recommended)
+1. **Prepare Database:**
+   - Set up production MySQL database
+   - Note connection string: `mysql://user:password@host:3306/dbname`
+
+2. **Push to GitHub:**
+   ```bash
+   git push origin main
+   ```
+
+3. **Configure Vercel:**
+   - Connect your Vercel account
+   - Import the repository
+   - Set environment variables:
+     ```
+     DATABASE_URL="mysql://user:password@host:3306/mmw_hubix_prod"
+     NEXTAUTH_URL="https://your-domain.vercel.app"
+     NEXTAUTH_SECRET="generate-strong-secret-key"
+     ```
+
+4. **Deploy:**
+   - Vercel automatically builds and deploys
+   - Run migrations after first deployment:
+     ```bash
+     npx prisma migrate deploy
+     ```
+
+### Deploy to VPS/Dedicated Server
+
+1. **Prepare Server:**
+   ```bash
+   # Install Node.js 18+
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   
+   # Install MySQL
+   sudo apt-get install mysql-server
+   ```
+
+2. **Set Up Application:**
+   ```bash
+   # Clone repository
+   git clone https://github.com/codelsaac/mmw-hubix.git
+   cd mmw-hubix
+   
+   # Install dependencies
+   npm install
+   
+   # Configure environment
+   nano .env.production
+   # Add DATABASE_URL, NEXTAUTH_URL, NEXTAUTH_SECRET
+   ```
+
+3. **Run Migrations:**
+   ```bash
+   npx prisma migrate deploy
+   npm run db:seed
+   ```
+
+4. **Build and Start:**
+   ```bash
+   npm run build
+   npm start
+   ```
+
+5. **Set Up Process Manager (PM2):**
+   ```bash
+   npm install -g pm2
+   pm2 start npm --name "mmw-hubix" -- start
+   pm2 save
+   pm2 startup
+   ```
+
+### Environment Variables Reference
+
+**Required:**
+```env
+DATABASE_URL="mysql://user:password@host:3306/dbname?connection_limit=10"
+NEXTAUTH_URL="https://your-domain.com"
+NEXTAUTH_SECRET="<generate-with: openssl rand -base64 32>"
+```
+
+**Optional:**
+```env
+NEXT_PUBLIC_APP_URL="https://your-domain.com"
+OPENROUTER_API_KEY="your-openrouter-key"  # For AI chat feature
+```
 
 ## 📚 Documentation
 
@@ -519,22 +648,50 @@ npx prisma generate
 ## 🔧 Configuration
 
 ### Environment Variables
-Create a .env.local file:
+
+Create a **`.env.local`** file in your project root for local development:
+
 ```env
-# Database (MySQL)
-# Example: mysql://USER:PASSWORD@HOST:PORT/DBNAME?connection_limit=5
-DATABASE_URL="mysql://user:password@localhost:3306/mmw_hubix"
+# ================================
+# MMW Hubix - Local Development
+# ================================
 
-# If you don't have MySQL locally, temporarily use SQLite:
-# DATABASE_URL="file:./prisma/dev.db"
+# Database (MySQL) - Required
+# Format: mysql://USER:PASSWORD@HOST:PORT/DATABASE?connection_limit=5
+DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 
-# NextAuth.js
+# NextAuth.js - Required
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_SECRET="dev-secret-change-in-production"
 
-# Others
+# Application URLs - Optional
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# AI Chat (OpenRouter) - Optional
+# Get API key from: https://openrouter.ai/
+OPENROUTER_API_KEY="your-api-key-here"
 ```
+
+**🔑 Environment Variables Explained:**
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ Yes | MySQL connection string |
+| `NEXTAUTH_URL` | ✅ Yes | Base URL for authentication callbacks |
+| `NEXTAUTH_SECRET` | ✅ Yes | Secret for encrypting session tokens |
+| `NEXT_PUBLIC_APP_URL` | ⚠️ Optional | Public-facing app URL (defaults to NEXTAUTH_URL) |
+| `OPENROUTER_API_KEY` | ⚠️ Optional | API key for AI chat feature |
+
+**📁 File Priority:**
+```
+.env.local       # Local development (highest priority, gitignored)
+.env.production  # Production deployment
+.env             # Base configuration (committed to Git)
+```
+
+> 💡 **Tip:** Use different database names for development and production  
+> - Development: `mmw_hubix_dev`  
+> - Production: `mmw_hubix_prod`
 
 ### Structure and Type Adjustments (MySQL Optimization)
 - Long text fields use appropriate MySQL types:
@@ -576,32 +733,54 @@ export const siteConfig = {
 2. Use TypeScript and React
 3. Follow naming conventions
 
-### Database Changes
-1. **Stop all Node processes** (to avoid file locks):
-   ```bash
+### Making Database Changes
+
+**Before Making Changes:**
+1. Stop all Node processes to avoid file locks:
+   ```powershell
    taskkill /F /IM node.exe
    ```
 
-2. Edit schema file:
-   - `prisma/schema.prisma` (MySQL)
+**Workflow:**
+1. Edit schema file: `prisma/schema.prisma`
 
-3. Run migration commands:
+2. Choose your approach:
+   
+   **Option A: Development (Quick)** - Use `db push` for rapid iteration
    ```bash
-   # MySQL
-   npx prisma generate
-   npx prisma migrate dev
+   npx prisma generate      # Regenerate Prisma Client
+   npx prisma db push       # Push changes to database
+   npm run db:seed          # Re-seed if needed
+   ```
+   
+   **Option B: Production (Migrations)** - Use migrations for version control
+   ```bash
+   npx prisma generate           # Regenerate Prisma Client
+   npx prisma migrate dev        # Create migration file
+   # Prisma will prompt for migration name
+   npm run db:seed               # Re-seed if needed
    ```
 
-4. Update related APIs and components
+3. Update related code:
+   - API routes that use the modified models
+   - Components that display the data
+   - TypeScript types if needed
 
-5. **Run mandatory quality checks**:
+4. **Run mandatory quality checks:**
    ```bash
    npm run quality-check
    ```
 
-For detailed database migration guides and troubleshooting, see:
+5. Test your changes:
+   ```bash
+   npm run dev              # Start dev server
+   npx prisma studio        # Verify data in database
+   ```
+
+**📚 Additional Resources:**
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Development procedures
-- [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md) - Database setup
+- [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md) - Setup guide
+- [Prisma Docs](https://www.prisma.io/docs/) - Official Prisma documentation
 
 ## 🤝 Contributing
 
@@ -681,81 +860,87 @@ This project is licensed under the MIT License — see the LICENSE file for deta
 - IT Prefect Team
 - All contributors
 
----
+## 🪟 Windows Production Setup
 
-## Deploying on Windows (Using MySQL)
-The following describes how to set up and run a production build connected to a MySQL database on Windows.
+Running a production build locally on Windows for testing or internal deployment.
 
-### Step 1: Set Environment Variables
-You need to set DATABASE_URL so Prisma can connect to your MySQL database. Choose one of the methods below:
+### Quick Setup
 
-#### Method A: Use a .env file (Recommended)
-This is the simplest method because it keeps your production settings within the project.
+1. **Configure Environment:**
+   ```powershell
+   # Create .env.production in project root
+   # Add these variables (replace with your values):
+   DATABASE_URL="mysql://root:password@localhost:3306/mmw_hubix_prod?connection_limit=10"
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="<generate-with: openssl rand -base64 32>"
+   ```
 
-1. In your project root (c:\Users\user\Documents\IT perfect\mmw-hubix), create a file named .env
-2. Put your MySQL connection string and other production env variables in it. Replace placeholders with your actual DB credentials.
-```dotenv
-# Production environment variables
+2. **Prepare Database:**
+   ```powershell
+   # Create production database
+   mysql -u root -p
+   CREATE DATABASE mmw_hubix_prod CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   exit;
+   
+   # Run migrations
+   npx prisma migrate deploy
+   npm run db:seed
+   ```
 
-# 1. Database (MySQL)
-# Replace USER, PASSWORD, HOST, and DBNAME with your MySQL details.
-DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DBNAME?connection_limit=5"
+3. **Build and Run:**
+   ```powershell
+   npm run build
+   npm start
+   ```
 
-# 2. NextAuth.js
-# If you have a production domain, use it; otherwise localhost works for local prod testing.
-NEXTAUTH_URL="http://localhost:3000"
+### Alternative: PowerShell Environment Variables
 
-# Generate a strong secret for production.
-# You can run `openssl rand -base64 32` in Git Bash or use an online generator.
-NEXTAUTH_SECRET="your-super-strong-random-secret-for-production"
-```
-
-Example:
-If your MySQL server runs on the same machine, your DATABASE_URL might look like:
-DATABASE_URL="mysql://root:my-secret-password@127.0.0.1:3306/mmw_hubix_prod?connection_limit=5"
-
-Important:
-Remember to URL-encode any special characters in the password (e.g., @ becomes %40, ! becomes %21).
-
-#### Method B: Set system variables via PowerShell
-This method sets variables directly in your Windows environment.
-
-- Current session only (lost when you close the terminal):
+Set variables for current session (temporary):
 ```powershell
-$env:DATABASE_URL = "mysql://USER:PASSWORD@HOST:3306/DBNAME?connection_limit=5"
+$env:DATABASE_URL = "mysql://root:password@localhost:3306/mmw_hubix_prod"
 $env:NEXTAUTH_URL = "http://localhost:3000"
-$env:NEXTAUTH_SECRET = "your-super-strong-random-secret-for-production"
-```
-
-- Persist for your user account:
-```powershell
-setx DATABASE_URL "mysql://USER:PASSWORD@HOST:3306/DBNAME?connection_limit=5"
-setx NEXTAUTH_URL "http://localhost:3000"
-setx NEXTAUTH_SECRET "your-super-strong-random-secret-for-production"
-```
-After running setx, you must close and reopen your PowerShell terminal for changes to take effect.
-
-### Step 2: Run the Application
-After setting the environment variables using one of the methods above, run the following commands from your project directory to start the production server connected to MySQL:
-
-1. Migrate the database:
-This creates tables in your MySQL database.
-```powershell
-npm run db:migrate
-```
-Prisma will prompt you to name the migration. You can call it initial-migration or drop-announcements-model.
-
-2. Build for production:
-```powershell
-npm run build
-```
-
-3. Start the production server:
-```powershell
+$env:NEXTAUTH_SECRET = "your-secret-key"
 npm start
 ```
 
-Your application will now run at http://localhost:3000 and be connected to your MySQL database.
+Set variables permanently (persists across sessions):
+```powershell
+setx DATABASE_URL "mysql://root:password@localhost:3306/mmw_hubix_prod"
+setx NEXTAUTH_URL "http://localhost:3000"
+setx NEXTAUTH_SECRET "your-secret-key"
+# Close and reopen PowerShell, then:
+npm start
+```
+
+> ⚠️ **Security Note:** URL-encode special characters in passwords  
+> Example: `p@ssw0rd!` → `p%40ssw0rd%21`
+
+### Troubleshooting
+
+**Build Fails:**
+```powershell
+# Clear Next.js cache
+Remove-Item -Recurse -Force .next
+npm run build
+```
+
+**Database Connection Error:**
+```powershell
+# Verify MySQL is running
+netstat -ano | findstr :3306
+
+# Test connection
+mysql -u root -p
+```
+
+**Port 3000 In Use:**
+```powershell
+# Find process using port 3000
+netstat -ano | findstr :3000
+
+# Kill process (replace PID)
+taskkill /PID <PID> /F
+```
 
 ---
 
