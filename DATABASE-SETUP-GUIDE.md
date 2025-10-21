@@ -4,33 +4,135 @@ This project now standardizes on **MySQL** for both development and production e
 
 ## 📋 Current Configuration
 
+### Understanding Environment Files
+
+**`.env`** - Base configuration, committed to Git (use placeholder values)  
+**`.env.local`** - Local overrides, **NOT** committed to Git (contains real credentials)
+
+> 💡 `.env.local` takes precedence over `.env`. Use it for local development.
+
 ### Configure `.env.local`
+
+Create a `.env.local` file in your project root with your MySQL connection:
+
+#### Option 1: MySQL without password (XAMPP default)
 ```env
 DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 ```
 
-If your MySQL instance requires authentication, include the password:
-
+#### Option 2: MySQL with password
 ```env
 DATABASE_URL="mysql://root:YOUR_PASSWORD@localhost:3306/mmw_hubix_dev?connection_limit=5"
 ```
+
+#### Option 3: Custom MySQL user
+```env
+DATABASE_URL="mysql://mmw_user:secure_password@localhost:3306/mmw_hubix_dev?connection_limit=5"
+```
+
+**Connection String Format:**
+```
+mysql://[USER]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]?connection_limit=5
+```
+
+- `USER`: MySQL username (default: `root`)
+- `PASSWORD`: MySQL password (omit `:PASSWORD` if no password)
+- `HOST`: Database server address (usually `localhost` or `127.0.0.1`)
+- `PORT`: MySQL port (default: `3306`)
+- `DATABASE`: Database name (`mmw_hubix_dev` for development)
+- `connection_limit=5`: Max concurrent connections (adjust for production)
+
+> ⚠️ **Special Characters**: URL-encode passwords with special characters  
+> Example: `p@ssw0rd!` becomes `p%40ssw0rd%21`
 
 ---
 
 ## 🔧 Setup Instructions
 
 ### Step 1: Start MySQL
-- Launch **XAMPP** (or your preferred MySQL server)
-- Start the **MySQL** service and ensure it is running on port `3306`
+
+#### Option A: Using XAMPP (Recommended for Windows)
+1. Open **XAMPP Control Panel**
+2. Click **Start** next to **MySQL**
+3. Verify status shows "Running" with green background
+4. Default port: `3306` (no password required)
+
+#### Option B: Using Standalone MySQL Server
+1. **Windows Service:**
+   ```powershell
+   net start mysql
+   ```
+2. **Check status:**
+   ```powershell
+   mysql -u root -p
+   ```
+
+#### Option C: Using MySQL Workbench
+1. Open MySQL Workbench
+2. Connect to your local instance
+3. Verify connection is active
+
+#### Port Conflict Troubleshooting
+If port `3306` is already in use:
+
+1. **Find conflicting process:**
+   ```powershell
+   netstat -ano | findstr :3306
+   ```
+
+2. **Change MySQL port in XAMPP:**
+   - Open XAMPP Control Panel
+   - Click **Config** → **my.ini**
+   - Change `port = 3306` to `port = 3307`
+   - Update your `DATABASE_URL` accordingly
+
+3. **Or stop the conflicting service:**
+   ```powershell
+   taskkill /PID <PID> /F
+   ```
 
 ### Step 2: Create Database
+
+#### Option A: Using phpMyAdmin (XAMPP)
 1. Open http://localhost/phpmyadmin
 2. Click **"New"** in the left sidebar
 3. Set database name to `mmw_hubix_dev`
 4. Set collation to `utf8mb4_unicode_ci`
 5. Click **Create**
 
-Alternatively, run the SQL script in `setup-mysql.sql`.
+#### Option B: Using SQL Script
+```powershell
+mysql -u root -p < setup-mysql.sql
+```
+
+#### Option C: Using MySQL Command Line
+```sql
+CREATE DATABASE mmw_hubix_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### Step 2.1: Create MySQL User (Optional but Recommended)
+
+For better security, create a dedicated database user instead of using `root`:
+
+```sql
+-- Connect to MySQL
+mysql -u root -p
+
+-- Create user
+CREATE USER 'mmw_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON mmw_hubix_dev.* TO 'mmw_user'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Verify
+SHOW GRANTS FOR 'mmw_user'@'localhost';
+```
+
+Then update your `.env.local`:
+```env
+DATABASE_URL="mysql://mmw_user:your_secure_password@localhost:3306/mmw_hubix_dev?connection_limit=5"
+```
 
 ### Step 3: Generate Client & Push Schema
 ```powershell
@@ -66,11 +168,63 @@ npx prisma studio
 
 ## 🚨 Troubleshooting
 
-- **"EPERM: operation not permitted"**: close running Node processes with `taskkill /F /IM node.exe`
-- **"Error validating datasource"**: ensure `DATABASE_URL` uses the `mysql://` scheme
-- **"Can't reach database server"**: verify MySQL is running, confirm port `3306`, and check firewall settings
-- **Database out of sync**: run `npx prisma db push`
-- **Seed data missing**: run `npm run db:seed`
+### Common Issues
+
+#### 1. "EPERM: operation not permitted"
+**Cause:** Node processes locking Prisma files  
+**Solution:**
+```powershell
+taskkill /F /IM node.exe
+npx prisma generate
+```
+
+#### 2. "Error validating datasource"
+**Cause:** Incorrect `DATABASE_URL` format  
+**Solution:**
+- Must start with `mysql://` (not `mysql2://`)
+- Check for typos in connection string
+- Verify special characters are URL-encoded
+
+#### 3. "Can't reach database server"
+**Cause:** MySQL not running or wrong port  
+**Solution:**
+1. Verify MySQL is running:
+   ```powershell
+   netstat -ano | findstr :3306
+   ```
+2. Check XAMPP Control Panel shows MySQL as "Running"
+3. Test connection:
+   ```powershell
+   mysql -u root -p
+   ```
+4. Verify firewall allows port 3306
+
+#### 4. "Access denied for user"
+**Cause:** Wrong username/password  
+**Solution:**
+- Verify credentials in `.env.local`
+- Check if password has special characters (URL-encode them)
+- Try connecting via MySQL Workbench with same credentials
+- Reset MySQL password if needed (see `RESET-MYSQL-PASSWORD.md`)
+
+#### 5. "Database out of sync"
+**Cause:** Schema changes not applied  
+**Solution:**
+```powershell
+npx prisma generate
+npx prisma db push
+```
+
+#### 6. "Seed data missing"
+**Cause:** Database not seeded  
+**Solution:**
+```powershell
+npm run db:seed
+```
+
+#### 7. "Port 3306 already in use"
+**Cause:** Another MySQL instance or service using the port  
+**Solution:** See "Port Conflict Troubleshooting" in Step 1
 
 ---
 

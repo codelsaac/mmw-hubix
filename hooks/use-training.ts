@@ -36,7 +36,7 @@ export function useTraining() {
     }
   }
 
-  const deleteResource = async (id: number): Promise<boolean> => {
+  const deleteResource = async (id: string): Promise<boolean> => {
     try {
       const success = await TrainingService.deleteResource(id)
       if (success) {
@@ -51,7 +51,7 @@ export function useTraining() {
     }
   }
 
-  const updateViews = async (id: number) => {
+  const updateViews = async (id: string) => {
     try {
       await TrainingService.updateViews(id)
       // Optimistic update: immediately update view count

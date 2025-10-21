@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/page-transition"
 import { BrowserExtensionCleanup } from "@/components/browser-extension-cleanup"
 import { Header } from "@/components/header"
 import { FooterSitemap } from "@/components/footer-sitemap"
+import { AIChatWidget } from "@/components/ai-chat-widget"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <PageTransition>{children}</PageTransition>
           </main>
           <FooterSitemap />
+          <AIChatWidget />
         </div>
       </ErrorBoundary>
     </SessionProvider>

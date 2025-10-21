@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         "X-Title": "MMW Hubix AI Assistant",
       },
       body: JSON.stringify({
-        model: "z-ai/glm-4.5-air:free",
+        model: "openai/gpt-oss-20b:free",
         messages: [systemMessage, ...messages],
         max_tokens: 500,
         temperature: 0.7,

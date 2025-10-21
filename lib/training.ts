@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger"
 export type ResourceContentType = 'VIDEO' | 'TEXT' | 'FILE'
 
 export interface TrainingResource {
-  id: number
+  id: string
   title: string
   description: string
   contentType: ResourceContentType
@@ -114,7 +114,7 @@ export class TrainingService {
     }
   }
 
-  static async deleteResource(id: number): Promise<boolean> {
+  static async deleteResource(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${this.API_BASE}/${id}`, {
         method: 'DELETE'
@@ -126,7 +126,7 @@ export class TrainingService {
     }
   }
 
-  static async updateViews(id: number): Promise<void> {
+  static async updateViews(id: string): Promise<void> {
     try {
       await fetch(`${this.API_BASE}/${id}/views`, {
         method: 'PATCH'

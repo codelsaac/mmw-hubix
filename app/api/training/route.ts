@@ -142,7 +142,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(resource, { status: 201 })
+    // Parse tags to match GET response format
+    const processedResource = {
+      ...resource,
+      tags: resource.tags ? JSON.parse(resource.tags) : []
+    }
+
+    return NextResponse.json(processedResource, { status: 201 })
   } catch (error) {
     logger.error('Error creating training resource:', error)
     const { message, statusCode } = handleApiError(error)

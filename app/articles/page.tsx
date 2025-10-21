@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Search, Calendar, Eye, FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { usePublicArticles, type Article } from "@/hooks/use-articles"
@@ -14,6 +15,7 @@ export default function ArticlesPage() {
   const { articles, loading, error, pagination, fetchArticles } = usePublicArticles()
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const showSkeleton = loading && articles.length === 0
 
   const handleSearch = () => {
     setCurrentPage(1)
@@ -23,16 +25,6 @@ export default function ArticlesPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     fetchArticles(page, 10, undefined, searchQuery || undefined)
-  }
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center py-8 text-muted-foreground">Loading articles...</div>
-        </div>
-      </div>
-    )
   }
 
   if (error) {
@@ -85,7 +77,21 @@ export default function ArticlesPage() {
 
         {/* Articles List */}
         <div className="space-y-6">
-          {articles.length === 0 ? (
+          {showSkeleton ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card key={index} className="border-dashed">
+                <CardHeader className="space-y-3">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-9 w-24" />
+                </CardContent>
+              </Card>
+            ))
+          ) : articles.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {searchQuery ? "No articles match your search." : "No articles published yet."}
             </div>

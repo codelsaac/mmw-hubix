@@ -63,7 +63,16 @@ export function useSettings() {
         setSettings({ ...defaultSettings, ...data })
         logger.log('Settings loaded from database:', data)
       } else {
-        // Fallback to localStorage if API fails
+        if (response.status === 401 || response.status === 403) {
+          const publicResponse = await fetch('/api/settings')
+          if (publicResponse.ok) {
+            const publicData = await publicResponse.json()
+            setSettings({ ...defaultSettings, ...publicData })
+            logger.log('Public settings loaded from database:', publicData)
+            return
+          }
+        }
+
         if (typeof window !== 'undefined') {
           const savedSettings = localStorage.getItem('mmw-hubix-settings')
           if (savedSettings) {

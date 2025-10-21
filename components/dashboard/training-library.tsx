@@ -18,7 +18,12 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   PlayCircle,
@@ -46,6 +51,7 @@ import {
   XCircle,
   Edit,
   Check,
+  ChevronDown,
 } from "lucide-react"
 import { useTraining } from "@/hooks/use-training"
 import { TrainingResource, TrainingService, ResourceContentType } from "@/lib/training"
@@ -71,6 +77,17 @@ const contentTypes = [
   { id: "FILE", name: "File Upload", icon: File, description: "Documents, presentations, PDFs, and more" },
 ]
 
+// Helper function to normalize tags (handle both array and JSON string)
+const normalizeTags = (tags: any): string[] => {
+  if (!tags) return []
+  if (Array.isArray(tags)) return tags
+  try {
+    return JSON.parse(tags)
+  } catch {
+    return []
+  }
+}
+
 export function TrainingLibrary() {
   const { resources, loading, addResource, updateViews, deleteResource } = useTraining()
   const { user } = useAuth()
@@ -80,9 +97,10 @@ export function TrainingLibrary() {
   const [selectedResource, setSelectedResource] = useState<TrainingResource | null>(null)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [selectedContentType, setSelectedContentType] = useState<ResourceContentType>("VIDEO")
-  const [watchedResources, setWatchedResources] = useState<Set<number>>(new Set())
+  const [watchedResources, setWatchedResources] = useState<Set<string>>(new Set())
   const [isUploading, setIsUploading] = useState(false)
   const [availableCategories, setAvailableCategories] = useState<typeof defaultCategories>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [newCategoryName, setNewCategoryName] = useState("")
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [editingCategory, setEditingCategory] = useState<string | null>(null)
@@ -93,9 +111,8 @@ export function TrainingLibrary() {
   const allCategories = useMemo(() => {
     const categorySet = new Set<string>()
     resources.forEach(resource => {
-      if (resource.tags && Array.isArray(resource.tags)) {
-        resource.tags.forEach(tag => categorySet.add(tag))
-      }
+      const tags = normalizeTags(resource.tags)
+      tags.forEach(tag => categorySet.add(tag))
     })
     return Array.from(categorySet)
   }, [resources])
@@ -134,11 +151,12 @@ export function TrainingLibrary() {
   }, [])  // Only run once on mount to avoid constant refetching
 
   const filteredResources = resources.filter((resource) => {
-    const matchesCategory = selectedCategory === "all" || (resource.tags && resource.tags.includes(selectedCategory))
+    const tags = normalizeTags(resource.tags)
+    const matchesCategory = selectedCategory === "all" || tags.includes(selectedCategory)
     const matchesSearch =
       resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (resource.tags && resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     return matchesCategory && matchesSearch
   })
 
@@ -150,23 +168,26 @@ export function TrainingLibrary() {
 
   const handleUploadResource = async (formData: FormData) => {
     setIsUploading(true)
-    
+
     try {
       const title = formData.get("title") as string
       const description = formData.get("description") as string
-      const categories = formData.get("categories") as string
-      const difficulty = formData.get("difficulty") as string
       const videoUrl = formData.get("videoUrl") as string
       const textContent = formData.get("textContent") as string
       const file = formData.get("file") as File
 
-      if (!title || !difficulty) {
-        alert("請填寫必填欄位：標題和難度")
+      if (!title) {
+        alert("請填寫必填欄位：標題")
         return
       }
 
-      // Parse categories from comma-separated string
-      const parsedCategories = categories ? categories.split(',').map(category => category.trim()).filter(category => category.length > 0) : []
+      // Use selected categories from state (fallback to hidden input if needed)
+      const categoriesValue = selectedCategories.length
+        ? selectedCategories
+        : ((formData.get("categories") as string) || "")
+            .split(',')
+            .map((category) => category.trim())
+            .filter((category) => category.length > 0)
 
       // Validate content type specific requirements
       if (selectedContentType === 'VIDEO' && !videoUrl) {
@@ -226,8 +247,7 @@ export function TrainingLibrary() {
       let resourceData: any = {
         title,
         description,
-        tags: parsedCategories,
-        difficulty: difficulty || "Beginner",
+        tags: categoriesValue,
         contentType: selectedContentType,
       }
 
@@ -294,7 +314,7 @@ export function TrainingLibrary() {
     })
   }
 
-  const handleDeleteResource = (resourceId: number, e: React.MouseEvent) => {
+  const handleDeleteResource = (resourceId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     if (confirm("Are you sure you want to delete this resource?")) {
       deleteResource(resourceId)
@@ -363,7 +383,7 @@ export function TrainingLibrary() {
     
     // Check if any resources are using this category
     const resourcesUsingCategory = resources.filter(resource => 
-      resource.tags && resource.tags.includes(oldName)
+      normalizeTags(resource.tags).includes(oldName)
     )
     
     if (resourcesUsingCategory.length > 0) {
@@ -421,7 +441,7 @@ export function TrainingLibrary() {
     
     // Check if any resources are using this category
     const resourcesUsingCategory = resources.filter(resource => 
-      resource.tags && resource.tags.includes(categoryName)
+      normalizeTags(resource.tags).includes(categoryName)
     )
     
     if (resourcesUsingCategory.length > 0) {
@@ -489,7 +509,7 @@ export function TrainingLibrary() {
                   Add Resource
                 </Button>
               </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add Training Resource</DialogTitle>
                 <DialogDescription>Add a new training resource to the library</DialogDescription>
@@ -522,43 +542,95 @@ export function TrainingLibrary() {
                   const formData = new FormData(e.currentTarget)
                   await handleUploadResource(formData)
                 }}
-                className="space-y-4"
+                className="space-y-4 rounded-xl bg-white/90 p-6 border border-slate-200 shadow-sm"
               >
                 <div>
                   <Label htmlFor="title">Resource Title</Label>
-                  <Input id="title" name="title" placeholder="Enter resource title" required />
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="Enter resource title"
+                    required
+                    className="bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500 focus:ring-2 focus:ring-slate-400"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" placeholder="Describe the resource content" />
+                  <Textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe the resource content"
+                    className="bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500 focus:ring-2 focus:ring-slate-400"
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="categories">Categories</Label>
-                    <Input
-                      id="categories"
-                      name="categories"
-                      placeholder="Enter categories separated by commas (e.g., IT Basics, Security)"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Separate multiple categories with commas
-                    </p>
-                  </div>
-                  <div>
-                    <Label htmlFor="difficulty">Difficulty</Label>
-                    <Select name="difficulty" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select difficulty" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Beginner">Beginner</SelectItem>
-                        <SelectItem value="Intermediate">Intermediate</SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label>Categories</Label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full justify-between border-slate-300 text-slate-900 hover:bg-slate-50"
+                      >
+                        {selectedCategories.length > 0 ? (
+                          <div className="flex flex-wrap gap-1 max-w-[80%]">
+                            {selectedCategories.map((category) => (
+                              <Badge key={category} variant="secondary" className="text-xs">
+                                {category}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">Select categories</span>
+                        )}
+                        <ChevronDown className="w-4 h-4 opacity-60" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64 max-h-60 overflow-y-auto">
+                      {availableCategories.length === 0 ? (
+                        <div className="px-2 py-1.5 text-sm text-slate-700">
+                          No categories available. Add one from the sidebar.
+                        </div>
+                      ) : (
+                        availableCategories.map((category) => (
+                          <DropdownMenuCheckboxItem
+                            key={category.id}
+                            checked={selectedCategories.includes(category.name)}
+                            onCheckedChange={(checked) => {
+                              setSelectedCategories((prev) => {
+                                if (checked) {
+                                  return prev.includes(category.name)
+                                    ? prev
+                                    : [...prev, category.name]
+                                }
+                                return prev.filter((item) => item !== category.name)
+                              })
+                            }}
+                          >
+                            {category.name}
+                          </DropdownMenuCheckboxItem>
+                        ))
+                      )}
+                      {selectedCategories.length > 0 && (
+                        <DropdownMenuCheckboxItem
+                          checked={false}
+                          className="text-sm text-destructive"
+                          onSelect={(event) => {
+                            event.preventDefault()
+                            setSelectedCategories([])
+                          }}
+                        >
+                          Clear selection
+                        </DropdownMenuCheckboxItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <input type="hidden" name="categories" value={selectedCategories.join(',')} />
+                  <p className="text-xs text-slate-700 mt-1">
+                    Choose one or more categories for this resource
+                  </p>
                 </div>
-                
+
                 {/* Content Type Specific Fields */}
                 {selectedContentType === 'VIDEO' && (
                   <div>
@@ -569,13 +641,14 @@ export function TrainingLibrary() {
                       type="url"
                       placeholder="YouTube, Google Drive, or direct video URL..."
                       required
+                      className="bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500 focus:ring-2 focus:ring-slate-400"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-slate-700 mt-1">
                       Supports YouTube, Google Drive, and direct video file links
                     </p>
                   </div>
                 )}
-                
+
                 {selectedContentType === 'TEXT' && (
                   <div>
                     <Label htmlFor="textContent">Text Content</Label>
@@ -583,15 +656,15 @@ export function TrainingLibrary() {
                       id="textContent"
                       name="textContent"
                       placeholder="Enter your article content here..."
-                      className="min-h-[200px]"
+                      className="min-h-[200px] bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500 focus:ring-2 focus:ring-slate-400"
                       required
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-slate-700 mt-1">
                       You can use markdown formatting
                     </p>
                   </div>
                 )}
-                
+
                 {selectedContentType === 'FILE' && (
                   <div>
                     <Label htmlFor="file">Upload File</Label>
@@ -599,11 +672,15 @@ export function TrainingLibrary() {
                       id="file"
                       name="file"
                       type="file"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z,.jpg,.jpeg,.png,.gif,.webp,.mp4,.webm,.ogg,.avi,.mov"
                       required
+                      className="bg-white border border-slate-300 text-slate-900 file:text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-400"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Supported: PDF, Word, Excel, PowerPoint, Text, Archives (Max 50MB)
+                    <p className="text-xs text-slate-700 mt-1">
+                      <strong>Documents:</strong> PDF, Word, Excel, PowerPoint, Text, CSV<br/>
+                      <strong>Images:</strong> JPEG, PNG, GIF, WebP<br/>
+                      <strong>Videos:</strong> MP4, WebM, OGG, AVI, MOV<br/>
+                      <strong>Archives:</strong> ZIP, RAR, 7Z (Max 50MB)
                     </p>
                   </div>
                 )}
@@ -788,14 +865,16 @@ export function TrainingLibrary() {
                 <span className="font-medium">{resources.length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Uploaded Resources</span>
-                <span className="font-medium">{resources.filter((r) => r.isPublic).length}</span>
+                <span className="text-muted-foreground">Videos</span>
+                <span className="font-medium">{resources.filter((r) => r.contentType === 'VIDEO').length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">This Month</span>
-                <span className="font-medium">
-                  {resources.filter((r) => new Date(r.dateAdded).getMonth() === new Date().getMonth()).length} new
-                </span>
+                <span className="text-muted-foreground">Documents/Files</span>
+                <span className="font-medium">{resources.filter((r) => r.contentType === 'FILE').length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Articles</span>
+                <span className="font-medium">{resources.filter((r) => r.contentType === 'TEXT').length}</span>
               </div>
             </CardContent>
           </Card>
@@ -863,12 +942,6 @@ export function TrainingLibrary() {
                         Uploaded
                       </Badge>
                     )}
-                    {watchedResources.has(resource.id) && (
-                      <Badge variant="default" className="text-xs bg-green-600">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Viewed
-                      </Badge>
-                    )}
                   </div>
                   {canManageResources && (
                     <div className="absolute bottom-2 right-2">
@@ -899,20 +972,23 @@ export function TrainingLibrary() {
                   <CardDescription className="text-xs line-clamp-2">{resource.description}</CardDescription>
 
                   {/* Display categories */}
-                  {resource.tags && resource.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {resource.tags.slice(0, 3).map((category, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {category}
-                        </Badge>
-                      ))}
-                      {resource.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{resource.tags.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  )}
+                  {(() => {
+                    const tags = normalizeTags(resource.tags)
+                    return tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {tags.slice(0, 3).map((category: string, index: number) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {category}
+                          </Badge>
+                        ))}
+                        {tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{tags.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    )
+                  })()}
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
@@ -930,7 +1006,7 @@ export function TrainingLibrary() {
                     ) : (
                       <Download className="w-3 h-3 mr-2" />
                     )}
-                    {watchedResources.has(resource.id) ? "View Again" : "View"}
+                    View
                   </Button>
                 </CardContent>
               </Card>
@@ -951,17 +1027,10 @@ export function TrainingLibrary() {
       </div>
 
       <Dialog open={!!selectedResource} onOpenChange={() => setSelectedResource(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl max-h-[90vh] bg-white text-slate-900 border border-slate-200 shadow-xl overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <DialogTitle>{selectedResource?.title}</DialogTitle>
-                <DialogDescription className="mt-2">{selectedResource?.description}</DialogDescription>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedResource(null)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <DialogTitle>{selectedResource?.title}</DialogTitle>
+            <DialogDescription className="mt-2">{selectedResource?.description}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {selectedResource?.contentType === 'VIDEO' && (
@@ -982,21 +1051,74 @@ export function TrainingLibrary() {
               </div>
             )}
             
-            {selectedResource?.contentType === 'FILE' && (
-              <div className="bg-gray-50 rounded-lg p-6 text-center">
-                <File className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">{selectedResource?.fileName}</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {selectedResource?.fileSize && `Size: ${(selectedResource.fileSize / 1024 / 1024).toFixed(2)} MB`}
-                </p>
-                <Button asChild>
-                  <a href={selectedResource?.fileUrl} download target="_blank" rel="noopener noreferrer">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download File
-                  </a>
-                </Button>
-              </div>
-            )}
+            {selectedResource?.contentType === 'FILE' && (() => {
+              const fileUrl = selectedResource?.fileUrl || ''
+              const mimeType = selectedResource?.mimeType || ''
+              const isImage = mimeType.startsWith('image/')
+              const isPDF = mimeType === 'application/pdf'
+              const isVideo = mimeType.startsWith('video/')
+              
+              return (
+                <div className="bg-gray-50 rounded-lg p-6">
+                  {/* Image Preview */}
+                  {isImage && (
+                    <div className="mb-4">
+                      <img 
+                        src={fileUrl} 
+                        alt={selectedResource?.fileName}
+                        className="max-w-full max-h-96 mx-auto rounded-lg shadow-md"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* PDF Preview */}
+                  {isPDF && (
+                    <div className="mb-4">
+                      <iframe
+                        src={fileUrl}
+                        className="w-full h-[600px] border-0 rounded-lg"
+                        title={selectedResource?.fileName}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Video Preview */}
+                  {isVideo && (
+                    <div className="mb-4">
+                      <video 
+                        controls 
+                        className="w-full max-h-96 rounded-lg"
+                        src={fileUrl}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  )}
+                  
+                  {/* File Info for non-previewable files */}
+                  {!isImage && !isPDF && !isVideo && (
+                    <div className="text-center mb-4">
+                      <File className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    </div>
+                  )}
+                  
+                  {/* File Details */}
+                  <div className="text-center">
+                    <h3 className="font-medium mb-2">{selectedResource?.fileName}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {selectedResource?.fileSize && `Size: ${(selectedResource.fileSize / 1024 / 1024).toFixed(2)} MB`}
+                      {mimeType && ` • ${mimeType.split('/')[1].toUpperCase()}`}
+                    </p>
+                    <Button asChild>
+                      <a href={fileUrl} download target="_blank" rel="noopener noreferrer">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download File
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              )
+            })()}
             
             {/* Display categories in detail view */}
             {selectedResource?.tags && selectedResource.tags.length > 0 && (
