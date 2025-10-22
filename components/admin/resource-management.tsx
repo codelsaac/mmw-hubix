@@ -637,7 +637,6 @@ function ResourceDialog({
             id="name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="e.g., Student Portal"
             required
           />
         </div>

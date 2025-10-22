@@ -16,38 +16,7 @@ interface SitemapSection {
   }[]
 }
 
-const sitemapSections: SitemapSection[] = [
-  {
-    title: "Main Navigation",
-    links: [
-      {
-        title: "Resource Hub",
-        href: "/",
-        description: "Access learning resources and materials"
-      },
-      {
-        title: "Activity News",
-        href: "/announcements",
-        description: "Latest school news and updates"
-      },
-      {
-        title: "Internal Dashboard",
-        href: "/dashboard",
-        description: "Staff and student portal"
-      }
-    ]
-  },
-  {
-    title: "Quick Links",
-    links: [
-      {
-        title: "School Website",
-        href: "https://www.cccmmwc.edu.hk/",
-        description: "Visit our main school website"
-      }
-    ]
-  }
-]
+const sitemapSections: SitemapSection[] = []
 
 export function FooterSitemap() {
   return (
