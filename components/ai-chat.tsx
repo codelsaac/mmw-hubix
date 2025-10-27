@@ -26,13 +26,26 @@ export function AIChat() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const previousMessageCount = useRef(messages.length)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    // Use a more gentle scroll approach
+    messagesEndRef.current?.scrollIntoView({ 
+      behavior: "smooth", 
+      block: "end",
+      inline: "nearest"
+    })
   }
 
   useEffect(() => {
-    scrollToBottom()
+    // Only scroll to bottom if new messages were actually added
+    if (messages.length > previousMessageCount.current) {
+      // Add a small delay to ensure DOM is updated
+      setTimeout(() => {
+        scrollToBottom()
+      }, 50)
+      previousMessageCount.current = messages.length
+    }
   }, [messages])
 
   const sendMessage = async (e: React.FormEvent) => {
@@ -154,7 +167,8 @@ export function AIChat() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me anything about school..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 focus:scroll-m-0"
+            style={{ scrollMargin: 0 }}
           />
           <Button type="submit" size="sm" disabled={!input.trim() || isLoading}>
             <Send className="h-4 w-4" />
