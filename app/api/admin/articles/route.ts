@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { UserRole } from '@/lib/permissions'
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { handleApiError } from '@/lib/error-handler'
+import { NotificationService } from '@/lib/notification-service'
 import { z } from 'zod'
 
 // GET /api/admin/articles - Get all articles for admin management
@@ -95,6 +96,22 @@ export async function POST(request: NextRequest) {
         },
       },
     })
+
+    // Create system notification for new article
+    if (validated.isPublic) {
+      try {
+        await NotificationService.createSystemNotification({
+          title: 'New Article Published',
+          message: `${validated.title}${validated.excerpt ? ': ' + validated.excerpt.substring(0, 100) : ''}`,
+          type: 'ANNOUNCEMENT',
+          priority: 'NORMAL',
+          link: `/articles/${uniqueSlug}`,
+          metadata: JSON.stringify({ articleId: article.id, slug: uniqueSlug })
+        })
+      } catch (notifError) {
+        logger.error('Failed to create article notification:', notifError)
+      }
+    }
 
     return NextResponse.json(article, { status: 201 })
   } catch (error) {

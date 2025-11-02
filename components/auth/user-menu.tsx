@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { LogOut, Settings } from "lucide-react"
+import { LogOut, Settings, LogIn } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { SimpleLoginDialog } from './simple-login-dialog'
 import Link from "next/link"
@@ -31,7 +32,18 @@ export function UserMenu() {
   }
 
   if (!user) {
-    return <SimpleLoginDialog />
+    return (
+      <SimpleLoginDialog>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full"
+        >
+          <LogIn className="h-4 w-4" />
+          <span className="sr-only">Login</span>
+        </Button>
+      </SimpleLoginDialog>
+    )
   }
 
   const getRoleColor = (role: string) => {

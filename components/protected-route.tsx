@@ -61,7 +61,7 @@ export function ProtectedRoute({ children, requiredRole = "prefect" }: Protected
             </div>
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You need administrator privileges to access this area. Contact your IT Prefect admin for assistance.
+              You need administrator privileges to access this area. Contact your IT Prefect administrator for assistance.
             </CardDescription>
           </CardHeader>
         </Card>

@@ -288,7 +288,7 @@ async function main() {
       {
         title: 'Welcome to MMW Hubix',
         slug: 'welcome-to-mmw-hubix',
-        content: `# Welcome to MMW Hubix\n\nMMW Hubix is your central hub for IT resources, training materials, and school announcements.\n\n## Features\n\n- **Resource Hub**: Quick access to all essential school resources\n- **Training Library**: Comprehensive IT training materials\n- **Activity News**: Stay updated with school events\n- **Admin Dashboard**: Manage content and users (Admin only)\n\nWe're excited to have you here!`,
+        content: `# Welcome to MMW Hubix\n\nMMW Hubix is your central hub for IT resources, training materials, and school announcements.\n\n## Features\n\n- **Resource Hub**: Quick access to all essential school resources\n- **Library**: Comprehensive IT training materials\n- **Activity News**: Stay updated with school events\n- **Admin Dashboard**: Manage content and users (Admin only)\n\nWe're excited to have you here!`,
         excerpt: 'Your central hub for IT resources and school information',
         status: ArticleStatus.PUBLISHED,
         isPublic: true,

@@ -57,11 +57,11 @@ export const DEFAULT_SETTINGS: SettingDefinition[] = [
   },
   {
     key: "registrationEnabled",
-    value: "false",
+    value: "true",
     category: "general",
     label: "User Registration",
     type: "BOOLEAN",
-    isPublic: false,
+    isPublic: true,
   },
   // Security Settings
   {

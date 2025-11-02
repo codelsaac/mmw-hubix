@@ -104,19 +104,23 @@ model Category {
 }
 
 model Resource {
-  id          String   @id @default(cuid())
-  name        String
-  url         String   @db.VarChar(2048)
-  description String?  @db.Text
-  categoryId  String?
-  status      String   @default("active")
-  clicks      Int      @default(0)
-  createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  url             String   @db.VarChar(2048)
+  description     String?  @db.Text
+  categoryId      String?
+  status          String   @default("active")
+  clicks          Int      @default(0)
+  createdBy       String?
+  isAdminResource Boolean  @default(false) // True if created by admin, cannot be deleted by users
+  isPublic        Boolean  @default(true) // Public resources visible to all, private only to creator
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   category Category? @relation(fields: [categoryId], references: [id])
   creator  User?     @relation(fields: [createdBy], references: [id])
+
+  @@index([createdBy, isPublic])
 }
 
 model PublicEvent {

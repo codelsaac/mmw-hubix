@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { CustomLinkManager } from "@/components/custom-link-manager"
 import { logger } from "@/lib/logger"
 import {
   BookOpen,
@@ -101,16 +102,107 @@ export function ResourceHub() {
         
         if (resourcesResponse.ok) {
           const resourcesData = await resourcesResponse.json()
-          setResources(resourcesData)
+          // Merge local custom links (guest users)
+          let mergedResources = Array.isArray(resourcesData) ? resourcesData : []
+          if (typeof window !== 'undefined') {
+            try {
+              const stored = localStorage.getItem('customLinks')
+              const localLinks: any[] = stored ? JSON.parse(stored) : []
+              const mapped = localLinks.map((l, i) => ({
+                id: Date.now() + i,
+                name: l.name,
+                url: l.url,
+                description: l.description || "",
+                category: (!l.category || !l.category.name || (l.category.name || '').toLowerCase() === 'custom')
+                  ? 'Uncategorized'
+                  : l.category.name,
+                status: "active" as const,
+                clicks: 0,
+                lastUpdated: new Date().toISOString().split("T")[0]
+              }))
+              mergedResources = [...mergedResources, ...mapped]
+            } catch {}
+          }
+          const normalized = mergedResources.map(r => ({
+            ...r,
+            category: (!r.category || r.category.toLowerCase() === 'custom') ? 'Uncategorized' : r.category,
+          }))
+          setResources(normalized)
         } else {
-          // Fallback to localStorage if API fails
-          const loadedResources = resourceService.getResources()
-          setResources(loadedResources)
+          // Fallback: merge from local custom links in localStorage
+          let mergedLocal: Resource[] = []
+          try {
+            if (typeof window !== 'undefined') {
+              const stored = localStorage.getItem('customLinks')
+              const localLinks: any[] = stored ? JSON.parse(stored) : []
+              mergedLocal = localLinks.map((l, i) => ({
+                id: Date.now() + i,
+                name: l.name,
+                url: l.url,
+                description: l.description || "",
+                category: (!l.category || !l.category.name || (l.category.name || '').toLowerCase() === 'custom')
+                  ? 'Uncategorized'
+                  : l.category.name,
+                status: "active",
+                clicks: 0,
+                lastUpdated: new Date().toISOString().split("T")[0]
+              }))
+            }
+          } catch {}
+          const normalizedLocal = mergedLocal.map(r => ({
+            ...r,
+            category: (!r.category || r.category.toLowerCase() === 'custom') ? 'Uncategorized' : r.category,
+          }))
+          setResources(normalizedLocal)
         }
         
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json()
-          setCategories(categoriesData)
+          let serverCategories: any[] = Array.isArray(categoriesData) ? categoriesData : (categoriesData.categories || [])
+
+          // Merge local custom categories
+          if (typeof window !== 'undefined') {
+            try {
+              const storedCats = localStorage.getItem('customCategories')
+              const localCats: any[] = storedCats ? JSON.parse(storedCats) : []
+              const names = new Set(serverCategories.map((c: any) => (c.name || '').toLowerCase()))
+              const extras = localCats
+                .filter(c => c?.name && (c.name || '').toLowerCase() !== 'custom' && !names.has(c.name.toLowerCase()))
+                .map(c => ({ id: c.id || `local-${c.name}`, name: c.name, icon: 'star', color: '#6B7280', sortOrder: 1000 }))
+              serverCategories = [...serverCategories, ...extras]
+            } catch {}
+          }
+          // Remove any 'Custom' category from tabs
+          setCategories(serverCategories.filter((c: any) => (c.name || '').toLowerCase() !== 'custom'))
+        } else {
+          // Fallback: build categories from local custom links and local custom categories
+          try {
+            if (typeof window !== 'undefined') {
+              const storedCats = localStorage.getItem('customCategories')
+              const localCats: any[] = storedCats ? JSON.parse(storedCats) : []
+              const storedLinks = localStorage.getItem('customLinks')
+              const localLinks: any[] = storedLinks ? JSON.parse(storedLinks) : []
+              const names = new Set<string>()
+              const fromCats = localCats
+                .filter(c => (c?.name || '').toLowerCase() !== 'custom')
+                .map(c => ({ id: c.id || `local-${c.name}`, name: c.name, icon: 'star', color: '#6B7280', sortOrder: 1000 }))
+              fromCats.forEach(c => names.add((c.name || '').toLowerCase()))
+              const fromLinks = localLinks
+                .map(l => {
+                  const n = (l.category?.name as string) || 'Uncategorized'
+                  return (n || '').toLowerCase() === 'custom' ? 'Uncategorized' : n
+                })
+                .filter(Boolean)
+                .map(n => ({ id: `local-${n}`, name: n, icon: 'star', color: '#6B7280', sortOrder: 1000 }))
+                .filter(c => {
+                  const key = (c.name || '').toLowerCase()
+                  if (names.has(key)) return false
+                  names.add(key)
+                  return true
+                })
+              setCategories([...fromCats, ...fromLinks])
+            }
+          } catch {}
         }
       } catch (error) {
         logger.error('Error fetching data:', error)
@@ -130,11 +222,16 @@ export function ResourceHub() {
     const handleResourcesUpdated = (event: CustomEvent) => {
       setResources(event.detail)
     }
+    const handleCustomLinksUpdated = () => {
+      fetchData()
+    }
 
     window.addEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
+    window.addEventListener("customLinksUpdated", handleCustomLinksUpdated as EventListener)
     return () => {
       clearInterval(interval)
       window.removeEventListener("resourcesUpdated", handleResourcesUpdated as EventListener)
+      window.removeEventListener("customLinksUpdated", handleCustomLinksUpdated as EventListener)
     }
   }, [])
 
@@ -164,25 +261,41 @@ export function ResourceHub() {
     }
   }
 
+  const handleGoogleSearch = () => {
+    if (searchQuery.trim()) {
+      const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`
+      window.open(googleSearchUrl, "_blank", "noopener,noreferrer")
+    }
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleGoogleSearch()
+    }
+  }
+
   // Don't render content until hydrated to prevent mismatch
   if (!isHydrated) {
     return (
       <section className="space-y-6">
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-serif font-bold text-foreground">Resource Hub</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Quick access to all essential school resources, tools, and information in one centralized location.
-          </p>
         </div>
-        <div className="max-w-md mx-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search resources..."
-              className="pl-10"
-              value=""
-              disabled
-            />
+        <div className="max-w-4xl mx-auto">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search resources..."
+                className="pl-10"
+                value=""
+                disabled
+              />
+            </div>
+            <Button disabled variant="outline" className="border-2 border-gray-300 text-gray-700 px-4 py-2 opacity-50 whitespace-nowrap">
+              <Globe className="w-4 h-4 mr-2" />
+              Google
+            </Button>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -214,28 +327,38 @@ export function ResourceHub() {
 
   return (
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 sm:px-0">
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-3">
         <h2 className="text-2xl sm:text-3xl font-serif font-bold text-foreground animate-in fade-in slide-in-from-top-4 duration-700">Resource Hub</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
-          Quick access to all essential school resources, tools, and information in one centralized location.
-        </p>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
-        <div className="relative px-4 sm:px-0">
-          <Search className="absolute left-3 sm:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors duration-300" />
-          <Input
-            placeholder="Search resources..."
-            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm transition-all duration-300 w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex gap-2 px-4 sm:px-0">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors duration-300" />
+            <Input
+              placeholder="Search resources..."
+              className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm transition-all duration-300 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+          </div>
+          <Button
+            onClick={handleGoogleSearch}
+            disabled={!searchQuery.trim()}
+            variant="outline"
+            className="border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-700 hover:text-blue-700 px-4 py-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            title="Search on Google"
+          >
+            <Globe className="w-4 h-4 mr-2" />
+            Google
+          </Button>
         </div>
         
         {/* Category Filter Tabs */}
         <div className="w-full px-4 sm:px-0">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex gap-2 min-w-max px-2 sm:px-0">
+            <div className="flex gap-2 min-w-max px-2 sm:px-0 items-center">
               <Button
                 variant={selectedCategory === "all" ? "default" : "outline"}
                 size="sm"
@@ -253,9 +376,9 @@ export function ResourceHub() {
             return (
               <Button
                 key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
+                variant={selectedCategory === category.name ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => setSelectedCategory(category.name)}
                 className="text-xs whitespace-nowrap flex-shrink-0"
               >
                 <CategoryIcon className="w-3 h-3 mr-1" />
@@ -267,6 +390,7 @@ export function ResourceHub() {
               </Button>
             )
           })}
+              <CustomLinkManager trigger="icon" className="ml-1" />
             </div>
           </div>
         </div>

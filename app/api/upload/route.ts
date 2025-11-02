@@ -136,26 +136,6 @@ export async function POST(request: NextRequest) {
     // Return the public URL path
     const publicUrl = `/uploads/${fileCategory}/${fileName}`
 
-    // Create success notification
-    try {
-      await NotificationService.createForUser(session.user.id, {
-        title: "File Upload Successful",
-        message: `Successfully uploaded "${file.name}" (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
-        type: "SUCCESS",
-        priority: "NORMAL",
-        link: publicUrl,
-        metadata: JSON.stringify({
-          fileName: fileName,
-          originalName: file.name,
-          size: file.size,
-          type: file.type,
-          category: fileCategory
-        })
-      })
-    } catch (notificationError) {
-      logger.error('Failed to create upload success notification:', notificationError)
-    }
-
     return NextResponse.json({ 
       success: true, 
       fileName: fileName,
