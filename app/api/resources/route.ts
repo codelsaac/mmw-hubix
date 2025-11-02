@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     
     // Transform to match the expected Resource interface
     const transformedResources = sortedResources.map(resource => ({
-      id: parseInt(resource.id, 36) || 0, // Convert cuid to number
+      id: resource.id,
       name: resource.name,
       url: resource.url,
       description: resource.description || "",

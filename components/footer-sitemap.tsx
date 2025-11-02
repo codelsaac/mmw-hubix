@@ -77,7 +77,7 @@ export function FooterSitemap() {
               © <ClientOnly fallback="2025">{new Date().getFullYear()}</ClientOnly> C.C.C. Mong Man Wai College. All rights reserved.
             </p>
             <p className="mt-1">
-              Built with by the IT Perfect Team
+             The first version was built by the IT Perfect team in 2024-2025.
             </p>
           </div>
           

@@ -12,5 +12,23 @@
     "editor.experimentalGpuAcceleration": "on",
     "files.autoGuessEncoding": true,
     "files.autoSaveWhenNoErrors": true,
-    "markdown.validate.enabled": true
+    "markdown.validate.enabled": true,
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "10.125.145.49",
+            "port": 33060,
+            "driver": "MySQL",
+            "database": "6A25",
+            "username": "mmw20-1086",
+            "name": "mmwc",
+            "password": "MmwS25555",
+            "connectionTimeout": 30
+        }
+    ]
 }
