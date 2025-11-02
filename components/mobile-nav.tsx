@@ -26,13 +26,13 @@ const navigationItems: NavItem[] = [
   {
     title: "Resource Hub",
     href: "/",
-    description: "學習資源和材料",
+    description: "Learning resources and materials",
     requiredPermissions: [Permission.VIEW_RESOURCES]
   },
   {
     title: "Activity News", 
     href: "/activity-news",
-    description: "學校最新消息",
+    description: "Latest school news and updates",
     requiredPermissions: [Permission.VIEW_RESOURCES]
   },
   {
@@ -43,14 +43,14 @@ const navigationItems: NavItem[] = [
   {
     title: "IT System",
     href: "/dashboard",
-    description: "內部儀表板和IT系統管理",
+    description: "Internal dashboard and IT system management",
     requiredPermissions: [Permission.VIEW_DASHBOARD],
     badge: "IT"
   },
   {
     title: "Admin Panel",
     href: "/admin",
-    description: "系統管理",
+    description: "System administration",
     requiredPermissions: [Permission.MANAGE_WEBSITE],
     badge: "Admin"
   }

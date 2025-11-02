@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
+import NextAuth, { NextAuthOptions, getServerSession } from "next-auth"
 import { UserRole } from "@/lib/permissions"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { getCurrentPassword } from "@/lib/password-utils"
@@ -139,18 +139,6 @@ export const authOptions: NextAuthOptions = {
                   where: { id: dbUser.id },
                   data: { lastLoginAt: new Date() }
                 })
-                
-                // Create login success notification for demo account
-                try {
-                  await NotificationService.createForUser(dbUser.id, {
-                    title: "Login Successful",
-                    message: `Welcome back, ${user.name}! You have successfully logged in.`,
-                    type: "SUCCESS",
-                    priority: "LOW"
-                  })
-                } catch (notificationError) {
-                  logger.error("Failed to create login success notification:", notificationError)
-                }
               }
 
               return {
@@ -241,4 +229,9 @@ export const authOptions: NextAuthOptions = {
   },
 }
 
-export default NextAuth(authOptions)
+// Helper compatible with NextAuth v4 in App Router
+export async function auth() {
+  return getServerSession(authOptions)
+}
+
+export default auth

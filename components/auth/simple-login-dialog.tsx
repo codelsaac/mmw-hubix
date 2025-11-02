@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LogIn, UserCheck } from "lucide-react"
+import { RegisterDialog } from "./register-dialog"
+import { useSettings } from "@/hooks/use-settings"
 
 interface SimpleLoginDialogProps {
   children?: React.ReactNode
@@ -23,10 +25,12 @@ interface SimpleLoginDialogProps {
 
 export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
   const [open, setOpen] = useState(false)
+  const [registerOpen, setRegisterOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const { settings } = useSettings()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,9 +164,38 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Login"}
             </Button>
+
+            {settings.registrationEnabled ? (
+              <div className="text-center text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false)
+                    setRegisterOpen(true)
+                  }}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Create one
+                </button>
+              </div>
+            ) : (
+              <div className="text-center text-sm text-muted-foreground">
+                Registration is currently disabled by the admin.
+              </div>
+            )}
           </form>
         </div>
       </DialogContent>
+
+      <RegisterDialog 
+        open={registerOpen} 
+        onOpenChange={setRegisterOpen}
+        onSwitchToLogin={() => {
+          setRegisterOpen(false)
+          setOpen(true)
+        }}
+      />
     </Dialog>
   )
 }

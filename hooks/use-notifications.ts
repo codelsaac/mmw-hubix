@@ -161,6 +161,27 @@ export function useNotifications() {
     }
   }
 
+  // Sync guest read state on login
+  const syncGuestReadState = async (guestReadIds: string[]) => {
+    if (guestReadIds.length === 0) return
+
+    try {
+      // Mark notifications that were read as guest
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationIds: guestReadIds }),
+      })
+
+      if (response.ok) {
+        await mutate() // Refresh notifications
+        logger.log(`Synced ${guestReadIds.length} guest read notifications`)
+      }
+    } catch (err) {
+      logger.error('Error syncing guest read state:', err)
+    }
+  }
+
   return {
     notifications,
     unreadCount,
@@ -171,5 +192,6 @@ export function useNotifications() {
     markAllAsRead,
     deleteNotifications,
     deleteAllRead,
+    syncGuestReadState,
   }
 }

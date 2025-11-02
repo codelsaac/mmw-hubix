@@ -41,7 +41,7 @@ MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform tha
 **Internal IT Prefect System:**
 - **Team Dashboard**: Mission statement, organizational structure, and internal communications
 - **Event Calendar**: Internal meetings, duties, and training session management
-- **Training Library**: Categorized repository of training videos and materials
+- **Library**: Categorized repository of training videos and materials
 - **Admin CMS**: Content management system for updating all website content
 
 **User Roles:**
@@ -121,14 +121,25 @@ Visit http://localhost:3000 to view the site.
 ### Development Notes
 
 #### Database Configuration
-The project uses **MySQL** for both development and production, providing a consistent environment.
+The project uses **MySQL** with a **direct connection** to the database server at `10.125.145.49:3306`.
+
+**✅ Working Configuration:**
+- **Host**: `10.125.145.49:3306`
+- **Database**: `mmw_hubix_dev`
+- **Connection Method**: Direct (no SSH tunnel needed)
+- **Status**: Fully operational
+
+**Testing Connection:**
+```bash
+node test-database-connection.js
+```
 
 **📚 Detailed Setup Guide:** [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)
 
 **Key Configuration Files:**
 - **`.env`** - Base configuration (committed to Git, placeholder values)
-- **`.env.local`** - Local overrides (NOT committed, contains real credentials)
-- **`setup-mysql.sql`** - Database creation script
+- **`.env.local`** - Local overrides with working DATABASE_URL (NOT committed, contains real credentials)
+- **`direct-mysql-config.env`** - Reference configuration for direct connection
 - **`prisma/schema.prisma`** - Database schema definition
 
 **Environment File Priority:**
@@ -236,7 +247,7 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 ### IT Prefect System (Authenticated)
 - **Team Dashboard**: Mission statement, organizational structure, and internal communications
 - **Internal Calendar**: Manage team meetings, duties, and training sessions (viewable by all prefects, editable by admins)
-- **Training Library**: Categorized repository of training videos and materials with search functionality
+- **Library**: Categorized repository of training videos and materials with search functionality
 - **Event Management**: Create and track IT-related events and activities
 - **Task System**: Assign and manage team tasks and responsibilities
 - **User Profile & Settings**: Personal profile management with password change functionality and user preferences
@@ -657,8 +668,12 @@ Create a **`.env.local`** file in your project root for local development:
 # ================================
 
 # Database (MySQL) - Required
-# Format: mysql://USER:PASSWORD@HOST:PORT/DATABASE?connection_limit=5
-DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
+# Working Configuration (Direct connection to 10.125.145.49:3306)
+# For local development, copy from .env.local or direct-mysql-config.env
+DATABASE_URL="mysql://mmw20-1086:MmwS25555@10.125.145.49:3306/mmw_hubix_dev"
+
+# Alternative: Local MySQL setup
+# DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 
 # NextAuth.js - Required
 NEXTAUTH_URL="http://localhost:3000"

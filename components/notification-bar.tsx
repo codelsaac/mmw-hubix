@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Bell, Check, CheckCheck, X, Trash2, AlertCircle, Info, CheckCircle, AlertTriangle, Megaphone } from 'lucide-react'
@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useNotifications, type Notification } from '@/hooks/use-notifications'
+import { useGuestNotifications } from '@/hooks/use-guest-notifications'
 import { toast } from 'sonner'
 
 const notificationIcons = {
@@ -139,6 +140,52 @@ function NotificationItem({ notification, onMarkRead, onDelete }: {
 
 export function NotificationBar() {
   const { status } = useSession()
+  const [isOpen, setIsOpen] = useState(false)
+  const [hasSynced, setHasSynced] = useState(false)
+  const [deviceNotify, setDeviceNotify] = useState(false)
+  const prevIdsRef = useRef<Set<string>>(new Set())
+  const [hasPrompted, setHasPrompted] = useState(false)
+
+  // Use authenticated or guest notifications based on session
+  const isAuthenticated = status === 'authenticated'
+  
+  const authNotifications = useNotifications()
+  const guestNotifications = useGuestNotifications()
+
+  // Sync guest read state when user logs in
+  useEffect(() => {
+    if (isAuthenticated && !hasSynced) {
+      const guestReadIds = guestNotifications.getReadState()
+      if (guestReadIds.length > 0) {
+        authNotifications.syncGuestReadState(guestReadIds)
+        guestNotifications.clearLocalState()
+        setHasSynced(true)
+      }
+    }
+  }, [isAuthenticated, hasSynced])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem('mmw-hubix-device-notify')
+    const enabled = stored === '1'
+    if (enabled && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        setDeviceNotify(true)
+      } else if (Notification.permission === 'default') {
+        Notification.requestPermission().then((p) => {
+          if (p === 'granted') {
+            setDeviceNotify(true)
+            localStorage.setItem('mmw-hubix-device-notify', '1')
+          } else {
+            setDeviceNotify(false)
+            localStorage.removeItem('mmw-hubix-device-notify')
+          }
+        })
+      }
+    }
+  }, [])
+
+  // Select the appropriate hook based on auth status
   const {
     notifications,
     unreadCount,
@@ -147,39 +194,115 @@ export function NotificationBar() {
     markAllAsRead,
     deleteNotifications,
     deleteAllRead,
-  } = useNotifications()
+  } = isAuthenticated ? authNotifications : guestNotifications
 
-  const [isOpen, setIsOpen] = useState(false)
+  useEffect(() => {
+    const supported = typeof window !== 'undefined' && 'Notification' in window
+    if (!supported || !deviceNotify || Notification.permission !== 'granted') return
+    const prev = prevIdsRef.current
+    if (prev.size === 0 && notifications.length > 0) {
+      notifications.forEach((n) => prev.add(n.id))
+      return
+    }
+    notifications.forEach((n) => {
+      if (!prev.has(n.id) && !n.isRead) {
+        const title = n.title || 'Notification'
+        const body = n.message
+        try {
+          const nfy = new Notification(title, {
+            body,
+            icon: '/icon2.png',
+          })
+          nfy.onclick = () => {
+            window.focus()
+            if (n.link) window.location.href = n.link
+          }
+        } catch {}
+        prev.add(n.id)
+      }
+    })
+  }, [notifications, deviceNotify])
 
-  // Don't render notification bell if user is not authenticated
-  if (status !== 'authenticated') {
-    return null
-  }
+  const toggleDeviceNotify = useCallback(async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return
+    if (!deviceNotify) {
+      const p = await Notification.requestPermission()
+      if (p === 'granted') {
+        setDeviceNotify(true)
+        localStorage.setItem('mmw-hubix-device-notify', '1')
+      }
+    } else {
+      setDeviceNotify(false)
+      localStorage.removeItem('mmw-hubix-device-notify')
+    }
+  }, [deviceNotify])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (hasPrompted) return
+    if (!('Notification' in window)) return
+    const stored = localStorage.getItem('mmw-hubix-device-notify')
+    if (stored) return
+
+    setHasPrompted(true)
+    toast.info('Enable device notifications?', {
+      description: 'Allow browser alerts so you never miss public announcements.',
+      action: {
+        label: 'Enable',
+        onClick: () => {
+          toggleDeviceNotify()?.catch(() => {
+            toast.error('Notification permission request failed.')
+          })
+        },
+      },
+      dismissible: true,
+    })
+  }, [hasPrompted, toggleDeviceNotify])
 
   const handleMarkRead = async (id: string) => {
-    const success = await markAsRead([id])
-    if (success) {
+    if (isAuthenticated) {
+      const success = await markAsRead([id])
+      if (success) {
+        toast.success('Notification marked as read')
+      }
+    } else {
+      markAsRead([id])
       toast.success('Notification marked as read')
     }
   }
 
   const handleMarkAllRead = async () => {
-    const success = await markAllAsRead()
-    if (success) {
+    if (isAuthenticated) {
+      const success = await markAllAsRead()
+      if (success) {
+        toast.success('All notifications marked as read')
+      }
+    } else {
+      markAllAsRead()
       toast.success('All notifications marked as read')
     }
   }
 
   const handleDelete = async (id: string) => {
-    const success = await deleteNotifications([id])
-    if (success) {
-      toast.success('Notification deleted')
+    if (isAuthenticated) {
+      const success = await deleteNotifications([id])
+      if (success) {
+        toast.success('Notification deleted')
+      }
+    } else {
+      deleteNotifications([id])
+      toast.success('Notification dismissed')
     }
   }
 
   const handleDeleteAllRead = async () => {
-    const success = await deleteAllRead()
-    if (success) {
+    if (isAuthenticated) {
+      const success = await deleteAllRead()
+      if (success) {
+        toast.success('Read notifications cleared')
+      }
+    } else {
+      deleteAllRead()
       toast.success('Read notifications cleared')
     }
   }
@@ -208,7 +331,18 @@ export function NotificationBar() {
       <PopoverContent className="w-96 p-0" align="end">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold text-sm">Notifications</h3>
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center">
+            {typeof window !== 'undefined' && 'Notification' in window && (
+              <Button
+                variant={deviceNotify ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={toggleDeviceNotify}
+                className="h-8 px-2"
+              >
+                <Bell className="w-4 h-4 mr-1" />
+                {deviceNotify ? 'Device on' : 'Device off'}
+              </Button>
+            )}
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
