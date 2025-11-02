@@ -121,7 +121,7 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
                 <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Activity News</h1>
               </div>
               <p className="text-sm text-muted-foreground">
-                Join exciting activities and events organized by our school and other organizations !
+                Join exciting activities and events organized by our school and other organizations!
               </p>
             </div>
           </div>

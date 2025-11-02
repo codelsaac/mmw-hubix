@@ -15,6 +15,9 @@ const notificationSchema = z.object({
   metadata: z.string().optional(),
   userId: z.string().optional().nullable(), // If null, system-wide notification
   sendToAll: z.boolean().optional(), // If true, create for all users
+  targetType: z.enum(["all", "role", "user", "guests"]).optional(),
+  targetRole: z.enum(["ADMIN", "HELPER", "GUEST"]).optional(),
+  targetUserId: z.string().optional(),
 });
 
 // GET /api/admin/notifications - Get all notifications (Admin only)
@@ -50,32 +53,115 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const validatedData = notificationSchema.parse(body);
-    const { sendToAll, ...notificationData } = validatedData;
+    const { sendToAll, targetType, targetRole, targetUserId, ...notificationData } = validatedData;
 
-    if (sendToAll) {
-      // Create notification for all active users
+    // Handle different targeting options
+    if (targetType === 'all' || sendToAll) {
+      // Create a single system-wide notification for all users and guests
       const users = await prisma.user.findMany({
         where: { isActive: true },
         select: { id: true }
       });
 
-      const notifications = await prisma.notification.createMany({
-        data: users.map(user => ({
+      const notification = await prisma.notification.create({
+        data: {
           ...notificationData,
-          userId: user.id,
+          userId: null, // System-wide for all users and guests
           link: notificationData.link || null,
-          metadata: notificationData.metadata || null,
-        }))
+          metadata: JSON.stringify({ 
+            ...JSON.parse(notificationData.metadata || '{}'),
+            targetType: 'all',
+            sentToUsers: users.length,
+            sentToGuests: true
+          }),
+        },
       });
 
       return NextResponse.json({
         success: true,
-        message: `Notification sent to ${users.length} users`,
-        count: users.length
+        message: `Notification sent to all users and guests`,
+        count: 1,
+        notification
       }, { status: 201 });
     }
 
-    // Create single notification
+    if (targetType === 'guests') {
+      // Create system-wide notification for guests only
+      const notification = await prisma.notification.create({
+        data: {
+          ...notificationData,
+          userId: null, // System-wide for guests
+          link: notificationData.link || null,
+          metadata: JSON.stringify({ 
+            ...JSON.parse(notificationData.metadata || '{}'),
+            targetType: 'guests',
+            sentToGuests: true
+          }),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Notification sent to all guests",
+        count: 1
+      }, { status: 201 });
+    }
+
+    if (targetType === 'role' && targetRole) {
+      // Create a single system-wide notification for specific role
+      const users = await prisma.user.findMany({
+        where: { 
+          role: targetRole,
+          isActive: true 
+        },
+        select: { id: true }
+      });
+
+      const notification = await prisma.notification.create({
+        data: {
+          ...notificationData,
+          userId: null, // System-wide with role targeting
+          link: notificationData.link || null,
+          metadata: JSON.stringify({ 
+            ...JSON.parse(notificationData.metadata || '{}'),
+            targetType: 'role',
+            targetRole: targetRole,
+            sentToUsers: users.length
+          }),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Notification sent to ${targetRole} role`,
+        count: 1,
+        notification
+      }, { status: 201 });
+    }
+
+    if (targetType === 'user' && targetUserId) {
+      // Create notification for specific user
+      const notification = await prisma.notification.create({
+        data: {
+          ...notificationData,
+          userId: targetUserId,
+          link: notificationData.link || null,
+          metadata: JSON.stringify({ 
+            ...JSON.parse(notificationData.metadata || '{}'),
+            targetType: 'user',
+            targetUserId: targetUserId
+          }),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Notification sent to user",
+        count: 1
+      }, { status: 201 });
+    }
+
+    // Fallback: Create single notification (legacy support)
     const notification = await prisma.notification.create({
       data: {
         ...notificationData,

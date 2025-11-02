@@ -3,17 +3,23 @@ import { prisma } from "@/lib/prisma"
 import { logger } from "@/lib/logger"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 import { handleApiError } from "@/lib/error-handler"
+import auth from "@/auth"
 
 /**
  * GET /api/resources
- * Get all active resources (public endpoint - no authentication required)
+ * Get all active resources + user's custom resources
+ * Public endpoint - returns admin resources for everyone, plus user's personal links if logged in
  */
 export async function GET(req: NextRequest) {
   try {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
     if (rateLimitResult) return rateLimitResult
 
-    const resources = await prisma.resource.findMany({
+    // Get session to check if user is logged in
+    const session = await auth()
+
+    // Fetch admin resources (public resources)
+    const adminResources = await prisma.resource.findMany({
       where: {
         status: "active"
       },
@@ -40,9 +46,45 @@ export async function GET(req: NextRequest) {
         name: 'asc'
       }
     })
+
+    // Fetch user's personal resources if logged in
+    let userResources: any[] = []
+    if (session?.user?.id) {
+      userResources = await prisma.resource.findMany({
+        where: {
+          createdBy: session.user.id,
+          status: "user-private"
+        },
+        select: {
+          id: true,
+          name: true,
+          url: true,
+          description: true,
+          status: true,
+          clicks: true,
+          updatedAt: true,
+          categoryId: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+              icon: true,
+              color: true,
+              sortOrder: true
+            }
+          }
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      })
+    }
+
+    // Merge admin and user resources
+    const allResources = [...adminResources, ...userResources]
     
     // Sort manually to handle null categories
-    const sortedResources = resources.sort((a, b) => {
+    const sortedResources = allResources.sort((a: any, b: any) => {
       // Resources without category go last
       if (!a.category && !b.category) return 0
       if (!a.category) return 1
@@ -56,19 +98,26 @@ export async function GET(req: NextRequest) {
     })
     
     // Transform to match the expected Resource interface
-    const transformedResources = sortedResources.map(resource => ({
-      id: parseInt(resource.id, 36) || 0, // Convert cuid to number
-      name: resource.name,
-      url: resource.url,
-      description: resource.description || "",
-      category: resource.category?.name || "Uncategorized",
-      categoryId: resource.category?.id || "",
-      categoryIcon: resource.category?.icon || "globe",
-      categoryColor: resource.category?.color || "#6B7280",
-      status: resource.status as "active" | "maintenance" | "inactive",
-      clicks: resource.clicks,
-      lastUpdated: new Date(resource.updatedAt).toISOString().split("T")[0]
-    }))
+    const transformedResources = sortedResources.map((resource: any) => {
+      const rawCategory = resource.category?.name || "Uncategorized"
+      const normalizedCategory = rawCategory.toLowerCase() === "custom" ? "Uncategorized" : rawCategory
+
+      return {
+        id: parseInt(resource.id, 36) || 0, // Convert cuid to number
+        name: resource.name,
+        url: resource.url,
+        description: resource.description || "",
+        category: normalizedCategory,
+        categoryId: resource.category?.id || "",
+        categoryIcon: resource.category?.icon || "globe",
+        categoryColor: resource.category?.color || "#6B7280",
+        status: (resource.status === "active" || resource.status === "maintenance" || resource.status === "inactive")
+          ? resource.status
+          : "active",
+        clicks: resource.clicks,
+        lastUpdated: new Date(resource.updatedAt).toISOString().split("T")[0]
+      }
+    })
     
     return NextResponse.json(transformedResources)
   } catch (error) {
