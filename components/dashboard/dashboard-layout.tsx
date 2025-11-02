@@ -22,6 +22,7 @@ import {
   LinkIcon,
   FileText,
   BookOpen,
+  Bell,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -36,6 +37,7 @@ const adminNavigation = [
   { name: "Resources", href: "/admin/resources", icon: LinkIcon },
   { name: "Activity", href: "/admin/announcements", icon: FileText },
   { name: "Articles", href: "/admin/articles", icon: BookOpen },
+  { name: "Notifications", href: "/admin/notifications", icon: Bell },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ]

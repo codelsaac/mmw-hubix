@@ -103,21 +103,109 @@ export const NotificationService = {
         select: { id: true }
       })
 
-      await prisma.notification.createMany({
-        data: users.map(user => ({
-          title: input.title,
-          message: input.message,
-          type: input.type || 'INFO',
-          priority: input.priority || 'NORMAL',
-          userId: user.id,
-          link: input.link,
-          metadata: input.metadata,
-        }))
-      })
+      if (users.length > 0) {
+        await prisma.notification.createMany({
+          data: users.map(user => ({
+            title: input.title,
+            message: input.message,
+            type: input.type || 'INFO',
+            priority: input.priority || 'NORMAL',
+            userId: user.id,
+            link: input.link,
+            metadata: JSON.stringify({ 
+              ...JSON.parse(input.metadata || '{}'),
+              targetType: 'role',
+              targetRole: role
+            }),
+          }))
+        })
+      }
 
       return { count: users.length }
     } catch (error) {
       logger.error('Error creating notifications for role:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Create notification for all users including guests
+   */
+  async createForAllIncludingGuests(input: Omit<CreateNotificationInput, 'userId'>) {
+    try {
+      const users = await prisma.user.findMany({
+        where: { isActive: true },
+        select: { id: true }
+      })
+
+      // Create individual notifications for each user
+      if (users.length > 0) {
+        await prisma.notification.createMany({
+          data: users.map(user => ({
+            title: input.title,
+            message: input.message,
+            type: input.type || 'INFO',
+            priority: input.priority || 'NORMAL',
+            userId: user.id,
+            link: input.link,
+            metadata: JSON.stringify({ 
+              ...JSON.parse(input.metadata || '{}'),
+              targetType: 'all',
+              sentToUsers: users.length
+            }),
+          }))
+        })
+      }
+
+      // Create system-wide notification for guests
+      await prisma.notification.create({
+        data: {
+          title: input.title,
+          message: input.message,
+          type: input.type || 'INFO',
+          priority: input.priority || 'NORMAL',
+          userId: null, // System-wide for guests
+          link: input.link,
+          metadata: JSON.stringify({ 
+            ...JSON.parse(input.metadata || '{}'),
+            targetType: 'all',
+            sentToUsers: users.length,
+            sentToGuests: true
+          }),
+        }
+      })
+
+      return { count: users.length + 1 } // +1 for system-wide
+    } catch (error) {
+      logger.error('Error creating notifications for all including guests:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Create notification for guests only
+   */
+  async createForGuestsOnly(input: Omit<CreateNotificationInput, 'userId'>) {
+    try {
+      const notification = await prisma.notification.create({
+        data: {
+          title: input.title,
+          message: input.message,
+          type: input.type || 'INFO',
+          priority: input.priority || 'NORMAL',
+          userId: null, // System-wide for guests
+          link: input.link,
+          metadata: JSON.stringify({ 
+            ...JSON.parse(input.metadata || '{}'),
+            targetType: 'guests',
+            sentToGuests: true
+          }),
+        }
+      })
+
+      return { count: 1 }
+    } catch (error) {
+      logger.error('Error creating notification for guests:', error)
       throw error
     }
   },

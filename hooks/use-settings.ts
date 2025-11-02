@@ -34,7 +34,7 @@ const defaultSettings: Settings = {
   maxFileSize: "10",
   allowedFileTypes: "pdf,doc,docx,jpg,png,mp4",
   maintenanceMode: false,
-  registrationEnabled: false,
+  registrationEnabled: true,
   sessionTimeout: "30",
   maxLoginAttempts: "5",
   emailNotifications: true,

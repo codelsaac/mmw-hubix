@@ -6,6 +6,7 @@ import { UserRole } from "@/lib/permissions"
 import { logger } from "@/lib/logger"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 import { handleApiError } from "@/lib/error-handler"
+import { NotificationService } from "@/lib/notification-service"
 // GET /api/activity-news - Get all activity news
 export async function GET(req: NextRequest) {
   try {
@@ -119,6 +120,22 @@ export async function POST(request: NextRequest) {
         },
       },
     })
+
+    // Create system notification for new activity news
+    if (isPublic) {
+      try {
+        await NotificationService.createSystemNotification({
+          title: 'New Activity Announcement',
+          message: `${title} - ${club} on ${new Date(date).toLocaleDateString()}`,
+          type: 'ANNOUNCEMENT',
+          priority: 'NORMAL',
+          link: '/activity-news',
+          metadata: JSON.stringify({ announcementId: activityNews.id, club, date })
+        })
+      } catch (notifError) {
+        logger.error('Failed to create activity news notification:', notifError)
+      }
+    }
 
     return NextResponse.json(activityNews, { status: 201 })
   } catch (error) {

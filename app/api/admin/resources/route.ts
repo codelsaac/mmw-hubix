@@ -91,14 +91,20 @@ export async function POST(req: NextRequest) {
     // Verify user exists in database before setting createdBy
     let createdById: string | null = null;
     if (user?.id) {
-      const userExists = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { id: true }
-      });
-      if (userExists) {
-        createdById = user.id;
-      } else {
-        logger.warn(`[ADMIN_RESOURCES_POST] Session user ID ${user.id} not found in database`);
+      try {
+        const userExists = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { id: true }
+        });
+        if (userExists) {
+          createdById = user.id;
+        } else {
+          logger.warn(`[ADMIN_RESOURCES_POST] Session user ID ${user.id} not found in database`);
+        }
+      } catch (dbError) {
+        // Database connection failed, proceed without createdBy
+        logger.warn(`[ADMIN_RESOURCES_POST] Database connection failed, proceeding without user verification:`, dbError);
+        createdById = null;
       }
     }
 

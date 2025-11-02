@@ -5,7 +5,7 @@ trigger: always_on
 # MMW Hubix - Project Rules
 
 ## Tech Stack
-- Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui
+- Next.js 16 (App Router), TypeScript, Tailwind CSS, shadcn/ui
 - Prisma ORM: MySQL
 - NextAuth.js: **USERNAME-based auth** (NOT email)
 - Zod validation, React Hook Form, Recharts, React Data Grid
@@ -118,3 +118,5 @@ lib/                # Utilities, validation, database
 - ✅ Use semantic HTML and ARIA labels
 - ✅ Test all API endpoints with proper auth
 - If there is an important update, update the [text](../../README.md).
+
+*Remember quality is the most important(bug-free)*
