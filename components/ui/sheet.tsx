@@ -5,8 +5,11 @@ import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useHydration } from "@/hooks/use-hydration"
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
+  const hydrated = useHydration()
+  if (!hydrated) return null
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
