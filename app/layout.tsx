@@ -1,4 +1,5 @@
 import type React from "react"
+import { Suspense } from "react"
 import type { Metadata, Viewport } from "next"
 import { Source_Sans_3, Playfair_Display } from "next/font/google"
 import { siteConfig } from "@/config/site"
@@ -53,7 +54,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
     >
       <head />
       <body className="min-h-screen bg-background font-sans antialiased">
-        <TopLoadingBar />
+        <Suspense fallback={null}>
+          <TopLoadingBar />
+        </Suspense>
         <Providers>{children}</Providers>
       </body>
     </html>

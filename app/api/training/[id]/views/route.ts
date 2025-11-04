@@ -6,13 +6,13 @@ import { handleApiError } from "@/lib/error-handler"
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.GENERAL)
     if (rateLimitResult) return rateLimitResult
 
-    const resourceId = params.id
+    const resourceId = (await params).id
 
     // Increment views
     const resource = await prisma.trainingResource.update({

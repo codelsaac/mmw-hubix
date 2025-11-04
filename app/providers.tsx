@@ -11,7 +11,12 @@ import { AIChatWidget } from "@/components/ai-chat-widget"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider
+      refetchOnWindowFocus={false}
+      refetchInterval={0}
+      refetchWhenHidden={false}
+      refetchWhenOffline={false}
+    >
       <BrowserExtensionCleanup />
       <ErrorBoundary>
         <div className="relative flex min-h-screen flex-col bg-background">

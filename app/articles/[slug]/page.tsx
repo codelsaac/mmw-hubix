@@ -9,8 +9,10 @@ import Link from "next/link"
 import { usePublicArticles, type Article } from "@/hooks/use-articles"
 import { notFound } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+
 interface ArticlePageProps {
-  params: Promise<{ slug: string }>
+  params: { slug: string }
 }
 
 export default function ArticlePage({ params }: ArticlePageProps) {
@@ -18,11 +20,7 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [slug, setSlug] = useState<string>('')
-
-  useEffect(() => {
-    params.then(({ slug }) => setSlug(slug))
-  }, [params])
+  const slug = params.slug
 
   useEffect(() => {
     if (!slug) return

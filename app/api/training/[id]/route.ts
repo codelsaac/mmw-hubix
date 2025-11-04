@@ -10,7 +10,7 @@ import path from 'path'
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
@@ -30,7 +30,7 @@ export async function DELETE(
       )
     }
 
-    const resourceId = params.id
+    const resourceId = (await params).id
 
     // Get the resource first to check if it has a file to delete
     const resource = await prisma.trainingResource.findUnique({

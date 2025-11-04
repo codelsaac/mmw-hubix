@@ -6,9 +6,6 @@ const __dirname = dirname(__filename)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: false, // Enable ESLint validation
-  },
   typescript: {
     ignoreBuildErrors: false, // Enable TypeScript validation
   },
@@ -114,12 +111,6 @@ const nextConfig = {
   
   // PoweredByHeader removal
   poweredByHeader: false,
-  
-  // Optimize fonts
-  optimizeFonts: true,
-  
-  // Enable SWC minification
-  swcMinify: true,
 }
 
 export default nextConfig

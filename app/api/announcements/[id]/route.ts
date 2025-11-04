@@ -5,14 +5,14 @@ import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { logger } from "@/lib/logger"
 
-// GET /api/activity-news/[id] - Get single activity news
+// GET /api/announcements/[id] - Get single announcement
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const activityNews = await prisma.activityNews.findUnique({
+    const announcement = await prisma.announcement.findUnique({
       where: { id: id },
       include: {
         creator: {
@@ -25,24 +25,24 @@ export async function GET(
       },
     })
 
-    if (!activityNews) {
+    if (!announcement) {
       return NextResponse.json(
-        { error: "Activity News not found" },
+        { error: "Announcement not found" },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(activityNews)
+    return NextResponse.json(announcement)
   } catch (error) {
-    logger.error("Error fetching activity news:", error)
+    logger.error("Error fetching announcement:", error)
     return NextResponse.json(
-      { error: "Failed to fetch activity news" },
+      { error: "Failed to fetch announcement" },
       { status: 500 }
     )
   }
 }
 
-// PUT /api/activity-news/[id] - Update activity news
+// PUT /api/announcements/[id] - Update announcement
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -69,7 +69,7 @@ export async function PUT(
       isPublic,
     } = body
 
-    const activityNews = await prisma.activityNews.update({
+    const announcement = await prisma.announcement.update({
       where: { id: id },
       data: {
         title,
@@ -94,9 +94,9 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(activityNews)
+    return NextResponse.json(announcement)
   } catch (error) {
-    logger.error("Error updating activity news:", error)
+    logger.error("Error updating announcement:", error)
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
@@ -104,13 +104,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     return NextResponse.json(
-      { error: "Failed to update activity news" },
+      { error: "Failed to update announcement" },
       { status: 500 }
     )
   }
 }
 
-// DELETE /api/activity-news/[id] - Delete activity news
+// DELETE /api/announcements/[id] - Delete announcement
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -123,16 +123,16 @@ export async function DELETE(
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    await prisma.activityNews.delete({ where: { id: id } })
+    await prisma.announcement.delete({ where: { id: id } })
 
-    return NextResponse.json({ message: "Activity News deleted successfully" })
+    return NextResponse.json({ message: "Announcement deleted successfully" })
   } catch (error) {
-    logger.error("Error deleting activity news:", error)
+    logger.error("Error deleting announcement:", error)
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
     return NextResponse.json(
-      { error: "Failed to delete activity news" },
+      { error: "Failed to delete announcement" },
       { status: 500 }
     )
   }

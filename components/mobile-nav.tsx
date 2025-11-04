@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/use-auth"
 import { Permission } from "@/lib/permissions"
 import { Menu } from "lucide-react"
+import { useHydration } from "@/hooks/use-hydration"
 
 interface NavItem {
   title: string
@@ -57,6 +58,7 @@ const navigationItems: NavItem[] = [
 ]
 
 export function MobileNav() {
+  const isHydrated = useHydration()
   const [open, setOpen] = React.useState(false)
   const pathname = usePathname()
   const { hasAnyPermission, isAuthenticated } = useAuth()
@@ -75,6 +77,10 @@ export function MobileNav() {
     if (!item.requiredPermissions || item.requiredPermissions.length === 0) return true
     return hasAnyPermission(item.requiredPermissions)
   })
+
+  if (!isHydrated) {
+    return null
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

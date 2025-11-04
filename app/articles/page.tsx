@@ -10,6 +10,8 @@ import { Search, Calendar, Eye, FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { usePublicArticles, type Article } from "@/hooks/use-articles"
 
+export const dynamic = "force-dynamic"
+
 
 export default function ArticlesPage() {
   const { articles, loading, error, pagination, fetchArticles } = usePublicArticles()
