@@ -1,116 +1,94 @@
-# MMW Hubix - Project Rules
+## AI Assistant Mandate
+- Act as the MMW Hubix pair programmer and obey this ruleset.
+- Keep responses concise and token-efficient.
+- Avoid unsolicited refactors, file churn, or structural rewrites.
+- Enforce username-only authentication and server-side permission checks; never expose Prisma to client code.
+- Always validate with Zod, run tests/quality checks, and update docs before calling work complete.
+- Read the entire target file before editing and search for dependencies.
+- Use project import aliases, Tailwind with `cn()`, and default to server components.
+- Never commit secrets; rely on environment variables.
+- Do not run destructive commands without explicit user approval.
 
-## Tech Stack
-- Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui
-- Prisma ORM: MySQL
-- NextAuth.js: **USERNAME-based auth** (NOT email)
-- Zod validation, React Hook Form, Recharts, React Data Grid
+# MMW Hubix – Project Rules
 
-## Key Conventions
-- **Files**: Components `kebab-case.tsx`, Pages `page.tsx`, API `route.ts`, Hooks `use-*.ts`
-- **Components**: Server Components default, add `"use client"` only when needed (state/effects)
-- **Imports**: `@/components/*`, `@/lib/*`, `@/hooks/*`, `@/app/*`
-- **Styling**: Tailwind only, use `cn()` from `lib/utils.ts`, no inline styles
+## Tech Stack Facts
+- Next.js 15 App Router with TypeScript, Tailwind CSS, shadcn/ui.
+- Prisma ORM (MySQL backend).
+- NextAuth.js with username-based login only.
+- Validation via Zod; forms use React Hook Form; charts via Recharts; tabular data via React Data Grid.
+
+## File, Component & Import Conventions
+- **Naming**: Components `kebab-case.tsx`, pages `page.tsx`, APIs `route.ts`, hooks `use-*.ts`.
+- **Component Type**: Server Component by default; add `"use client"` only when state/effects are required.
+- **Imports**: Use path aliases (`@/components/*`, `@/lib/*`, `@/hooks/*`, `@/app/*`).
+- **Styling**: Tailwind only; compose classes with `cn()` from `@/lib/utils`.
 
 ## Auth & Roles
-- **Roles**: ADMIN (full access) / HELPER (dashboard) / GUEST (read-only)
-- **Server**: Use `auth()` in pages, `requireAuth(["ADMIN"])` in API routes
-- **Always validate permissions server-side**
+- Roles: `ADMIN` (full access), `HELPER` (IT Perfect management), `IT_PREFECT` (view-only resources).
+- Server pages call `auth()`; API routes guard with `requireAuth([...roles])`.
+- Always enforce permissions server-side; never rely on client checks alone.
 
-## Database Models
-- **User**: username-based auth, roles, permissions, activity tracking
-- **Article**: CMS system with slug, content, status, featured images
-- **Announcement**: Club events with attendees, location, scheduling
-- **TrainingResource**: Videos, text, files with categories and difficulty
-- **PublicEvent/InternalEvent**: Calendar system with attendees
-- **Activity/Task**: Team management with assignments and priorities
-- **Resource**: External links organized by category
+## Core Database Models
+- **User**: Username auth, role/permission metadata, activity tracking.
+- **Article**: CMS entries with slug, content, status, featured media.
+- **Announcement**: Club events covering schedule, attendees, and venue.
+- **TrainingResource**: Video, text, and file content with categories/difficulty.
+- **PublicEvent/InternalEvent**: Calendar entities with attendee lists.
+- **Activity/Task**: Team assignments with priority management.
+- **Resource**: Curated external links grouped by category.
+- **Category**: Defines resource taxonomy with icons, colors, and ordering.
+- **SiteSetting**: Central configuration store pulled from the database.
 
-## Core Features
-- **Articles CMS**: Full content management with drafts, publishing, SEO
-- **Announcements**: Club event management with RSVP system
-- **Training Library**: Multi-format resources (video/text/file) with search
-- **Calendar System**: Public and internal events with attendee management
-- **AI Chat Assistant**: Conversational support for campus navigation
-- **File Uploads**: Secure document/image/video handling with validation
-- **Activity Management**: Task assignment and team coordination
-- **Resource Hub**: Curated external links with click tracking
+## Database Usage
+- Use a Prisma singleton, prefer `cuid()` primary keys, size MySQL fields appropriately, and add required indexes.
 
-## Database
-- Use singleton: `import { prisma } from "@/lib/prisma"`
-- Primary keys: `cuid()` for cross-DB compatibility
-- MySQL types: `@db.Text`, `@db.VarChar(2048)`, `@db.VarChar(255)`, `@db.LongText`
-- Use proper indexes for performance: `@@index([status, publishedAt])`
+## API Structure Expectations
+- Wrap handlers in `requireAuth`, validate inputs with Zod, use `NextResponse.json`, and wrap logic in `try/catch` following existing patterns.
 
-## API Patterns
-```typescript
-import { requireAuth } from "@/lib/auth-middleware"
-import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
+## Security & Validation Guarantees
+- Validate all inbound data with Zod schemas.
+- For uploads, enforce file type, size, and signature checks.
+- Apply CSRF protection for any state-changing request.
+- Rate-limit abusive endpoints.
+- Rely on Prisma’s parameterised queries to prevent SQL injection.
+- Sanitize user-generated output to block XSS.
 
-export async function GET(req: Request) {
-  const session = await requireAuth(["ADMIN"])
-  try {
-    const data = await prisma.model.findMany()
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: "Message" }, { status: 500 })
-  }
-}
+## Pre-Work Checklist (run **before** coding)
+1. **Read the code**: Load the entire target file with `read_file`, understand patterns, and note related modules.
+2. **Search dependencies**: Use `grep_search` to locate every reference and confirm type signatures.
+3. **Validate imports**: Confirm alias paths, existence of targets, and avoid circular dependencies.
+4. **Check types**: Ensure TypeScript/Prisma types align; never introduce `any` as a shortcut.
+5. **Respect conventions**: Follow naming, component, and API patterns exactly.
 
-export async function POST(req: Request) {
-  const session = await requireAuth(["ADMIN"])
-  try {
-    const body = await req.json()
-    // Validate with Zod schema
-    const data = await prisma.model.create({ data: body })
-    return NextResponse.json(data, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: "Message" }, { status: 500 })
-  }
-}
-```
+## Post-Work Checklist (run **after** coding)
+1. **Test**: Use Playwright MCP for UI, authenticated calls for APIs, and inspect browser/terminal logs.
+2. **Quality checks**: Run `npm run quality-check`; fix all TypeScript/ESLint/build issues.
+3. **Docs**: Update README/docs if the change touches API, DB, Auth, UI, Config, or Env vars.
+4. **Verify diffs**: Review every modified file and confirm import sanity.
+5. **Commit standards**: Stage intentionally and commit with descriptive messages (e.g., `feat: add category management system with CRUD operations`).
 
-## Security & Validation
-- **Input Validation**: Use Zod schemas for all API endpoints
-- **File Uploads**: Validate file types, sizes, and signatures
-- **CSRF Protection**: Implement CSRF tokens for state-changing operations
-- **Rate Limiting**: Prevent abuse with request throttling
-- **SQL Injection**: Use Prisma parameterized queries only
-- **XSS Prevention**: Sanitize all user-generated content
+## README Update Gate
+- When API, DB, Auth, UI, Config, or Env changes occur, update Recent Updates and the affected sections (API, Database Models, Auth & Roles, Tech Stack, Env Vars) before finishing the task.
 
-## File Organization
-```
-app/
-├── admin/           # Admin console pages
-├── api/            # API routes
-│   ├── admin/      # Admin-only endpoints
-│   ├── public/     # Public endpoints
-│   └── dashboard/  # Authenticated user endpoints
-├── articles/       # Article pages
-└── dashboard/      # User dashboard pages
+## Critical Do / Do-Not Rules
+- ❌ Never implement email auth, bypass auth checks, run Prisma in client components, hardcode credentials, skip README updates, skip quality checks, or edit files you did not review.
+- ✅ Always validate server-side inputs with Zod, wrap logic in `try/catch`, keep TypeScript strict, preserve accessibility (semantic HTML + ARIA), test APIs with auth, follow conventions, and run `npm run quality-check` before completion.
 
-components/
-├── admin/          # Admin management components
-├── auth/           # Authentication components
-├── dashboard/      # Dashboard components
-└── ui/             # Base UI components (shadcn/ui)
+## Acceptance Criteria For Any Change
+- TypeScript compiles with zero errors.
+- ESLint reports no new warnings.
+- Affected routes/pages run without server or browser console errors.
+- API updates are authenticated, validated, and error-handled.
+- Schema changes include migrations and Prisma client regeneration.
+- UI changes remain responsive and accessible.
+- README/docs updates reflect the impact.
+- `npm run quality-check` passes; smoke tests complete successfully.
 
-hooks/              # Custom React hooks
-lib/                # Utilities, validation, database
-```
-
-## Critical Rules
-- ❌ NO email auth (use username)
-- ❌ NO `any` types without reason
-- ❌ NO Prisma in client components
-- ❌ NO skipping auth checks in API routes
-- ❌ NO direct database queries (use Prisma)
-- ❌ NO hardcoded credentials (use environment variables)
-- ✅ Always validate input server-side with Zod
-- ✅ Handle errors with try/catch
-- ✅ Use TypeScript strict mode
-- ✅ Implement proper error boundaries
-- ✅ Use semantic HTML and ARIA labels
-- ✅ Test all API endpoints with proper auth
-- If there is an important update, update the [text](../../README.md).
+## Pre-Deployment Checklist
+- All automated tests pass.
+- `npm run quality-check` succeeds.
+- No console warnings/errors remain.
+- README.md reflects the current state.
+- Database migrations are prepared/applied if schema changed.
+- Environment variable requirements are documented.
+- Any breaking changes are clearly called out.

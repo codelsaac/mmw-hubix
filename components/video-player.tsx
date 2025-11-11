@@ -50,7 +50,7 @@ export function VideoPlayer({ videoUrl, title, className }: VideoPlayerProps) {
         URL.revokeObjectURL(localVideoUrl)
       }
     }
-  }, [videoUrl])
+  }, [videoUrl, localVideoUrl])
 
   if (isLoading) {
     return (

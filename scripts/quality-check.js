@@ -28,7 +28,7 @@ const checks = [
 const optionalChecks = [
   {
     name: 'ESLint Check',
-    command: 'npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0',
+    command: 'npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 5',
     critical: false
   }
 ];

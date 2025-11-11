@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/auth'
 import { z } from 'zod'
 import { logger } from "@/lib/logger"
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { handleApiError } from '@/lib/error-handler'
+import { requireAuthAPI } from "@/lib/auth-server"
+import { UserRole } from "@/lib/permissions"
 
 // For demo purposes, we'll store updated user data in a simple in-memory store
 // In a real application, this would be stored in the database
@@ -27,23 +27,19 @@ export async function GET(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.AUTH)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const userId = session.user.id
+    // Only ADMIN and HELPER may access profile data
+    const user = await requireAuthAPI([UserRole.ADMIN, UserRole.HELPER])
+    const userId = user.id
     const userUpdates = getUserUpdates(userId)
     
     return NextResponse.json({
-      id: session.user.id,
-      username: session.user.username,
-      name: userUpdates.name || session.user.name,
-      email: userUpdates.email || session.user.email,
-      department: userUpdates.department || session.user.department,
-      role: session.user.role,
-      image: session.user.image
+      id: user.id,
+      username: user.username,
+      name: userUpdates.name || user.name,
+      email: userUpdates.email || user.email,
+      department: userUpdates.department || user.department,
+      role: user.role,
+      image: user.image
     })
   } catch (error) {
     logger.error('[PROFILE_GET]', error)
@@ -57,11 +53,8 @@ export async function PATCH(request: NextRequest) {
     const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Only ADMIN and HELPER may update profile
+    const user = await requireAuthAPI([UserRole.ADMIN, UserRole.HELPER])
 
     const body = await request.json()
     logger.log('[PROFILE_PATCH] Received body:', body)
@@ -69,7 +62,7 @@ export async function PATCH(request: NextRequest) {
     const validatedData = profileUpdateSchema.parse(body)
     logger.log('[PROFILE_PATCH] Validated data:', validatedData)
     
-    const userId = session.user.id
+    const userId = user.id
     
     // Store the updates (in a real app, this would update the database)
     const currentUpdates = getUserUpdates(userId)
@@ -80,12 +73,12 @@ export async function PATCH(request: NextRequest) {
     
     return NextResponse.json({
       id: userId,
-      username: session.user.username,
-      name: newUpdates.name || session.user.name,
-      email: newUpdates.email || session.user.email,
-      department: newUpdates.department || session.user.department,
-      role: session.user.role,
-      image: session.user.image
+      username: user.username,
+      name: newUpdates.name || user.name,
+      email: newUpdates.email || user.email,
+      department: newUpdates.department || user.department,
+      role: user.role,
+      image: user.image
     })
   } catch (error) {
     logger.error('[PROFILE_PATCH]', error)
@@ -96,8 +89,8 @@ export async function PATCH(request: NextRequest) {
         details: error.issues 
       }, { status: 400 })
     }
-    
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const { message, statusCode } = handleApiError(error)
+    return NextResponse.json({ error: message }, { status: statusCode })
   }
 }
 

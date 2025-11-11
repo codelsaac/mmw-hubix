@@ -108,6 +108,7 @@ model Resource {
   name        String
   url         String   @db.VarChar(2048)
   description String?  @db.Text
+  icon        String?  // Icon name or favicon URL for the resource
   categoryId  String?
   status      String   @default("active")
   clicks      Int      @default(0)
@@ -291,39 +292,6 @@ model TeamNotes {
   updatedBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Notification {
-  id        String               @id @default(cuid())
-  title     String
-  message   String               @db.Text
-  type      NotificationType     @default(INFO)
-  priority  NotificationPriority @default(NORMAL)
-  isRead    Boolean              @default(false)
-  userId    String?
-  link      String?              @db.VarChar(2048)
-  metadata  String?              @db.Text
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
-
-  @@index([userId, isRead, createdAt])
-  @@index([createdAt])
-}
-
-enum NotificationType {
-  INFO
-  SUCCESS
-  WARNING
-  ERROR
-  ANNOUNCEMENT
-  SYSTEM
-}
-
-enum NotificationPriority {
-  LOW
-  NORMAL
-  HIGH
-  URGENT
 }
 
 model SiteSetting {

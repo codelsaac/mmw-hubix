@@ -18,7 +18,42 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Edit, Trash2, Search, Palette, Type } from "lucide-react"
+import { IconPicker } from "@/components/ui/icon-picker"
+import { ColorPicker } from "@/components/ui/color-picker"
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  Palette,
+  Type,
+  BookOpen,
+  Users,
+  FileText,
+  Laptop,
+  Library,
+  Building,
+  Heart,
+  Briefcase,
+  DollarSign,
+  Home,
+  Car,
+  PartyPopper,
+  UserCheck,
+  Microscope,
+  Globe2,
+  GraduationCap,
+  Phone,
+  Calendar,
+  Mail,
+  Clock,
+  MapPin,
+  ExternalLink,
+  Search as SearchIcon,
+  Settings,
+  Shield,
+  Star,
+} from "lucide-react"
 import { toast } from "sonner"
 import { logger } from "@/lib/logger"
 
@@ -213,14 +248,49 @@ export function CategoryManagement() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {category.icon && (
-                      <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-semibold"
-                        style={{ backgroundColor: category.color || '#3b82f6' }}
-                      >
-                        <Type className="w-4 h-4" />
-                      </div>
-                    )}
+                    {(() => {
+                      const iconMap: Record<string, any> = {
+                        BookOpen,
+                        Users,
+                        FileText,
+                        Laptop,
+                        Library,
+                        Building,
+                        Heart,
+                        Briefcase,
+                        DollarSign,
+                        Home,
+                        Car,
+                        PartyPopper,
+                        UserCheck,
+                        Microscope,
+                        Globe2,
+                        GraduationCap,
+                        Phone,
+                        Calendar,
+                        Mail,
+                        Clock,
+                        MapPin,
+                        ExternalLink,
+                        Search: SearchIcon,
+                        Settings,
+                        Shield,
+                        Star,
+                      }
+                      const IconComp = iconMap[category.icon || "Globe2"] || Globe2
+                      return (
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                          {IconComp === Globe2 ? (
+                            <span
+                              className="w-3.5 h-3.5 rounded-full border"
+                              style={{ backgroundColor: category.color || '#3b82f6', borderColor: (category.color || '#d1d5db') as string }}
+                            />
+                          ) : (
+                            <IconComp className="w-4 h-4" style={{ color: category.color || '#3b82f6' }} />
+                          )}
+                        </div>
+                      )
+                    })()}
                     <div>
                       <CardTitle className="text-lg">{category.name}</CardTitle>
                       <div className="flex items-center gap-2 mt-1">
@@ -343,39 +413,19 @@ function CategoryDialog({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="icon">Icon</Label>
-            <Select value={formData.icon} onValueChange={(value) => setFormData({ ...formData, icon: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select icon" />
-              </SelectTrigger>
-              <SelectContent>
-                {iconOptions.map((icon) => (
-                  <SelectItem key={icon} value={icon}>
-                    {icon}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <IconPicker
+              value={formData.icon}
+              onChange={(value) => setFormData({ ...formData, icon: value })}
+              icons={iconOptions}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="color">Color</Label>
-            <Select value={formData.color} onValueChange={(value) => setFormData({ ...formData, color: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select color" />
-              </SelectTrigger>
-              <SelectContent>
-                {colorOptions.map((color) => (
-                  <SelectItem key={color} value={color}>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-4 h-4 rounded-full border border-gray-300" 
-                        style={{ backgroundColor: color }}
-                      />
-                      {color}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ColorPicker
+              value={formData.color}
+              onChange={(value) => setFormData({ ...formData, color: value })}
+              colors={colorOptions}
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/auth'
 import { z } from 'zod'
 import { logger } from "@/lib/logger"
 import { verifyCurrentPassword, updatePassword, getDemoAccount } from "@/lib/password-utils"
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { handleApiError } from '@/lib/error-handler'
+import { requireAuthAPI } from "@/lib/auth-server"
+import { UserRole } from "@/lib/permissions"
 
 const passwordChangeSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -17,17 +17,14 @@ export async function PATCH(request: NextRequest) {
     const rateLimitResult = await rateLimit(request, RATE_LIMITS.AUTH)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Only ADMIN and HELPER may change password
+    const user = await requireAuthAPI([UserRole.ADMIN, UserRole.HELPER])
 
     const body = await request.json()
     const { currentPassword, newPassword } = passwordChangeSchema.parse(body)
     
-    const userId = session.user.id
-    const username = session.user.username
+    const userId = user.id
+    const username = user.username
     
     // Find the demo account
     const demoAccount = getDemoAccount(userId)

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import type { FormEvent } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -34,6 +35,8 @@ import {
   Phone,
 } from "lucide-react"
 import { resourceService, type Resource } from "@/lib/resources"
+import { parseIconValue } from "@/lib/favicon-utils"
+import { GoogleSearchButton } from "@/components/google-search-widget"
 
 // Category icon mapping
 const getCategoryIcon = (category: string) => {
@@ -157,10 +160,26 @@ export function ResourceHub() {
     {} as Record<string, Resource[]>,
   )
 
+  const getCategoryColor = (value: string) => {
+    const cat = (categories as any[]).find((c) => c.id === value || c.name === value) as any
+    return cat?.color || "#3b82f6"
+  }
+
   const handleResourceClick = (resource: Resource) => {
     if (typeof window !== 'undefined') {
       resourceService.updateResource(resource.id, { clicks: resource.clicks + 1 })
       window.open(resource.url, "_blank", "noopener,noreferrer")
+    }
+  }
+
+  const handleGoogleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const trimmedQuery = searchQuery.trim()
+    if (!trimmedQuery) return
+
+    if (typeof window !== 'undefined') {
+      const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(trimmedQuery)}`
+      window.open(googleSearchUrl, "_blank", "noopener,noreferrer")
     }
   }
 
@@ -222,16 +241,19 @@ export function ResourceHub() {
       </div>
 
       <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
-        <div className="relative px-4 sm:px-0">
-          <Search className="absolute left-3 sm:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors duration-300" />
-          <Input
-            placeholder="Search resources..."
-            className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm transition-all duration-300 w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
+        <form onSubmit={handleGoogleSearch} className="px-4 sm:px-0 flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors duration-300" />
+            <Input
+              placeholder="Search resources..."
+              className="pl-10 bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 placeholder:text-gray-500 shadow-sm transition-all duration-300 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <GoogleSearchButton disabled={!searchQuery.trim()} />
+        </form>
+
         {/* Category Filter Tabs */}
         <div className="w-full px-4 sm:px-0">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -258,7 +280,10 @@ export function ResourceHub() {
                 onClick={() => setSelectedCategory(category.id)}
                 className="text-xs whitespace-nowrap flex-shrink-0"
               >
-                <CategoryIcon className="w-3 h-3 mr-1" />
+                <span
+                  className="mr-1 inline-block w-2.5 h-2.5 rounded-full border"
+                  style={{ backgroundColor: category.color || undefined, borderColor: (category.color || '#d1d5db') as string }}
+                />
                 <span className="hidden sm:inline">{category.name}</span>
                 <span className="sm:hidden">{category.name.split(' ')[0]}</span>
                 <Badge variant="secondary" className="ml-2 text-[10px]">
@@ -279,8 +304,13 @@ export function ResourceHub() {
             <div key={category} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
               <div className="flex items-center gap-2 flex-wrap">
                 {(() => {
-                  const CategoryIcon = getCategoryIcon(category)
-                  return <CategoryIcon className="w-5 h-5 text-primary flex-shrink-0" />
+                  const iconColor = getCategoryColor(category)
+                  return (
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border flex-shrink-0"
+                      style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
+                    />
+                  )
                 })()}
                 <h3 className="text-lg sm:text-xl font-serif font-semibold text-foreground">{category}</h3>
                 <Badge variant="secondary" className="text-xs flex-shrink-0">
@@ -289,7 +319,47 @@ export function ResourceHub() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {categoryResources.map((resource) => {
-                  const IconComponent = getResourceIcon(resource.name, resource.category)
+                  const iconColor = getCategoryColor(resource.category as any)
+                  const resourceIconData = parseIconValue((resource as any).icon)
+                  
+                  // Determine which icon to display
+                  let iconDisplay
+                  if (resourceIconData.type === 'url') {
+                    // Display favicon image
+                    iconDisplay = (
+                      <img 
+                        src={resourceIconData.value || ''} 
+                        alt={resource.name}
+                        className="w-5 h-5 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    )
+                  } else if (resourceIconData.type === 'icon') {
+                    // Display Lucide icon from iconMap
+                    const iconMap: Record<string, any> = {
+                      BookOpen, Users, FileText, Laptop, Library, Building, Heart, Briefcase,
+                      DollarSign, Home, Car, PartyPopper, UserCheck, Microscope, Globe2,
+                      GraduationCap, Phone, Calendar, Mail, Clock, MapPin, ExternalLink
+                    }
+                    const IconComponent = iconMap[resourceIconData.value || ''] || Globe
+                    iconDisplay = <IconComponent className="w-5 h-5 transition-transform duration-300" style={{ color: iconColor }} />
+                  } else {
+                    // Fallback to automatic icon selection
+                    const IconComponent = getResourceIcon(resource.name, resource.category)
+                    if (IconComponent === Globe || IconComponent === Globe2) {
+                      iconDisplay = (
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border"
+                          style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
+                        />
+                      )
+                    } else {
+                      iconDisplay = <IconComponent className="w-5 h-5 transition-transform duration-300" style={{ color: iconColor }} />
+                    }
+                  }
+                  
                   return (
                     <Card
                       key={resource.id}
@@ -299,7 +369,7 @@ export function ResourceHub() {
                       <CardHeader className="pb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 flex-shrink-0">
-                            <IconComponent className="w-5 h-5 text-primary transition-transform duration-300" />
+                            {iconDisplay}
                           </div>
                           <div className="flex-1 min-w-0">
                             <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -328,8 +398,12 @@ export function ResourceHub() {
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-center gap-2 flex-wrap">
                   {(() => {
-                    const CategoryIcon = getCategoryIcon(selectedCategoryData.name)
-                    return <CategoryIcon className="w-5 h-5 text-primary flex-shrink-0" />
+                    return (
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border flex-shrink-0"
+                        style={{ backgroundColor: selectedCategoryData.color || undefined, borderColor: (selectedCategoryData.color || '#d1d5db') as string }}
+                      />
+                    )
                   })()}
                   <h3 className="text-lg sm:text-xl font-serif font-semibold text-foreground">{selectedCategoryData.name}</h3>
                   <Badge variant="secondary" className="text-xs flex-shrink-0">
@@ -339,6 +413,7 @@ export function ResourceHub() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {categoryResources.map((resource) => {
                     const IconComponent = getResourceIcon(resource.name, resource.category)
+                    const iconColor = getCategoryColor(resource.category as any)
                     return (
                       <Card
                         key={resource.id}
@@ -348,7 +423,14 @@ export function ResourceHub() {
                         <CardHeader className="pb-3">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 flex-shrink-0">
-                              <IconComponent className="w-5 h-5 text-primary transition-transform duration-300" />
+                              {IconComponent === Globe || IconComponent === Globe2 ? (
+                                <span
+                                  className="w-3.5 h-3.5 rounded-full border"
+                                  style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
+                                />
+                              ) : (
+                                <IconComponent className="w-5 h-5 transition-transform duration-300" style={{ color: iconColor }} />
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <CardTitle className="text-base font-semibold flex items-center gap-2">

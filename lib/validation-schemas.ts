@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 // Common validation patterns
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const usernamePattern = /^[a-zA-Z0-9_-]{3,50}$/
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/
 

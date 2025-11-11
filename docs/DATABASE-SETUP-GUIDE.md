@@ -205,7 +205,7 @@ npx prisma generate
 - Verify credentials in `.env.local`
 - Check if password has special characters (URL-encode them)
 - Try connecting via MySQL Workbench with same credentials
-- Reset MySQL password if needed (see `RESET-MYSQL-PASSWORD.md`)
+- Reset MySQL password if needed (see `docs/RESET-MYSQL-PASSWORD.md`)
 
 #### 5. "Database out of sync"
 **Cause:** Schema changes not applied  

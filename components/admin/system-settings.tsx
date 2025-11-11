@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Settings, Database, Shield, Bell, Palette, Download, Upload, CheckCircle } from "lucide-react"
+import { Settings, Database, Shield, Palette, Download, Upload, CheckCircle } from "lucide-react"
 import { useSettings } from "@/hooks/use-settings"
 import { toast } from "sonner"
 
@@ -94,10 +94,9 @@ export function SystemSettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="backup">Backup</TabsTrigger>
         </TabsList>
 
@@ -220,30 +219,6 @@ export function SystemSettings() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                Notification Settings
-              </CardTitle>
-              <CardDescription>Configure system notifications and alerts</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Send email notifications for important events</p>
-                </div>
-                <Switch
-                  checked={localSettings.emailNotifications}
-                  onCheckedChange={(checked) => handleSettingChange("emailNotifications", checked)}
-                />
               </div>
             </CardContent>
           </Card>

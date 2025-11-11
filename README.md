@@ -10,25 +10,36 @@
 
 ## Recent Updates
 
-### Latest Improvements (December 2024)
+### Latest Improvements (November 2024)
+- **🎉 Phase 2 Complete**: Sentry error monitoring fully integrated across client, server, and edge runtimes
+- **🚀 Enterprise Architecture**: Repository/Service/Controller pattern with ABAC permission system (Phase 0-1)
+- **🔒 Production-Ready Security**: Rate limiting, CSP headers, input sanitization, XSS protection
+- **📊 Error Monitoring**: Comprehensive Sentry integration with automatic error tracking and performance monitoring
+- **🤖 CI/CD Pipeline**: GitHub Actions for automated quality checks and deployment
+- **📝 Structured Logging**: Development-friendly colored logs, production JSON logs with context
+- **🔍 Google Search Widget**: Quick Google search functionality integrated into Resource Hub for convenient web searches
+- **Resource Icon Support**: Resources now support custom icons with automatic favicon fetching from URLs
+- **Visual Icon & Color Pickers**: Interactive selection interfaces for category icons and colors with search functionality
 - **Categories Management System**: Complete admin interface for managing resource categories with icons, colors, and sorting
 - **Enhanced Resource Hub**: Resources now properly organized by dynamic categories with visual indicators
-- **Database-Backed Settings System**: Comprehensive site configuration with categories (General, Security, Notifications, Backup)
+- **Database-Backed Settings System**: Comprehensive site configuration with categories (General, Security, Backup)
 - **Database Schema Updates**: New Category and SiteSetting models with full CRUD operations and proper relationships
 - **Enhanced UI & Animations**: Smooth transitions, hover effects, staggered animations across all components
-- **Bug Fixes**: Resolved TypeScript errors in admin users route and database schema issues
-- **Database Support**: MySQL-first workflow for development and production
-- **Documentation**: Added comprehensive database setup guide
-- **Quality Assurance**: Implemented mandatory bug checking procedures
+- **Quality Assurance**: Implemented mandatory bug checking procedures and comprehensive testing
 - **User Profile**: Enhanced profile management with modern UI
 - **AI Chat**: Polished floating button with pulsing animation
 - **System Settings**: Admin interface for site configuration with real-time updates
 
-### Coming Soon
+### Architecture Highlights
+- **📊 Phase 2**: Real-time error monitoring with Sentry (client + server + edge)
+- **🏗️ Phase 1**: Repository/Service/ABAC pattern for enterprise-grade architecture
+- **🛡️ Phase 0**: Security middleware, CI/CD, structured logging, input sanitization
+
+### Coming Soon (Phase 3)
+- Redis caching layer for performance
+- Comprehensive unit test suite
+- E2E testing with Playwright
 - Advanced analytics dashboard
-- Email notification system
-- File upload optimization
-- Performance monitoring
 
 ## Project Overview & Vision
 MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform that serves both public and internal needs. The portal provides:
@@ -88,7 +99,7 @@ pnpm install
 # Add your MySQL connection string:
 DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 
-# See DATABASE-SETUP-GUIDE.md for detailed configuration
+# See docs/DATABASE-SETUP-GUIDE.md for detailed configuration
 ```
 
 4. Set up the database
@@ -123,7 +134,7 @@ Visit http://localhost:3000 to view the site.
 #### Database Configuration
 The project uses **MySQL** for both development and production, providing a consistent environment.
 
-**📚 Detailed Setup Guide:** [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)
+**📚 Detailed Setup Guide:** [DATABASE-SETUP-GUIDE.md](./docs/DATABASE-SETUP-GUIDE.md)
 
 **Key Configuration Files:**
 - **`.env`** - Base configuration (committed to Git, placeholder values)
@@ -229,7 +240,7 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 ### User Profile & Settings
 - **Profile Management**: Users can update their personal information (name, email, department)
 - **Password Security**: Secure password change functionality with current password verification
-- **User Preferences**: Theme selection, notification settings, and personal customization
+- **User Preferences**: Theme selection and personal customization
 - **Access Control**: Users can only edit their own profile information
 - **Settings Access**: Available via user menu dropdown or direct navigation to `/dashboard/profile`
 
@@ -261,8 +272,7 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 - **System Settings**: Database-backed site configuration with categories:
   - **General Settings**: Site name, description, file upload limits
   - **Security Settings**: Session timeout, login attempts, access control
-  - **Notification Settings**: Email notifications and alert preferences
-  - **Backup Settings**: Automatic backup configuration
+  - **Backup Settings**: Automatic backup configuration and frequency
   - **Real-time Updates**: Changes apply immediately across the site
   - **Export/Import**: Settings backup and restore functionality
 
@@ -381,7 +391,6 @@ GET /api/admin/categories/meta
 - Features:
   - **General Settings**: Site name, description, file upload limits, maintenance mode
   - **Security Settings**: Session timeout, login attempts, access control
-  - **Notification Settings**: Email notifications and alert preferences
   - **Backup Settings**: Automatic backup configuration and frequency
   - **Real-time Updates**: Changes apply immediately across the site
   - **Export/Import**: Settings backup and restore functionality
@@ -392,7 +401,7 @@ GET /api/admin/categories/meta
 - Features:
   - Edit personal information (name, email, department)
   - Change password with current password verification
-  - Set user preferences (theme, notifications)
+  - Set user preferences (themes, layout options)
 
 API:
 ```http
@@ -478,7 +487,6 @@ The application uses a comprehensive database schema with the following key mode
 - **TeamNotes**: Collaborative team notes with version tracking
 
 ### System Models
-- **Notification**: Real-time notification system with types, priorities, and read status
 - **SiteSetting**: Database-backed settings management with categories and types
 - **Account/Session**: NextAuth.js authentication models for OAuth and session management
 
@@ -601,35 +609,46 @@ NEXTAUTH_SECRET="<generate-with: openssl rand -base64 32>"
 ```env
 NEXT_PUBLIC_APP_URL="https://your-domain.com"
 OPENROUTER_API_KEY="your-openrouter-key"  # For AI chat feature
+OPENROUTER_BASE_URL="https://openrouter.ai/api/v1/chat/completions"  # Optional override
+OPENROUTER_MODEL="openai/gpt-oss-20b:free"  # Optional model selection
+
+# Error Monitoring (Sentry)
+SENTRY_DSN="https://abc123@sentry.io/123456"  # Get from sentry.io
+NEXT_PUBLIC_SENTRY_DSN="https://abc123@sentry.io/123456"
+SENTRY_AUTH_TOKEN="your-auth-token"  # For source map upload
+SENTRY_ORG="your-org-slug"
+SENTRY_PROJECT="mmw-hubix"
+SENTRY_ENVIRONMENT="production"
+SENTRY_TRACES_SAMPLE_RATE="0.1"  # 10% performance monitoring
 ```
 
 ## 📚 Documentation
 
 ### Directory Overview
 - **For Developers**
-  - **[Contributing Guide](./CONTRIBUTING.md)** – Development environment setup, code standards, testing requirements, and pull request workflow
+  - **[Contributing Guide](./docs/CONTRIBUTING.md)** – Development environment setup, code standards, testing requirements, and pull request workflow
 - **API & Integration**
   - **[API Documentation](./docs/API.md)** – Endpoint reference, request/response formats, authentication, error handling, and rate limiting
 - **Core Systems**
-  - **[Notification System](./docs/NOTIFICATIONS.md)** – Architecture, creation workflow, user management, API endpoints, and React hook usage
   - **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)** – Role defaults (ADMIN, HELPER, GUEST), custom permissions, server/client usage, and management API
   - **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)** – Model overview, default values, admin tooling, visibility, and migration guidance
+- **Infrastructure & Monitoring**
+  - **[Sentry Error Monitoring](./docs/SENTRY_SETUP.md)** – Complete guide to error tracking, performance monitoring, and production debugging
 
 ### Quick Links
 - **Getting Started**
   1. Read the `README.md` for project overview
-  2. Follow **[Contributing Guide](./CONTRIBUTING.md)** for setup
+  2. Follow **[Contributing Guide](./docs/CONTRIBUTING.md)** for setup
   3. Review **[API Documentation](./docs/API.md)** for integration details
 - **Common Tasks**
-  - Adding a feature → **[Contributing Guide](./CONTRIBUTING.md)** (Code Patterns section)
-  - Creating API endpoints → **[API Documentation](./docs/API.md)** + **[Contributing Guide](./CONTRIBUTING.md)**
+  - Adding a feature → **[Contributing Guide](./docs/CONTRIBUTING.md)** (Code Patterns section)
+  - Creating API endpoints → **[API Documentation](./docs/API.md)** + **[Contributing Guide](./docs/CONTRIBUTING.md)**
   - Managing permissions → **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)**
-  - Working with notifications → **[Notification System](./docs/NOTIFICATIONS.md)**
   - Configuring settings → **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)**
 - **Additional References**
-  - **[Database Setup Guide](./DATABASE-SETUP-GUIDE.md)** – Dual database configuration and troubleshooting
-  - Setup MySQL → See `setup-mysql.sql` and `DATABASE-SETUP-GUIDE.md`
-  - Mandatory bug checking → See **[Contributing Guide](./CONTRIBUTING.md)**
+  - **[Database Setup Guide](./docs/DATABASE-SETUP-GUIDE.md)** – Dual database configuration and troubleshooting
+  - Setup MySQL → See `scripts/setup-mysql.sql` and `docs/DATABASE-SETUP-GUIDE.md`
+  - Mandatory bug checking → See **[Contributing Guide](./docs/CONTRIBUTING.md)**
   - Quality checks before commits → Run `npm run quality-check`
 
 ### Documentation Standards
@@ -681,6 +700,19 @@ OPENROUTER_API_KEY="your-api-key-here"
 | `NEXTAUTH_SECRET` | ✅ Yes | Secret for encrypting session tokens |
 | `NEXT_PUBLIC_APP_URL` | ⚠️ Optional | Public-facing app URL (defaults to NEXTAUTH_URL) |
 | `OPENROUTER_API_KEY` | ⚠️ Optional | API key for AI chat feature |
+| `OPENROUTER_BASE_URL` | ⚠️ Optional | Override OpenRouter endpoint if needed |
+| `OPENROUTER_MODEL` | ⚠️ Optional | Select model (defaults to `openai/gpt-oss-20b:free`) |
+
+### AI Chat Rate Limits (429)
+
+- The AI chat uses OpenRouter. Free upstream models can return `429` when rate-limited.
+- The `/api/chat` route now handles `429` gracefully:
+  - Performs limited retries with backoff and, if still limited, returns `429` with a helpful message.
+  - Clients should surface a “Please retry shortly” notice to users.
+- To reduce `429` errors:
+  - Add your own `OPENROUTER_API_KEY` to `.env.local` (https://openrouter.ai/settings/integrations).
+  - Consider selecting a less rate-limited model via `OPENROUTER_MODEL`.
+  - Avoid rapid consecutive requests; the app also enforces server-side rate limiting.
 
 **📁 File Priority:**
 ```
@@ -778,13 +810,13 @@ export const siteConfig = {
    ```
 
 **📚 Additional Resources:**
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - Development procedures
-- [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md) - Setup guide
+- [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - Development procedures
+- [DATABASE-SETUP-GUIDE.md](./docs/DATABASE-SETUP-GUIDE.md) - Setup guide
 - [Prisma Docs](https://www.prisma.io/docs/) - Official Prisma documentation
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read our [Contributing Guide](./CONTRIBUTING.md) for:
+We welcome contributions! Please read our [Contributing Guide](./docs/CONTRIBUTING.md) for:
 - Development setup and workflow
 - Code quality standards
 - Testing requirements
@@ -798,7 +830,7 @@ Quick start for contributors:
 5. Push the branch: `git push origin feature/new-feature`
 6. Open a Pull Request
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for complete guidelines.
+See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for complete guidelines.
 
 ## 🚨 Troubleshooting
 
@@ -847,14 +879,15 @@ npx prisma db push
 
 ### Getting Help
 
-- **Database Issues:** See [DATABASE-SETUP-GUIDE.md](./DATABASE-SETUP-GUIDE.md)
-- **Development Guide:** See [CONTRIBUTING.md](./CONTRIBUTING.md)
+- **Database Issues:** See [DATABASE-SETUP-GUIDE.md](./docs/DATABASE-SETUP-GUIDE.md)
+- **Development Guide:** See [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 - **API Reference:** See [docs/API.md](./docs/API.md)
 - **Report Bugs:** Open an issue on GitHub
 
-## 📄 License
+## License
 This project is licensed under the MIT License — see the LICENSE file for details.
 
+## Acknowledgements
 ## 🙏 Acknowledgements
 - C.C.C. Mong Man Wai College
 - IT Prefect Team

@@ -17,9 +17,6 @@ export interface Settings {
   sessionTimeout: string
   maxLoginAttempts: string
   
-  // Notification Settings
-  emailNotifications: boolean
-  
   // Backup Settings
   autoBackup: boolean
   backupFrequency: string
@@ -37,7 +34,6 @@ const defaultSettings: Settings = {
   registrationEnabled: false,
   sessionTimeout: "30",
   maxLoginAttempts: "5",
-  emailNotifications: true,
   autoBackup: true,
   backupFrequency: "weekly",
 }

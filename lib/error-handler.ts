@@ -125,11 +125,25 @@ export function setupGlobalErrorHandlers() {
     // Client-side error handling
     window.addEventListener('error', (event) => {
       logger.error('Global Error:', event.error)
+      
+      // Send to Sentry
+      if (process.env.NODE_ENV === 'production' && event.error) {
+        import('@sentry/nextjs').then((Sentry) => {
+          Sentry.captureException(event.error)
+        })
+      }
     })
 
     window.addEventListener('unhandledrejection', (event) => {
       logger.error('Unhandled Promise Rejection:', event.reason)
       event.preventDefault() // Prevent the default browser behavior
+      
+      // Send to Sentry
+      if (process.env.NODE_ENV === 'production') {
+        import('@sentry/nextjs').then((Sentry) => {
+          Sentry.captureException(event.reason)
+        })
+      }
     })
   }
 
@@ -137,10 +151,25 @@ export function setupGlobalErrorHandlers() {
     // Server-side error handling
     process.on('unhandledRejection', (reason, promise) => {
       logger.error('Unhandled Promise Rejection:', reason)
+      
+      // Send to Sentry
+      if (process.env.NODE_ENV === 'production') {
+        import('@sentry/nextjs').then((Sentry) => {
+          Sentry.captureException(reason)
+        })
+      }
     })
 
     process.on('uncaughtException', (error) => {
       logger.error('Uncaught Exception:', error)
+      
+      // Send to Sentry
+      if (process.env.NODE_ENV === 'production') {
+        import('@sentry/nextjs').then((Sentry) => {
+          Sentry.captureException(error)
+        })
+      }
+      
       process.exit(1) // Exit the process for uncaught exceptions
     })
   }

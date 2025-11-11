@@ -8,11 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, Lock, Bell, Palette, CheckCircle, AlertCircle } from "lucide-react"
+import { User, Lock, CheckCircle, AlertCircle } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { toast } from "sonner"
 import { logger } from "@/lib/logger"
-import { Switch } from "@/components/ui/switch"
 
 interface ProfileData {
   name: string
@@ -26,11 +25,6 @@ interface PasswordData {
   currentPassword: string
   newPassword: string
   confirmPassword: string
-}
-
-interface PreferencesData {
-  notifications: boolean
-  emailNotifications: boolean
 }
 
 export function UserProfile() {
@@ -54,12 +48,6 @@ export function UserProfile() {
     confirmPassword: ""
   })
   
-  // Preferences data
-  const [preferencesData, setPreferencesData] = useState<PreferencesData>({
-    notifications: true,
-    emailNotifications: true
-  })
-
   // Load user data on mount
   useEffect(() => {
     if (user) {
@@ -72,21 +60,6 @@ export function UserProfile() {
       })
     }
   }, [user])
-
-  // Load preferences from localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedPrefs = localStorage.getItem('mmw-hubix-user-preferences')
-      if (savedPrefs) {
-        try {
-          const parsed = JSON.parse(savedPrefs)
-          setPreferencesData(prev => ({ ...prev, ...parsed }))
-        } catch (error) {
-          logger.error('Failed to parse user preferences:', error)
-        }
-      }
-    }
-  }, [])
 
   const handleProfileUpdate = async () => {
     setIsLoading(true)
@@ -198,20 +171,6 @@ export function UserProfile() {
     }
   }
 
-  const handlePreferencesUpdate = () => {
-    // Save preferences to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('mmw-hubix-user-preferences', JSON.stringify(preferencesData))
-    }
-    
-    toast.success("Preferences saved!", {
-      description: "Your preferences have been updated.",
-      icon: <CheckCircle className="w-4 h-4" />,
-    })
-    
-    logger.log("User preferences updated:", preferencesData)
-  }
-
   const getRoleColor = (role: string) => {
     switch (role) {
       case "ADMIN":
@@ -278,10 +237,9 @@ export function UserProfile() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="password">Password</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -407,50 +365,6 @@ export function UserProfile() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="preferences" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Card className="hover:shadow-lg transition-shadow duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Preferences
-              </CardTitle>
-              <CardDescription>Customize your experience and notification settings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h4 className="font-medium">Notification Settings</h4>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-primary/50 transition-all duration-300 hover:shadow-sm">
-                    <div className="space-y-0.5">
-                      <Label className="font-medium">System Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive notifications for system updates and announcements</p>
-                    </div>
-                    <Switch
-                      checked={preferencesData.notifications}
-                      onCheckedChange={(checked) => setPreferencesData(prev => ({ ...prev, notifications: checked }))}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-primary/50 transition-all duration-300 hover:shadow-sm">
-                    <div className="space-y-0.5">
-                      <Label className="font-medium">Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive email notifications for important updates</p>
-                    </div>
-                    <Switch
-                      checked={preferencesData.emailNotifications}
-                      onCheckedChange={(checked) => setPreferencesData(prev => ({ ...prev, emailNotifications: checked }))}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-end">
-                <Button onClick={handlePreferencesUpdate} className="transition-all duration-300 hover:scale-105">
-                  Save Preferences
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   )

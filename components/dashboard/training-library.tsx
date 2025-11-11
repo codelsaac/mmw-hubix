@@ -147,8 +147,7 @@ export function TrainingLibrary() {
     }
     
     loadCategories()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])  // Only run once on mount to avoid constant refetching
+    }, [])  // Only run once on mount to avoid constant refetching
 
   const filteredResources = resources.filter((resource) => {
     const tags = normalizeTags(resource.tags)

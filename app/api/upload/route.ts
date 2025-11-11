@@ -4,7 +4,6 @@ import path from 'path'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/auth"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
-import { NotificationService } from "@/lib/notification-service"
 
 import { logger } from "@/lib/logger"
 const ALLOWED_FILE_TYPES = {
@@ -136,26 +135,6 @@ export async function POST(request: NextRequest) {
     // Return the public URL path
     const publicUrl = `/uploads/${fileCategory}/${fileName}`
 
-    // Create success notification
-    try {
-      await NotificationService.createForUser(session.user.id, {
-        title: "File Upload Successful",
-        message: `Successfully uploaded "${file.name}" (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
-        type: "SUCCESS",
-        priority: "NORMAL",
-        link: publicUrl,
-        metadata: JSON.stringify({
-          fileName: fileName,
-          originalName: file.name,
-          size: file.size,
-          type: file.type,
-          category: fileCategory
-        })
-      })
-    } catch (notificationError) {
-      logger.error('Failed to create upload success notification:', notificationError)
-    }
-
     return NextResponse.json({ 
       success: true, 
       fileName: fileName,
@@ -168,22 +147,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     logger.error('Upload error:', error)
-    
-    // Create error notification if user is authenticated
-    try {
-      const session = await getServerSession(authOptions)
-      if (session?.user?.id) {
-        await NotificationService.createForUser(session.user.id, {
-          title: "File Upload Failed",
-          message: `Failed to upload file. ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
-          type: "ERROR",
-          priority: "NORMAL"
-        })
-      }
-    } catch (notificationError) {
-      logger.error('Failed to create upload error notification:', notificationError)
-    }
-    
     return NextResponse.json({ success: false, error: 'Upload failed' })
   }
 }

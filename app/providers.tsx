@@ -14,8 +14,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider
       refetchOnWindowFocus={false}
       refetchInterval={0}
-      refetchWhenHidden={false}
-      refetchWhenOffline={false}
     >
       <BrowserExtensionCleanup />
       <ErrorBoundary>

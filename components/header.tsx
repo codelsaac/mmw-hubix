@@ -2,7 +2,6 @@ import Link from "next/link"
 import { MainNav } from "@/components/main-nav"
 import { MobileNav } from "@/components/mobile-nav"
 import { UserMenu } from "@/components/auth/user-menu"
-import { NotificationBar } from "@/components/notification-bar"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { siteConfig } from "@/config/site"
@@ -34,7 +33,6 @@ export function Header() {
               <span>School Website</span>
             </Link>
           </Button>
-          <NotificationBar />
           <UserMenu />
         </nav>
       </div>

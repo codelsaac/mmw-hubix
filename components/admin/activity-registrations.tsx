@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   Dialog,
   DialogContent,
@@ -58,13 +58,7 @@ export function ActivityRegistrations({
   const [error, setError] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (isOpen && activityId) {
-      fetchRegistrations()
-    }
-  }, [isOpen, activityId])
-
-  async function fetchRegistrations() {
+  const fetchRegistrations = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
@@ -80,7 +74,13 @@ export function ActivityRegistrations({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [activityId])
+
+  useEffect(() => {
+    if (isOpen && activityId) {
+      fetchRegistrations()
+    }
+  }, [isOpen, activityId, fetchRegistrations])
 
   async function updateRegistrationStatus(registrationId: string, status: string) {
     setUpdatingId(registrationId)

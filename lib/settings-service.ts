@@ -80,15 +80,6 @@ export const DEFAULT_SETTINGS: SettingDefinition[] = [
     type: "NUMBER",
     isPublic: false,
   },
-  // Notification Settings
-  {
-    key: "emailNotifications",
-    value: "true",
-    category: "notifications",
-    label: "Email Notifications",
-    type: "BOOLEAN",
-    isPublic: false,
-  },
   // Backup Settings
   {
     key: "autoBackup",

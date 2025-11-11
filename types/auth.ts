@@ -9,6 +9,7 @@ export interface AuthenticatedUser {
   email?: string | null
   username?: string
   name?: string | null
+  image?: string | null
   role: UserRole
   department?: string
   permissions?: string | null

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "./use-auth"
 
 import { logger } from "@/lib/logger"
@@ -27,8 +27,7 @@ export function useCalendar() {
   const [error, setError] = useState<string | null>(null)
   const { user, isAuthenticated } = useAuth()
 
-  // Load events from database
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     if (!isAuthenticated) return
 
     setLoading(true)
@@ -84,7 +83,7 @@ export function useCalendar() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [isAuthenticated])
 
   // Create internal event
   const createInternalEvent = async (eventData: {
@@ -257,7 +256,7 @@ export function useCalendar() {
   // Load events on mount
   useEffect(() => {
     loadEvents()
-  }, [isAuthenticated])
+  }, [isAuthenticated, loadEvents])
 
   return {
     events,

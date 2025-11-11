@@ -18,6 +18,7 @@ import {
 import { Calendar, MapPin, Users, Clock, CheckCircle2, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { format } from "date-fns"
 
 interface Announcement {
   id: string
@@ -172,7 +173,7 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
                   <div className="space-y-2.5 text-sm">
                     <div className="flex items-center text-muted-foreground">
                       <Calendar className="mr-2.5 h-4 w-4 text-primary/70" />
-                      <span>{new Date(activity.date).toLocaleDateString()}</span>
+                      <span>{format(new Date(activity.date), "yyyy/MM/dd")}</span>
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="mr-2.5 h-4 w-4 text-primary/70" />

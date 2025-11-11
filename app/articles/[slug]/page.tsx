@@ -12,7 +12,7 @@ import { notFound } from "next/navigation"
 export const dynamic = "force-dynamic"
 
 interface ArticlePageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default function ArticlePage({ params }: ArticlePageProps) {
@@ -20,7 +20,11 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const slug = params.slug
+  const [slug, setSlug] = useState<string | null>(null)
+
+  useEffect(() => {
+    params.then(p => setSlug(p.slug))
+  }, [params])
 
   useEffect(() => {
     if (!slug) return
@@ -42,7 +46,7 @@ export default function ArticlePage({ params }: ArticlePageProps) {
     }
 
     loadArticle()
-  }, [slug])
+  }, [slug, fetchArticleBySlug])
 
   const handleShare = async () => {
     if (navigator.share && article) {

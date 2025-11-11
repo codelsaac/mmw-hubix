@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSecurityHeaders } from '@/lib/security-headers'
+import { prisma } from '@/lib/prisma'
+import { createLogger } from '@/lib/logging/logger'
 
 // Health check data
 interface HealthStatus {
@@ -48,10 +50,11 @@ function getDiskUsage(): { usage: number; status: 'ok' | 'warning' | 'critical' 
 // Check database connectivity
 async function checkDatabase(): Promise<'up' | 'down'> {
   try {
-    // In a real implementation, you'd ping the database
-    // For now, assume it's up
+    await prisma.$queryRaw`SELECT 1`
     return 'up'
   } catch (error) {
+    const logger = createLogger({ path: '/api/health' })
+    logger.error('Database health check failed', error as Error)
     return 'down'
   }
 }

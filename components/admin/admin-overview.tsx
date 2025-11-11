@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Settings, Users, FileText, Calendar, PlayCircle, Activity, Shield, BookOpen, Tag } from "lucide-react"
+import { Settings, FileText, Calendar, PlayCircle, Activity, Shield, BookOpen, Tag } from "lucide-react"
 import NextLink from "next/link"
 
 import { useTraining } from "@/hooks/use-training"
@@ -43,14 +43,6 @@ const useAdminStats = () => {
       icon: BookOpen,
       trend: "No articles published",
       href: "/admin/articles",
-    },
-    {
-      title: "History",
-      value: "6",
-      description: "Milestones recorded",
-      icon: Users,
-      trend: "Explore our IT Prefect journey",
-      href: "/dashboard/team",
     },
     {
       title: "Training Resources",

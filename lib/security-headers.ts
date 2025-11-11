@@ -92,7 +92,7 @@ export function applySecurityHeaders(response: Response): Response {
 }
 
 // Security headers middleware for Next.js
-export function withSecurityHeaders(handler: Function) {
+export function withSecurityHeaders(handler: (req: Request, ...args: any[]) => Promise<Response>) {
   return async (req: Request, ...args: any[]) => {
     const response = await handler(req, ...args)
     

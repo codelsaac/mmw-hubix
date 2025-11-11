@@ -19,7 +19,10 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Edit, Trash2, ExternalLink, Search, FolderOpen, Link2 } from "lucide-react"
+import { IconPicker } from "@/components/ui/icon-picker"
+import { ColorPicker } from "@/components/ui/color-picker"
+import { Plus, Edit, Trash2, ExternalLink, Search, FolderOpen, Link2, Download } from "lucide-react"
+import { getFaviconUrl } from "@/lib/favicon-utils"
 import { toast } from "sonner"
 import { logger } from "@/lib/logger"
 
@@ -38,6 +41,7 @@ interface Resource {
   name: string
   url: string
   description: string
+  icon?: string
   categoryId: string
   clicks: number
   createdAt?: string
@@ -61,11 +65,29 @@ export function ResourceManagement() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [activeTab, setActiveTab] = useState("resources")
+  const [iconOptions, setIconOptions] = useState<string[]>([])
+  const [colorOptions, setColorOptions] = useState<string[]>([])
 
   useEffect(() => {
     fetchResources()
     fetchCategories()
+    fetchMeta()
   }, [])
+
+  async function fetchMeta() {
+    try {
+      const response = await fetch('/api/admin/categories/meta')
+      if (!response.ok) {
+        throw new Error('Failed to fetch meta')
+      }
+      const data = await response.json()
+      setIconOptions(data.iconOptions)
+      setColorOptions(data.colorOptions)
+    } catch (error) {
+      logger.error('Error fetching meta:', error)
+      // Don't show error toast as this is not critical
+    }
+  }
 
   async function fetchResources() {
     try {
@@ -278,6 +300,7 @@ export function ResourceManagement() {
                 setIsDialogOpen(false)
               }}
               categories={categories}
+              iconOptions={iconOptions}
             />
           </Dialog>
         )}
@@ -302,6 +325,8 @@ export function ResourceManagement() {
                 setEditingCategory(null)
                 setIsCategoryDialogOpen(false)
               }}
+              iconOptions={iconOptions}
+              colorOptions={colorOptions}
             />
           </Dialog>
         )}
@@ -473,10 +498,14 @@ function CategoryDialog({
   category,
   onSave,
   onCancel,
+  iconOptions,
+  colorOptions,
 }: {
   category: Category | null
   onSave: (data: any) => void
   onCancel: () => void
+  iconOptions: string[]
+  colorOptions: string[]
 }) {
   const [formData, setFormData] = useState({
     name: category?.name || "",
@@ -534,35 +563,32 @@ function CategoryDialog({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="category-color">Color</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="category-color"
-                type="color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-16 h-10"
-              />
-              <Input
-                type="text"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                placeholder="#3b82f6"
-                className="flex-1"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="category-sortOrder">Sort Order</Label>
-            <Input
-              id="category-sortOrder"
-              type="number"
-              value={formData.sortOrder}
-              onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
-              min="0"
-              required
+            <Label htmlFor="category-icon">Icon</Label>
+            <IconPicker
+              value={formData.icon}
+              onChange={(value) => setFormData({ ...formData, icon: value })}
+              icons={iconOptions}
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="category-color">Color</Label>
+            <ColorPicker
+              value={formData.color}
+              onChange={(value) => setFormData({ ...formData, color: value })}
+              colors={colorOptions}
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="category-sortOrder">Sort Order</Label>
+          <Input
+            id="category-sortOrder"
+            type="number"
+            value={formData.sortOrder}
+            onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
+            min="0"
+            required
+          />
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -592,28 +618,52 @@ function ResourceDialog({
   onSave,
   onCancel,
   categories,
+  iconOptions,
 }: {
   resource: Resource | null
   onSave: (data: any) => void
   onCancel: () => void
   categories: Category[]
+  iconOptions: string[]
 }) {
   console.log("ResourceDialog categories:", categories);
   const [formData, setFormData] = useState({
     name: resource?.name || "",
     url: resource?.url || "",
     description: resource?.description || "",
+    icon: resource?.icon || "",
     categoryId: resource?.categoryId || "",
   })
+  const [isFetchingIcon, setIsFetchingIcon] = useState(false)
 
   useEffect(() => {
     setFormData({
       name: resource?.name || "",
       url: resource?.url || "",
       description: resource?.description || "",
+      icon: resource?.icon || "",
       categoryId: resource?.categoryId || "",
     });
   }, [resource]);
+
+  const handleFetchFavicon = () => {
+    if (!formData.url) {
+      toast.error('Please enter a URL first')
+      return
+    }
+    
+    setIsFetchingIcon(true)
+    const faviconUrl = getFaviconUrl(formData.url)
+    
+    if (faviconUrl) {
+      setFormData({ ...formData, icon: faviconUrl })
+      toast.success('Favicon fetched successfully')
+    } else {
+      toast.error('Failed to fetch favicon')
+    }
+    
+    setIsFetchingIcon(false)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -652,6 +702,30 @@ function ResourceDialog({
             placeholder="https://example.com"
             required
           />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="icon">Icon</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleFetchFavicon}
+              disabled={!formData.url || isFetchingIcon}
+              className="h-7 text-xs"
+            >
+              <Download className="w-3 h-3 mr-1" />
+              Fetch Favicon
+            </Button>
+          </div>
+          <IconPicker
+            value={formData.icon}
+            onChange={(value) => setFormData({ ...formData, icon: value })}
+            icons={iconOptions}
+          />
+          <p className="text-xs text-muted-foreground">
+            Select an icon or fetch the website&apos;s favicon
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>

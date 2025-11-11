@@ -3,7 +3,6 @@ import { UserRole } from "@/lib/permissions"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { getCurrentPassword } from "@/lib/password-utils"
 import { prisma } from "@/lib/prisma"
-import { NotificationService } from "@/lib/notification-service"
 import { logger } from "@/lib/logger"
 
 // Enhanced user accounts with role-based access control
@@ -83,18 +82,6 @@ export const authOptions: NextAuthOptions = {
                 data: { lastLoginAt: new Date() }
               }).catch(err => logger.error("Failed to update lastLoginAt:", err))
               
-              // Create login success notification
-              try {
-                await NotificationService.createForUser(dbUser.id, {
-                  title: "Login Successful",
-                  message: `Welcome back, ${dbUser.name || dbUser.username}! You have successfully logged in.`,
-                  type: "SUCCESS",
-                  priority: "LOW"
-                })
-              } catch (notificationError) {
-                logger.error("Failed to create login success notification:", notificationError)
-              }
-              
               return {
                 id: dbUser.id,
                 username: dbUser.username,
@@ -139,18 +126,6 @@ export const authOptions: NextAuthOptions = {
                   where: { id: dbUser.id },
                   data: { lastLoginAt: new Date() }
                 })
-                
-                // Create login success notification for demo account
-                try {
-                  await NotificationService.createForUser(dbUser.id, {
-                    title: "Login Successful",
-                    message: `Welcome back, ${user.name}! You have successfully logged in.`,
-                    type: "SUCCESS",
-                    priority: "LOW"
-                  })
-                } catch (notificationError) {
-                  logger.error("Failed to create login success notification:", notificationError)
-                }
               }
 
               return {

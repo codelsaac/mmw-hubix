@@ -23,7 +23,7 @@ export function MaintenancePage() {
               Under Maintenance
             </h2>
             <p className="text-muted-foreground">
-              We're currently performing scheduled maintenance to improve your experience.
+              We&apos;re currently performing scheduled maintenance to improve your experience.
             </p>
           </div>
 

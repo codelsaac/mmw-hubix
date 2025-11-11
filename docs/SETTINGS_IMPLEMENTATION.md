@@ -9,7 +9,7 @@ The admin settings system has been migrated from localStorage to a database-back
 ### ✅ Database Model
 - **SiteSetting Model**: Stores all system settings with key-value pairs
 - **SettingType Enum**: STRING, NUMBER, BOOLEAN, JSON types
-- **Categories**: general, security, notifications, backup, appearance
+- **Categories**: general, security, backup, appearance
 - **Public/Private Settings**: Control which settings are publicly accessible
 
 ### ✅ API Endpoints
@@ -55,7 +55,6 @@ Location: `/hooks/use-settings.ts`
 | registrationEnabled | "false" | general | BOOLEAN | ✗ |
 | sessionTimeout | "30" | security | NUMBER | ✗ |
 | maxLoginAttempts | "5" | security | NUMBER | ✗ |
-| emailNotifications | "true" | notifications | BOOLEAN | ✗ |
 | autoBackup | "true" | backup | BOOLEAN | ✗ |
 | backupFrequency | "weekly" | backup | STRING | ✗ |
 | colorTheme | "school-blue-yellow" | appearance | STRING | ✓ |
