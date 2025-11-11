@@ -25,6 +25,12 @@ export const logger = {
     if (isDevelopment) {
       console.info(`[INFO] ${message}`, ...args)
     }
+  },
+  
+  debug: (message: string, ...args: any[]) => {
+    if (isDevelopment) {
+      console.debug(`[DEBUG] ${message}`, ...args)
+    }
   }
 }
 

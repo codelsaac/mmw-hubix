@@ -52,38 +52,49 @@ export function useSettings() {
   const loadSettings = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/admin/settings')
       
-      if (response.ok) {
-        const data = await response.json()
-        setSettings({ ...defaultSettings, ...data })
-        logger.log('Settings loaded from database:', data)
+      // First try public settings (always available)
+      const publicResponse = await fetch('/api/settings')
+      
+      if (publicResponse.ok) {
+        const publicData = await publicResponse.json()
+        setSettings({ ...defaultSettings, ...publicData })
+        logger.log('Public settings loaded from database:', publicData)
+        
+        // Try to get admin settings if user might be authenticated
+        // This won't throw errors, just silently fail if not authenticated
+        try {
+          const adminResponse = await fetch('/api/admin/settings')
+          if (adminResponse.ok) {
+            const adminData = await adminResponse.json()
+            setSettings({ ...defaultSettings, ...publicData, ...adminData })
+            logger.log('Admin settings merged with public settings')
+          }
+        } catch (adminError) {
+          // Silently ignore admin errors - user is not authenticated
+          logger.debug('Admin settings not available (user not authenticated)')
+        }
       } else {
-        if (response.status === 401 || response.status === 403) {
-          const publicResponse = await fetch('/api/settings')
-          if (publicResponse.ok) {
-            const publicData = await publicResponse.json()
-            setSettings({ ...defaultSettings, ...publicData })
-            logger.log('Public settings loaded from database:', publicData)
-            return
-          }
-        }
-
-        if (typeof window !== 'undefined') {
-          const savedSettings = localStorage.getItem('mmw-hubix-settings')
-          if (savedSettings) {
-            try {
-              const parsed = JSON.parse(savedSettings)
-              setSettings({ ...defaultSettings, ...parsed })
-              logger.log('Settings loaded from localStorage (fallback)')
-            } catch (error) {
-              logger.error('Failed to parse saved settings:', error)
-            }
-          }
-        }
+        throw new Error('Public settings endpoint failed')
       }
     } catch (error) {
       logger.error('Failed to load settings:', error)
+      
+      // Use localStorage fallback
+      if (typeof window !== 'undefined') {
+        const savedSettings = localStorage.getItem('mmw-hubix-settings')
+        if (savedSettings) {
+          try {
+            const parsed = JSON.parse(savedSettings)
+            setSettings({ ...defaultSettings, ...parsed })
+            logger.log('Settings loaded from localStorage (fallback)')
+            return
+          } catch (parseError) {
+            logger.error('Failed to parse saved settings:', parseError)
+          }
+        }
+      }
+      
       // Use default settings on error
       setSettings(defaultSettings)
     } finally {
@@ -115,9 +126,15 @@ export function useSettings() {
           localStorage.setItem('mmw-hubix-settings', JSON.stringify(updatedSettings))
         }
       } else {
+        // Handle authentication errors gracefully
+        if (response.status === 401 || response.status === 403) {
+          toast.error('Authentication required to save settings')
+        } else {
+          toast.error('Failed to save settings to database')
+        }
+        
         // Revert on error
         await loadSettings()
-        toast.error('Failed to save settings to database')
       }
     } catch (error) {
       logger.error('Failed to update settings:', error)

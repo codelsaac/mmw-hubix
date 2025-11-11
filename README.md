@@ -630,10 +630,7 @@ SENTRY_TRACES_SAMPLE_RATE="0.1"  # 10% performance monitoring
 - **API & Integration**
   - **[API Documentation](./docs/API.md)** – Endpoint reference, request/response formats, authentication, error handling, and rate limiting
 - **Core Systems**
-  - **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)** – Role defaults (ADMIN, HELPER, GUEST), custom permissions, server/client usage, and management API
   - **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)** – Model overview, default values, admin tooling, visibility, and migration guidance
-- **Infrastructure & Monitoring**
-  - **[Sentry Error Monitoring](./docs/SENTRY_SETUP.md)** – Complete guide to error tracking, performance monitoring, and production debugging
 
 ### Quick Links
 - **Getting Started**
@@ -643,7 +640,6 @@ SENTRY_TRACES_SAMPLE_RATE="0.1"  # 10% performance monitoring
 - **Common Tasks**
   - Adding a feature → **[Contributing Guide](./docs/CONTRIBUTING.md)** (Code Patterns section)
   - Creating API endpoints → **[API Documentation](./docs/API.md)** + **[Contributing Guide](./docs/CONTRIBUTING.md)**
-  - Managing permissions → **[Permission System](./docs/DYNAMIC_PERMISSIONS.md)**
   - Configuring settings → **[Settings System](./docs/SETTINGS_IMPLEMENTATION.md)**
 - **Additional References**
   - **[Database Setup Guide](./docs/DATABASE-SETUP-GUIDE.md)** – Dual database configuration and troubleshooting

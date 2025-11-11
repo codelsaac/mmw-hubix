@@ -111,9 +111,9 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
     activity.maxAttendees ? activity.attendees >= activity.maxAttendees : false
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background animate-in fade-in duration-500">
       {/* Hero Section - Compact */}
-      <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-cyan-50 border-b">
+      <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-cyan-50 border-b animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -130,9 +130,9 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {announcements.length === 0 ? (
-          <Card className="text-center py-16 border-dashed">
+          <Card className="text-center py-16 border-dashed animate-in fade-in slide-in-from-bottom-4 duration-500">
             <CardContent className="pt-6">
               <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                 <Calendar className="w-8 h-8 text-muted-foreground" />
@@ -146,9 +146,10 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
               <Card
                 key={activity.id}
                 className={cn(
-                  "group hover:shadow-xl transition-all duration-300 hover:border-primary/50",
+                  "group hover:shadow-xl transition-all duration-300 hover:border-primary/50 animate-in fade-in slide-in-from-bottom-4",
                   isFull(activity) && "opacity-75 saturate-50"
                 )}
+                style={{ animationDelay: `${announcements.indexOf(activity) * 75}ms` }}
               >
                 <CardHeader className="space-y-3">
                   <div className="flex justify-between items-start gap-2">
