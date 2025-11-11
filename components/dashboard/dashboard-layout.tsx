@@ -78,7 +78,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
                 <div>
                   <h1 className="text-lg font-serif font-bold text-foreground">
-                    {isAdminRoute ? "Admin Dashboard" : "Dashboard"}
+                    {isAdminRoute ? "Admin Dashboard" : "IT Perfect"}
                   </h1>
                   <p className="text-xs text-muted-foreground">
                     {isAdminRoute ? "Content Management System" : "Internal Management System"}
@@ -126,7 +126,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Main Navigation */}
             <div className="space-y-2">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {isAdminRoute ? "Admin" : "Dashboard"}
+                {isAdminRoute ? "Admin" : "IT Perfect"}
               </h3>
               {currentNavigation.map((item) => {
                 const isActive = pathname === item.href
@@ -149,7 +149,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {user?.role === UserRole.ADMIN && (
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {isAdminRoute ? "Dashboard" : "Admin"}
+                  {isAdminRoute ? "IT Perfect" : "Admin"}
                 </h3>
                 {(isAdminRoute ? navigation : adminNavigation).slice(0, 2).map((item) => (
                   <Link key={item.name} href={item.href}>

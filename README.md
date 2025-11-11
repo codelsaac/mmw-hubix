@@ -15,7 +15,6 @@
 - **🚀 Enterprise Architecture**: Repository/Service/Controller pattern with ABAC permission system (Phase 0-1)
 - **🔒 Production-Ready Security**: Rate limiting, CSP headers, input sanitization, XSS protection
 - **📊 Error Monitoring**: Comprehensive Sentry integration with automatic error tracking and performance monitoring
-- **🤖 CI/CD Pipeline**: GitHub Actions for automated quality checks and deployment
 - **📝 Structured Logging**: Development-friendly colored logs, production JSON logs with context
 - **🔍 Google Search Widget**: Quick Google search functionality integrated into Resource Hub for convenient web searches
 - **Resource Icon Support**: Resources now support custom icons with automatic favicon fetching from URLs
@@ -33,7 +32,7 @@
 ### Architecture Highlights
 - **📊 Phase 2**: Real-time error monitoring with Sentry (client + server + edge)
 - **🏗️ Phase 1**: Repository/Service/ABAC pattern for enterprise-grade architecture
-- **🛡️ Phase 0**: Security middleware, CI/CD, structured logging, input sanitization
+- **🛡️ Phase 0**: Security middleware, structured logging, input sanitization
 
 ### Coming Soon (Phase 3)
 - Redis caching layer for performance

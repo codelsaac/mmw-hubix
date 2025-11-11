@@ -42,7 +42,7 @@ const navigationItems: NavItem[] = [
     description: "Published articles and content"
   },
   {
-    title: "IT System",
+    title: "IT Perfect",
     href: "/dashboard",
     description: "內部儀表板和IT系統管理",
     requiredPermissions: [Permission.VIEW_DASHBOARD],
