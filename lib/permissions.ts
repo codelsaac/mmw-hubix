@@ -1,6 +1,7 @@
 export enum UserRole {
   ADMIN = 'ADMIN',
   HELPER = 'HELPER',
+  STUDENT = 'STUDENT',
   GUEST = 'GUEST'
 }
 
@@ -57,6 +58,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.MANAGE_TASKS,
     Permission.MANAGE_ACTIVITIES,
     Permission.MANAGE_CALENDAR,
+    Permission.VIEW_TRAINING_VIDEOS,
+    Permission.VIEW_RESOURCES,
+    Permission.VIEW_DASHBOARD,
+    Permission.VIEW_CALENDAR,
+    Permission.VIEW_TEAM_INFO
+  ],
+  [UserRole.STUDENT]: [
+    // Registered student: view-only access
     Permission.VIEW_TRAINING_VIDEOS,
     Permission.VIEW_RESOURCES,
     Permission.VIEW_DASHBOARD,
@@ -174,6 +183,8 @@ export class PermissionService {
         return 'System Administrator'
       case UserRole.HELPER:
         return 'IT Assistant'
+      case UserRole.STUDENT:
+        return 'Student'
       case UserRole.GUEST:
         return 'Guest User'
       default:
@@ -190,6 +201,8 @@ export class PermissionService {
         return 'Can manage entire website and IT Perfect system features'
       case UserRole.HELPER:
         return 'Can manage IT Perfect system but cannot access website admin features'
+      case UserRole.STUDENT:
+        return 'Registered student with view-only access to resources and training materials'
       case UserRole.GUEST:
         return 'Public access to training videos and learning materials'
       default:

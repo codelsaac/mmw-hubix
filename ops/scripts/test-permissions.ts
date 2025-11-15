@@ -3,7 +3,7 @@
  * Run with: npx ts-node scripts/test-permissions.ts
  */
 
-import { Permission, PermissionService, UserRole } from "../lib/permissions"
+import { Permission, PermissionService, UserRole } from "../../lib/permissions"
 
 console.log("🧪 Testing Dynamic Permission System\n")
 

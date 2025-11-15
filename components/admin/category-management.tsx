@@ -18,41 +18,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { IconPicker } from "@/components/ui/icon-picker"
 import { ColorPicker } from "@/components/ui/color-picker"
 import {
   Plus,
   Edit,
   Trash2,
   Search,
-  Palette,
-  Type,
-  BookOpen,
-  Users,
-  FileText,
-  Laptop,
-  Library,
-  Building,
-  Heart,
-  Briefcase,
-  DollarSign,
-  Home,
-  Car,
-  PartyPopper,
-  UserCheck,
-  Microscope,
-  Globe2,
-  GraduationCap,
-  Phone,
-  Calendar,
-  Mail,
-  Clock,
-  MapPin,
-  ExternalLink,
-  Search as SearchIcon,
-  Settings,
-  Shield,
-  Star,
 } from "lucide-react"
 import { toast } from "sonner"
 import { logger } from "@/lib/logger"
@@ -78,7 +49,6 @@ export function CategoryManagement() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [iconOptions, setIconOptions] = useState<string[]>([]);
   const [colorOptions, setColorOptions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -93,7 +63,6 @@ export function CategoryManagement() {
         throw new Error('Failed to fetch meta');
       }
       const data = await response.json();
-      setIconOptions(data.iconOptions);
       setColorOptions(data.colorOptions);
     } catch (error) {
       logger.error('Error fetching meta:', error);
@@ -217,7 +186,6 @@ export function CategoryManagement() {
               setEditingCategory(null)
               setIsDialogOpen(false)
             }}
-            iconOptions={iconOptions}
             colorOptions={colorOptions}
           />
         </Dialog>
@@ -248,49 +216,12 @@ export function CategoryManagement() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {(() => {
-                      const iconMap: Record<string, any> = {
-                        BookOpen,
-                        Users,
-                        FileText,
-                        Laptop,
-                        Library,
-                        Building,
-                        Heart,
-                        Briefcase,
-                        DollarSign,
-                        Home,
-                        Car,
-                        PartyPopper,
-                        UserCheck,
-                        Microscope,
-                        Globe2,
-                        GraduationCap,
-                        Phone,
-                        Calendar,
-                        Mail,
-                        Clock,
-                        MapPin,
-                        ExternalLink,
-                        Search: SearchIcon,
-                        Settings,
-                        Shield,
-                        Star,
-                      }
-                      const IconComp = iconMap[category.icon || "Globe2"] || Globe2
-                      return (
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                          {IconComp === Globe2 ? (
-                            <span
-                              className="w-3.5 h-3.5 rounded-full border"
-                              style={{ backgroundColor: category.color || '#3b82f6', borderColor: (category.color || '#d1d5db') as string }}
-                            />
-                          ) : (
-                            <IconComp className="w-4 h-4" style={{ color: category.color || '#3b82f6' }} />
-                          )}
-                        </div>
-                      )
-                    })()}
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border"
+                        style={{ backgroundColor: category.color || '#3b82f6', borderColor: (category.color || '#d1d5db') as string }}
+                      />
+                    </div>
                     <div>
                       <CardTitle className="text-lg">{category.name}</CardTitle>
                       <div className="flex items-center gap-2 mt-1">
@@ -348,19 +279,16 @@ function CategoryDialog({
   category,
   onSave,
   onCancel,
-  iconOptions,
   colorOptions,
 }: {
   category: Category | null
   onSave: (data: any) => void
   onCancel: () => void
-  iconOptions: string[];
   colorOptions: string[];
 }) {
   const [formData, setFormData] = useState({
     name: category?.name || "",
     description: category?.description || "",
-    icon: category?.icon || "",
     color: category?.color || "#3b82f6",
     isActive: category?.isActive ?? true,
     sortOrder: category?.sortOrder || 0,
@@ -370,7 +298,6 @@ function CategoryDialog({
     setFormData({
       name: category?.name || "",
       description: category?.description || "",
-      icon: category?.icon || "",
       color: category?.color || "#3b82f6",
       isActive: category?.isActive ?? true,
       sortOrder: category?.sortOrder || 0,
@@ -411,14 +338,6 @@ function CategoryDialog({
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="icon">Icon</Label>
-            <IconPicker
-              value={formData.icon}
-              onChange={(value) => setFormData({ ...formData, icon: value })}
-              icons={iconOptions}
-            />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="color">Color</Label>
             <ColorPicker

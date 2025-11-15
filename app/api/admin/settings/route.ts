@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { requireAuthAPI } from "@/lib/auth-server"
 import { UserRole } from "@/lib/permissions"
 import { getAllSettings, updateSettings, initializeSettings } from "@/lib/settings-service"
+import { SettingsSchemas } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
 
 /**
@@ -51,18 +52,21 @@ export async function PUT(req: Request) {
   try {
     await requireAuthAPI([UserRole.ADMIN])
     
-    const body = await req.json()
-    
-    // Validate input
-    if (!body || typeof body !== "object") {
+    const json = await req.json()
+
+    const parsed = SettingsSchemas.update.safeParse(json)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid settings data" },
+        {
+          error: "Invalid settings data",
+          details: parsed.error.flatten(),
+        },
         { status: 400 }
       )
     }
     
     // Update settings
-    await updateSettings(body)
+    await updateSettings(parsed.data)
     
     // Return updated settings
     const updatedSettings = await getAllSettings(true)

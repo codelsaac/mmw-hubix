@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CalendarIcon, Clock, MapPin, Users, Plus, ChevronLeft, ChevronRight, CheckCircle2, Loader2, AlertCircle, Globe } from "lucide-react"
+import { CalendarIcon, Clock, MapPin, Users, Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle, Globe } from "lucide-react"
 import { useCalendar } from "@/hooks/use-calendar"
 import { useDashboard } from "@/hooks/use-dashboard"
 import { useAuth } from "@/hooks/use-auth"
@@ -61,16 +61,6 @@ export function InternalCalendar() {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    })
-  }
-
-  const joinEvent = (event: any) => {
-    addActivity({
-      type: "meeting",
-      title: "Joined Event",
-      description: `Joined "${event.title}"`,
-      time: "Just now",
-      status: "completed",
     })
   }
 
@@ -452,20 +442,6 @@ export function InternalCalendar() {
 
         {/* Event Details Sidebar */}
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Event Types</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {Object.entries(eventTypes).map(([type, config]) => (
-                <div key={type} className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${config.color}`} />
-                  <span className="text-sm">{config.label}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
           {selectedEvent && (
             <Card>
               <CardHeader>
@@ -517,21 +493,15 @@ export function InternalCalendar() {
                   )}
                 </div>
 
-                <div className="pt-2 space-y-2">
-                  <Button size="sm" className="w-full" onClick={() => joinEvent(selectedEvent)}>
-                    <CheckCircle2 className="w-3 h-3 mr-2" />
-                    Join Event
-                  </Button>
-                  {selectedEvent.isInternal ? (
-                    <div className="text-xs text-center text-muted-foreground">
-                      This is a private event only visible to you
-                    </div>
-                  ) : (
-                    <div className="text-xs text-center text-muted-foreground">
-                      This is a public event visible to all users
-                    </div>
-                  )}
-                </div>
+                {selectedEvent.isInternal ? (
+                  <div className="text-xs text-center text-muted-foreground">
+                    This is a private event only visible to you
+                  </div>
+                ) : (
+                  <div className="text-xs text-center text-muted-foreground">
+                    This is a public event visible to all users
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

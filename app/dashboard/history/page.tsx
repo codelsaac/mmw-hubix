@@ -1,12 +1,12 @@
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { ItPerfectHub } from "@/components/dashboard/it-perfect-hub"
+import { ItPerfectHistory } from "@/components/dashboard/it-perfect-history"
 
-export default function DashboardPage() {
+export default function HistoryPage() {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <ItPerfectHub />
+        <ItPerfectHistory />
       </DashboardLayout>
     </ProtectedRoute>
   )

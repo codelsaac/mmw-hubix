@@ -39,7 +39,7 @@ const createUserSchema = z.object({
   username: z.string().min(2, { message: "Username must be at least 2 characters." }).max(50),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal("")),
-  role: z.enum(["ADMIN", "HELPER", "GUEST"], { required_error: "Role is required." }),
+  role: z.enum(["ADMIN", "HELPER", "STUDENT", "GUEST"], { required_error: "Role is required." }),
   department: z.string().min(1, { message: "Department is required." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
@@ -48,7 +48,7 @@ const editUserSchema = z.object({
   username: z.string().min(2, { message: "Username must be at least 2 characters." }).max(50),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal("")),
-  role: z.enum(["ADMIN", "HELPER", "GUEST"], { required_error: "Role is required." }),
+  role: z.enum(["ADMIN", "HELPER", "STUDENT", "GUEST"], { required_error: "Role is required." }),
   department: z.string().min(1, { message: "Department is required." }),
   password: optionalPasswordSchema,
 });
@@ -224,6 +224,7 @@ export function AddUserForm({ user, onSuccess }: AddUserFormProps) {
                 <SelectContent>
                   <SelectItem value="ADMIN">Admin</SelectItem>
                   <SelectItem value="HELPER">Helper</SelectItem>
+                  <SelectItem value="STUDENT">Student</SelectItem>
                   <SelectItem value="GUEST">Guest</SelectItem>
                 </SelectContent>
               </Select>

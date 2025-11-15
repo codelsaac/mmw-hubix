@@ -15,7 +15,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { LogIn, UserCheck } from "lucide-react"
+import { LogIn, UserCheck, UserPlus } from "lucide-react"
+import { RegistrationForm } from "./registration-form"
+import { useSettings } from "@/hooks/use-settings"
 
 interface SimpleLoginDialogProps {
   children?: React.ReactNode
@@ -27,6 +29,8 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
   const [error, setError] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [showRegistration, setShowRegistration] = useState(false)
+  const { settings } = useSettings()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,92 +81,137 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
     }
   }
 
+  const switchToRegistration = () => {
+    setShowRegistration(true)
+    setError("")
+    setUsername("")
+    setPassword("")
+  }
+
+  const switchToLogin = () => {
+    setShowRegistration(false)
+    setError("")
+    setUsername("")
+    setPassword("")
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button variant="outline" size="sm">
-            <LogIn className="mr-2 h-4 w-4" />
-            Login
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>MMW Hubix Login</DialogTitle>
-          <DialogDescription>
-            Sign in with your credentials or continue as guest
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Guest Access Button */}
-          <div className="text-center">
-            <Button
-              onClick={guestLogin}
-              disabled={isLoading}
-              className="w-full"
-              variant="outline"
-            >
-              <UserCheck className="mr-2 h-4 w-4" />
-              {isLoading ? "Accessing..." : "Continue as Guest"}
+    <>
+      <Dialog open={open && !showRegistration} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children || (
+            <Button variant="outline" size="sm">
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
             </Button>
-            <p className="text-xs text-muted-foreground mt-2">
-              Browse content without logging in
-            </p>
-          </div>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>MMW Hubix Login</DialogTitle>
+            <DialogDescription>
+              Sign in with your credentials or continue as guest
+            </DialogDescription>
+          </DialogHeader>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+          <div className="space-y-4">
+            {/* Guest Access Button */}
+            <div className="text-center">
+              <Button
+                onClick={guestLogin}
+                disabled={isLoading}
+                className="w-full"
+                variant="outline"
+              >
+                <UserCheck className="mr-2 h-4 w-4" />
+                {isLoading ? "Accessing..." : "Continue as Guest"}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Browse content without logging in
+              </p>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or login with credentials
-              </span>
-            </div>
-          </div>
 
-          {/* Manual Login Form */}
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                placeholder="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or login with credentials
+                </span>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+
+            {/* Manual Login Form */}
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+            </form>
+
+            {/* Registration Button */}
+            {settings.registrationEnabled && (
+              <div className="text-center pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={switchToRegistration}
+                  disabled={isLoading}
+                  className="text-primary hover:text-primary/80"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  New User? Create Account
+                </Button>
+              </div>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
-            </Button>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Registration Form Dialog */}
+      <RegistrationForm
+        open={open && showRegistration}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setOpen(false)
+            setShowRegistration(false)
+          }
+        }}
+        onSwitchToLogin={switchToLogin}
+      />
+    </>
   )
 }

@@ -201,25 +201,7 @@ export function SystemSettings() {
                   />
                 </div>
               </div>
-              <div className="space-y-4">
-                <div className="p-4 border border-border rounded-lg">
-                  <h4 className="font-medium mb-2">Security Status</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">SSL Certificate</span>
-                      <Badge variant="default">Active</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Two-Factor Authentication</span>
-                      <Badge variant="secondary">Optional</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Password Policy</span>
-                      <Badge variant="default">Enforced</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Removed legacy security status badges */}
             </CardContent>
           </Card>
         </TabsContent>

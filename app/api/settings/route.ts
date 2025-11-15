@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getAllSettings } from "@/lib/settings-service"
+import { getAllSettings, getSetting } from "@/lib/settings-service"
 
 /**
  * GET /api/settings
@@ -8,9 +8,16 @@ import { getAllSettings } from "@/lib/settings-service"
 export async function GET(req: Request) {
   try {
     // Get only public settings
-    const settings = await getAllSettings(false)
+    const publicSettings = await getAllSettings(false)
     
-    return NextResponse.json(settings)
+    // Expose specific non-sensitive flags needed by unauthenticated clients
+    // registrationEnabled controls whether the registration button is shown
+    const registrationEnabled = await getSetting("registrationEnabled")
+    
+    return NextResponse.json({
+      ...publicSettings,
+      registrationEnabled,
+    })
   } catch (error) {
     console.error("Failed to get public settings:", error)
     return NextResponse.json(

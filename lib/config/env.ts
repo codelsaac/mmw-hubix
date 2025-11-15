@@ -13,17 +13,6 @@ const envSchema = z.object({
   // Optional: AI Chat
   OPENROUTER_API_KEY: z.string().optional(),
 
-  // Optional: Sentry Error Monitoring
-  SENTRY_DSN: z.string().url().optional(),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
-  SENTRY_AUTH_TOKEN: z.string().optional(),
-  SENTRY_ORG: z.string().optional(),
-  SENTRY_PROJECT: z.string().optional(),
-  SENTRY_ENVIRONMENT: z.string().optional(),
-  SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
-  SENTRY_REPLAYS_SESSION_SAMPLE_RATE: z.string().optional(),
-  SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE: z.string().optional(),
-
   // Environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });

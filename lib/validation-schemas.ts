@@ -5,6 +5,9 @@ const usernamePattern = /^[a-zA-Z0-9_-]{3,50}$/
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/
 
 // Base schemas
+const booleanLike = z.coerce.boolean({ invalid_type_error: "Value must be a boolean" })
+const numberLike = z.coerce.number({ invalid_type_error: "Value must be a number" })
+
 export const BaseSchemas = {
   id: z.string().min(1, 'ID is required'),
   email: z.string().email('Invalid email format').max(255, 'Email too long'),
@@ -27,6 +30,30 @@ export const BaseSchemas = {
   text: z.string().max(10000, 'Text too long'),
   shortText: z.string().max(500, 'Text too long'),
   longText: z.string().max(50000, 'Text too long'),
+}
+
+export const SettingsSchemas = {
+  update: z.object({
+    siteName: z.string().min(1, "Site name is required").max(150, "Site name too long"),
+    siteDescription: z.string().max(500, "Description too long"),
+    maxFileSize: numberLike.min(1, "Max file size must be at least 1 MB"),
+    allowedFileTypes: z.string().min(1, "Allowed file types are required"),
+    maintenanceMode: booleanLike,
+    registrationEnabled: booleanLike,
+    sessionTimeout: numberLike.min(1, "Session timeout must be at least 1 minute"),
+    maxLoginAttempts: numberLike.min(1, "Max login attempts must be at least 1"),
+    autoBackup: booleanLike,
+    backupFrequency: z.enum(["daily", "weekly", "monthly"], {
+      errorMap: () => ({ message: "Backup frequency must be daily, weekly, or monthly" }),
+    }),
+    // Legacy flag kept for backwards compatibility
+    isMaintenanceMode: booleanLike.optional(),
+  })
+    .partial()
+    .refine((data) => Object.keys(data).length > 0, {
+      message: "At least one setting must be provided",
+      path: [],
+    }),
 }
 
 // User schemas

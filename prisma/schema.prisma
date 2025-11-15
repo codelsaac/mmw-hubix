@@ -61,6 +61,8 @@ model User {
   createdTrainingResources TrainingResource[]
   createdCategories        Category[]
 
+  createdHistoryEvents     HistoryEvent[]
+
   createdActivities    Activity[]     @relation("CreatedActivities")
   assignedActivities   Activity[]     @relation("AssignedActivities")
   createdTasks         Task[]         @relation("CreatedTasks")
@@ -80,6 +82,7 @@ model VerificationToken {
 enum UserRole {
   ADMIN
   HELPER
+  STUDENT
   GUEST
 }
 
@@ -254,6 +257,25 @@ model ActivityRegistration {
   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
 
   @@index([announcementId])
+  @@index([status])
+}
+
+model HistoryEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  date        DateTime
+  location    String?
+  imageUrl    String?  @db.VarChar(2048)
+  tags        String?  @db.Text
+  status      String   @default("active")
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator User? @relation(fields: [createdBy], references: [id])
+
+  @@index([date])
   @@index([status])
 }
 

@@ -26,13 +26,14 @@ import {
 import { cn } from "@/lib/utils"
 
 const navigation = [
-  { name: "Team Info", href: "/dashboard", icon: Users },
+  { name: "Overview", href: "/dashboard", icon: Users },
+  { name: "History", href: "/dashboard/history", icon: FileText },
+  { name: "Learning Resources", href: "/dashboard/training", icon: PlayCircle },
   { name: "Calendar", href: "/dashboard/calendar", icon: Calendar },
-  { name: "Training", href: "/dashboard/training", icon: PlayCircle },
 ]
 
 const adminNavigation = [
-  { name: "Admin Panel", href: "/admin", icon: Shield },
+  { name: "Admin", href: "/admin", icon: Shield },
   { name: "Resources", href: "/admin/resources", icon: LinkIcon },
   { name: "Activity", href: "/admin/announcements", icon: FileText },
   { name: "Articles", href: "/admin/articles", icon: BookOpen },
@@ -63,11 +64,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </Button>
 
-              <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="text-sm">Back to Portal</span>
-              </Link>
-
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   {isAdminRoute ? (
@@ -78,7 +74,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
                 <div>
                   <h1 className="text-lg font-serif font-bold text-foreground">
-                    {isAdminRoute ? "Admin Dashboard" : "IT Perfect"}
+                    {isAdminRoute ? "Admin Dashboard" : "IT Perfect Hub"}
                   </h1>
                   <p className="text-xs text-muted-foreground">
                     {isAdminRoute ? "Content Management System" : "Internal Management System"}
@@ -126,7 +122,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Main Navigation */}
             <div className="space-y-2">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {isAdminRoute ? "Admin" : "IT Perfect"}
+                {isAdminRoute ? "Admin" : "IT Perfect Hub"}
               </h3>
               {currentNavigation.map((item) => {
                 const isActive = pathname === item.href
@@ -149,7 +145,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {user?.role === UserRole.ADMIN && (
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {isAdminRoute ? "IT Perfect" : "Admin"}
+                  {isAdminRoute ? "IT Perfect Hub" : "Site Admin"}
                 </h3>
                 {(isAdminRoute ? navigation : adminNavigation).slice(0, 2).map((item) => (
                   <Link key={item.name} href={item.href}>

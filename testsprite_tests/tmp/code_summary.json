@@ -1,0 +1,113 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React 18",
+    "Next.js 15 (App Router)",
+    "Node.js",
+    "Tailwind CSS",
+    "shadcn/ui (Radix + Tailwind)",
+    "Prisma ORM (MySQL)",
+    "NextAuth.js (username-only auth)",
+    "Zod (validation)",
+    "React Hook Form",
+    "Recharts (charts)",
+    "React Data Grid (tables)",
+    "Playwright (e2e tests)"
+  ],
+  "features": [
+    {
+      "name": "Public Resource Hub",
+      "description": "Homepage resource hub showing curated links, categories, and training resources for students and staff.",
+      "files": [
+        "app/page.tsx",
+        "components/resource-hub.tsx",
+        "components/ui/icon-picker.tsx",
+        "components/ui/color-picker.tsx",
+        "lib/favicon-utils.ts",
+        "app/api/resources/route.ts",
+        "app/api/categories/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "AI Chat Assistant Widget",
+      "description": "Floating AI assistant button and chat panel integrated globally, backed by the /api/chat OpenRouter endpoint.",
+      "files": [
+        "components/ai-chat-widget.tsx",
+        "app/providers.tsx",
+        "app/api/chat/route.ts"
+      ]
+    },
+    {
+      "name": "Role-Based Authentication & Authorization",
+      "description": "Username-based login with ADMIN, HELPER, IT_PREFECT/STUDENT roles and permission-guarded routes and navigation.",
+      "files": [
+        "lib/permissions.ts",
+        "lib/auth-middleware.ts",
+        "hooks/use-auth-permissions.ts",
+        "components/role-based-nav.tsx",
+        "components/user-role-display.tsx",
+        "components/auth/unified-login-dialog.tsx",
+        "app/unauthorized/page.tsx",
+        "app/api/auth/[...nextauth]/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Admin Category & Resource Management",
+      "description": "Admin UI to manage resource categories, icons, colors, and individual resources with visual icon/color pickers.",
+      "files": [
+        "components/admin/category-management.tsx",
+        "components/admin/resource-management.tsx",
+        "components/ui/icon-picker.tsx",
+        "components/ui/color-picker.tsx",
+        "app/api/admin/categories/route.ts",
+        "app/api/admin/categories/meta/route.ts",
+        "app/api/resources/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Training Library (Video, Text, File)",
+      "description": "IT Perfect training hub supporting multi-type resources: videos, rich text, and document/file uploads.",
+      "files": [
+        "components/dashboard/training-library.tsx",
+        "lib/training-resources.ts",
+        "hooks/use-training-resources.ts",
+        "app/api/training-resources/route.ts",
+        "app/api/upload/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "IT Perfect Hub Dashboard",
+      "description": "Dashboard view for IT Perfect members with quick access to tasks, training, and internal tools.",
+      "files": [
+        "components/dashboard/it-perfect-hub.tsx",
+        "app/(dashboard)/it-perfect/page.tsx",
+        "lib/permissions.ts",
+        "hooks/use-auth-permissions.ts"
+      ]
+    },
+    {
+      "name": "Activity News & Announcements",
+      "description": "Public activity and announcement listing for school events and club updates.",
+      "files": [
+        "app/activity-news/page.tsx",
+        "app/api/announcements/route.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "name": "Global Layout, Navigation & Footer Sitemap",
+      "description": "Application shell with header navigation, global providers, and an accessible sitemap footer.",
+      "files": [
+        "app/layout.tsx",
+        "app/providers.tsx",
+        "components/role-based-nav.tsx",
+        "components/footer-sitemap.tsx",
+        "components/icons.tsx"
+      ]
+    }
+  ]
+}

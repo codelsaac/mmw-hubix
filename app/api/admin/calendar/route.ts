@@ -12,7 +12,10 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     // Allow admins and IT department users to access calendar management
-    if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
+    const userRole = session?.user?.role as UserRole | undefined
+    const userDepartment = session?.user?.department?.toUpperCase()
+
+    if (!session?.user || (userRole !== UserRole.ADMIN && userDepartment !== 'IT')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -38,6 +41,9 @@ export async function POST(request: NextRequest) {
       } : null 
     })
     
+    const userRole = session?.user?.role as UserRole | undefined
+    const userDepartment = session?.user?.department?.toUpperCase()
+
     const data = await request.json()
     logger.log('Request data:', data)
 
@@ -45,7 +51,7 @@ export async function POST(request: NextRequest) {
     const isPublicEvent = data.isVisible === true
 
     // Only admins can create public events
-    if (isPublicEvent && (!session?.user || session.user.role !== 'admin')) {
+    if (isPublicEvent && (!session?.user || userRole !== UserRole.ADMIN)) {
       logger.log('Authorization failed - only admins can create public events:', {
         hasUser: !!session?.user,
         role: session?.user?.role,
@@ -56,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Allow admins and IT department users to create internal calendar events
-    if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
+    if (!session?.user || (userRole !== UserRole.ADMIN && userDepartment !== 'IT')) {
       logger.log('Authorization failed - not admin or IT department:', {
         hasUser: !!session?.user,
         role: session?.user?.role,

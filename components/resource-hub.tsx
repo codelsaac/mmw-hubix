@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { logger } from "@/lib/logger"
+import Image from "next/image"
 import {
   BookOpen,
   Calendar,
@@ -146,7 +147,7 @@ export function ResourceHub() {
       resource.status === "active" &&
       (resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (resource.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (selectedCategory === "all" || resource.category === selectedCategory),
+      (selectedCategory === "all" || resource.categoryId === selectedCategory),
   )
 
   const resourcesByCategory = filteredResources.reduce(
@@ -272,6 +273,7 @@ export function ResourceHub() {
           {categories.map((category) => {
             const CategoryIcon = getCategoryIcon(category.name)
             const categoryResources = resourcesByCategory[category.name] || []
+            const categoryResourcesById = filteredResources.filter(resource => resource.categoryId === category.id)
             return (
               <Button
                 key={category.id}
@@ -287,7 +289,7 @@ export function ResourceHub() {
                 <span className="hidden sm:inline">{category.name}</span>
                 <span className="sm:hidden">{category.name.split(' ')[0]}</span>
                 <Badge variant="secondary" className="ml-2 text-[10px]">
-                  {categoryResources.length}
+                  {categoryResourcesById.length}
                 </Badge>
               </Button>
             )
@@ -327,12 +329,15 @@ export function ResourceHub() {
                   if (resourceIconData.type === 'url') {
                     // Display favicon image
                     iconDisplay = (
-                      <img 
-                        src={resourceIconData.value || ''} 
+                      <Image
+                        src={resourceIconData.value || ""}
                         alt={resource.name}
+                        width={20}
+                        height={20}
+                        unoptimized
                         className="w-5 h-5 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
+                        onError={(event) => {
+                          event.currentTarget.classList.add("hidden")
                         }}
                       />
                     )
@@ -392,7 +397,7 @@ export function ResourceHub() {
           // Show only selected category
           (() => {
             const selectedCategoryData = categories.find(cat => cat.id === selectedCategory)
-            const categoryResources = filteredResources.filter(resource => resource.category === selectedCategory)
+            const categoryResources = filteredResources.filter(resource => resource.categoryId === selectedCategory)
             
             return selectedCategoryData && categoryResources.length > 0 && (
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">

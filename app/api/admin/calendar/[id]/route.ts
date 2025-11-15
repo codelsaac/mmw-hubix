@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth'
 import { PublicCalendarDB } from '@/lib/database'
+import { UserRole } from '@/lib/permissions'
 
 import { logger } from "@/lib/logger"
 // PUT /api/admin/calendar/[id] - Update calendar event
@@ -10,8 +11,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const session = await getServerSession(authOptions)
     
+    const userRole = session?.user?.role as UserRole | undefined
+    const userDepartment = session?.user?.department?.toUpperCase()
+
     // Allow admins and IT department users to update calendar events
-    if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
+    if (!session?.user || (userRole !== UserRole.ADMIN && userDepartment !== 'IT')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -40,8 +44,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const { id } = await params
     const session = await getServerSession(authOptions)
     
+    const userRole = session?.user?.role as UserRole | undefined
+    const userDepartment = session?.user?.department?.toUpperCase()
+
     // Allow admins and IT department users to delete calendar events
-    if (!session?.user || (session.user.role !== 'admin' && session.user.department !== 'IT')) {
+    if (!session?.user || (userRole !== UserRole.ADMIN && userDepartment !== 'IT')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

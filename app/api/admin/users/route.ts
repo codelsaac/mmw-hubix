@@ -14,7 +14,7 @@ const userSchema = z.object({
   name: z.string().min(2).max(100).transform(sanitizeString),
   email: z.string().email().max(255).optional(),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  role: z.enum(["ADMIN", "HELPER", "GUEST"]),
+  role: z.enum(["ADMIN", "HELPER", "STUDENT", "GUEST"]),
   department: z.string().min(1).max(100).transform(sanitizeString).optional(),
   isActive: z.boolean().optional().default(true),
 });

@@ -325,7 +325,6 @@ export function ResourceManagement() {
                 setEditingCategory(null)
                 setIsCategoryDialogOpen(false)
               }}
-              iconOptions={iconOptions}
               colorOptions={colorOptions}
             />
           </Dialog>
@@ -498,19 +497,16 @@ function CategoryDialog({
   category,
   onSave,
   onCancel,
-  iconOptions,
   colorOptions,
 }: {
   category: Category | null
   onSave: (data: any) => void
   onCancel: () => void
-  iconOptions: string[]
   colorOptions: string[]
 }) {
   const [formData, setFormData] = useState({
     name: category?.name || "",
     description: category?.description || "",
-    icon: category?.icon || "",
     color: category?.color || "#3b82f6",
     isActive: category?.isActive ?? true,
     sortOrder: category?.sortOrder ?? 0,
@@ -520,7 +516,6 @@ function CategoryDialog({
     setFormData({
       name: category?.name || "",
       description: category?.description || "",
-      icon: category?.icon || "",
       color: category?.color || "#3b82f6",
       isActive: category?.isActive ?? true,
       sortOrder: category?.sortOrder ?? 0,
@@ -562,14 +557,6 @@ function CategoryDialog({
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="category-icon">Icon</Label>
-            <IconPicker
-              value={formData.icon}
-              onChange={(value) => setFormData({ ...formData, icon: value })}
-              icons={iconOptions}
-            />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="category-color">Color</Label>
             <ColorPicker

@@ -1,10 +1,13 @@
 import { logger } from "@/lib/logger"
 export interface Resource {
-  id: number
+  id: string
   name: string
   url: string
   description: string
   category: string
+  categoryId: string
+  categoryIcon: string
+  categoryColor: string
   status: "active" | "maintenance" | "inactive"
   clicks: number
   lastUpdated: string
@@ -56,7 +59,7 @@ class ResourceService {
     const resources = this.getResources()
     const newResource: Resource = {
       ...resource,
-      id: Date.now(),
+      id: `resource-${Date.now()}`,
       clicks: 0,
       lastUpdated: new Date().toISOString().split("T")[0],
     }
@@ -66,7 +69,7 @@ class ResourceService {
     return newResource
   }
 
-  updateResource(id: number, updates: Partial<Resource>): Resource | null {
+  updateResource(id: string, updates: Partial<Resource>): Resource | null {
     const resources = this.getResources()
     const index = resources.findIndex((r) => r.id === id)
 
@@ -84,7 +87,7 @@ class ResourceService {
     return updatedResource
   }
 
-  deleteResource(id: number): boolean {
+  deleteResource(id: string): boolean {
     const resources = this.getResources()
     const filteredResources = resources.filter((r) => r.id !== id)
 

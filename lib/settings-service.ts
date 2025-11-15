@@ -10,6 +10,42 @@ export interface SettingDefinition {
   isPublic?: boolean
 }
 
+function normalizeSettingsEntries(settings: Record<string, any>): [string, any][] {
+  const entries: [string, any][] = []
+  for (const [key, value] of Object.entries(settings)) {
+    if (typeof value === "undefined") {
+      continue
+    }
+    if (key === "isMaintenanceMode") {
+      entries.push(["maintenanceMode", value])
+      continue
+    }
+    entries.push([key, value])
+  }
+  return entries
+}
+
+function inferSettingType(value: any): SettingDefinition["type"] {
+  if (typeof value === "boolean") return "BOOLEAN"
+  if (typeof value === "number") return "NUMBER"
+  if (typeof value === "object" && value !== null) return "JSON"
+  return "STRING"
+}
+
+function serializeSettingValue(value: any, type: SettingDefinition["type"]): string {
+  switch (type) {
+    case "BOOLEAN":
+      return value ? "true" : "false"
+    case "NUMBER":
+      return typeof value === "number" ? value.toString() : String(value)
+    case "JSON":
+      return typeof value === "string" ? value : JSON.stringify(value)
+    case "STRING":
+    default:
+      return typeof value === "string" ? value : JSON.stringify(value)
+  }
+}
+
 /**
  * Default settings configuration
  */
@@ -99,6 +135,8 @@ export const DEFAULT_SETTINGS: SettingDefinition[] = [
   },
 ]
 
+const DEFAULT_SETTING_MAP = new Map(DEFAULT_SETTINGS.map((setting) => [setting.key, setting]))
+
 /**
  * Initialize default settings in database
  */
@@ -184,16 +222,29 @@ export async function getSetting(key: string) {
  */
 export async function updateSetting(key: string, value: any) {
   try {
-    const stringValue = typeof value === "string" ? value : JSON.stringify(value)
+    const definition = DEFAULT_SETTING_MAP.get(key)
+    const type = definition?.type ?? inferSettingType(value)
+    const category = definition?.category ?? "general"
+    const label = definition?.label
+    const isPublic = definition?.isPublic ?? false
+    const stringValue = serializeSettingValue(value, type)
     
     const setting = await prisma.siteSetting.upsert({
       where: { key },
-      update: { value: stringValue },
+      update: {
+        value: stringValue,
+        type,
+        category,
+        label,
+        isPublic,
+      },
       create: {
         key,
         value: stringValue,
-        category: "general",
-        type: "STRING",
+        category,
+        label,
+        type,
+        isPublic,
       },
     })
     
@@ -209,17 +260,35 @@ export async function updateSetting(key: string, value: any) {
  */
 export async function updateSettings(settings: Record<string, any>) {
   try {
-    const updates = Object.entries(settings).map(([key, value]) => {
-      const stringValue = typeof value === "string" ? value : JSON.stringify(value)
+    const normalizedEntries = normalizeSettingsEntries(settings)
+    if (normalizedEntries.length === 0) {
+      return true
+    }
+    
+    const updates = normalizedEntries.map(([key, value]) => {
+      const definition = DEFAULT_SETTING_MAP.get(key)
+      const type = definition?.type ?? inferSettingType(value)
+      const category = definition?.category ?? "general"
+      const label = definition?.label
+      const isPublic = definition?.isPublic ?? false
+      const stringValue = serializeSettingValue(value, type)
       
       return prisma.siteSetting.upsert({
         where: { key },
-        update: { value: stringValue },
+        update: {
+          value: stringValue,
+          type,
+          category,
+          label,
+          isPublic,
+        },
         create: {
           key,
           value: stringValue,
-          category: "general",
-          type: typeof value === "boolean" ? "BOOLEAN" : typeof value === "number" ? "NUMBER" : "STRING",
+          category,
+          label,
+          type,
+          isPublic,
         },
       })
     })

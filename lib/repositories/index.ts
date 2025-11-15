@@ -10,3 +10,4 @@ export * from './article.repository';
 export * from './user.repository';
 export * from './announcement.repository';
 export * from './category.repository';
+export * from './history-event.repository';

@@ -35,14 +35,14 @@ const navigationItems: NavItem[] = [
     description: "Published articles and content"
   },
   {
-    title: "IT Perfect",
+    title: "IT Perfect Hub",
     href: "/dashboard",
     description: "內部儀表板和IT系統管理",
     requiredPermissions: [Permission.VIEW_DASHBOARD],
     badge: "IT"
   },
   {
-    title: "Admin Panel",
+    title: "Admin",
     href: "/admin",
     description: "系統管理",
     requiredPermissions: [Permission.MANAGE_WEBSITE],

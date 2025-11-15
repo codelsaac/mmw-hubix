@@ -15,7 +15,7 @@ This project now standardizes on **MySQL** for both development and production e
 
 Create a `.env.local` file in your project root with your MySQL connection:
 
-#### Option 1: MySQL without password (XAMPP default)
+#### Option 1: MySQL without password (default root user)
 ```env
 DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 ```
@@ -51,11 +51,11 @@ mysql://[USER]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]?connection_limit=5
 
 ### Step 1: Start MySQL
 
-#### Option A: Using XAMPP (Recommended for Windows)
-1. Open **XAMPP Control Panel**
-2. Click **Start** next to **MySQL**
-3. Verify status shows "Running" with green background
-4. Default port: `3306` (no password required)
+#### Option A: Running MySQL as a Windows Service
+1. Press `Win + R`, type `services.msc`, and press Enter
+2. Locate **MySQL** or **MySQL80** in the list
+3. Right-click the service and choose **Start** (or **Restart**)
+4. Default port: `3306` (no password if root has none)
 
 #### Option B: Using Standalone MySQL Server
 1. **Windows Service:**
@@ -80,10 +80,10 @@ If port `3306` is already in use:
    netstat -ano | findstr :3306
    ```
 
-2. **Change MySQL port in XAMPP:**
-   - Open XAMPP Control Panel
-   - Click **Config** → **my.ini**
-   - Change `port = 3306` to `port = 3307`
+2. **Change the MySQL port:**
+   - Locate your `my.ini` (e.g., `C:\ProgramData\MySQL\MySQL Server 8.0\my.ini`)
+   - Update `port = 3306` to `port = 3307`
+   - Restart the MySQL service
    - Update your `DATABASE_URL` accordingly
 
 3. **Or stop the conflicting service:**
@@ -93,7 +93,7 @@ If port `3306` is already in use:
 
 ### Step 2: Create Database
 
-#### Option A: Using phpMyAdmin (XAMPP)
+#### Option A: Using phpMyAdmin
 1. Open http://localhost/phpmyadmin
 2. Click **"New"** in the left sidebar
 3. Set database name to `mmw_hubix_dev`
@@ -192,7 +192,7 @@ npx prisma generate
    ```powershell
    netstat -ano | findstr :3306
    ```
-2. Check XAMPP Control Panel shows MySQL as "Running"
+2. Confirm the MySQL service status in **Services** or MySQL Workbench
 3. Test connection:
    ```powershell
    mysql -u root -p
@@ -232,7 +232,7 @@ npm run db:seed
 
 ```powershell
 # Start services
-net start mysql   # or use XAMPP Control Panel
+net start mysql
 
 # Initialize schema & seed
 npx prisma db push
