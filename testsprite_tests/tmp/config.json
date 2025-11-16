@@ -4,15 +4,5 @@
   "scope": "codebase",
   "localEndpoint": "http://localhost:3000",
   "loginUser": "admin",
-  "loginPassword": "mmw2025",
-  "executionArgs": {
-    "projectName": "mmw-hubix",
-    "projectPath": "c:\\Users\\user\\Documents\\IT perfect\\mmw-hubix",
-    "testIds": [],
-    "additionalInstruction": "",
-    "envs": {
-      "API_KEY": "sk-user-y3h0nGuAsxE7OrbuzQCpvPVrkD1vlOsAu-TDCeYHOBO43Ffd8uqnFLRdrCURJ1sl60XYFWeL3lH4NwN9_USA2EbnWuABLCvcwsD9TghSlABnqfXN2M09B3IYLg8DFaGe2MI"
-    }
-  },
-  "proxy": "http://5ec5977b-d6de-4005-8705-1a352a5c29aa:48NK1ZNon4stjKd9zeyygpZyhU4lLfKX@tun.testsprite.com:8080"
+  "loginPassword": "mmw2025"
 }
