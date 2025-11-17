@@ -7,9 +7,8 @@ test.describe('Error Boundaries', () => {
     // Should be 404
     expect(response?.status()).toBe(404)
     
-    // Should show 404 message
-    const notFoundText = page.locator('text=/404|not found|page not found/i')
-    await expect(notFoundText).toBeVisible({ timeout: 5000 })
+    const notFoundHeading = page.getByRole('heading', { name: '404' })
+    await expect(notFoundHeading).toBeVisible({ timeout: 5000 })
   })
 
   test('unauthorized page should display for protected routes', async ({ page }) => {
@@ -31,15 +30,15 @@ test.describe('Loading States', () => {
     await page.goto('/')
     
     // Navigate to articles
-    const navigation = page.goto('/articles')
+    const navigation = page.goto('/articles', { waitUntil: 'domcontentloaded' })
     
     // Brief wait to catch loading state
-    await page.waitForTimeout(100)
+    await page.waitForTimeout(300)
     
     await navigation
     
     // Page should eventually load
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
     expect(page.url()).toContain('/articles')
   })
 })

@@ -1,668 +1,511 @@
 [
   {
     "id": "TC001",
-    "title": "Public Resource Hub Rendering and Navigation",
-    "description": "Verify that the public resource hub page loads correctly, displays categorized resources with icons and colors, and supports navigation without login.",
+    "title": "Username-based login success",
+    "description": "Verify users can successfully authenticate using valid username and password credentials.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the public homepage resource hub as a guest user."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the page loads with no errors and all resource categories are displayed."
-      },
-      {
-        "type": "assertion",
-        "description": "Check that each category displays an icon and color consistent with the admin settings."
+        "description": "Navigate to login page"
       },
       {
         "type": "action",
-        "description": "Click on a resource category link."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify navigation to the resource list or detail page without requiring login."
+        "description": "Enter valid username"
       },
       {
         "type": "action",
-        "description": "Resize the browser window to test responsive layout on multiple device widths."
+        "description": "Enter correct password"
+      },
+      {
+        "type": "action",
+        "description": "Click login button"
       },
       {
         "type": "assertion",
-        "description": "Ensure resource hub layout adapts correctly and remains usable on mobile and desktop screens."
+        "description": "Verify user is authenticated and redirected to the appropriate dashboard"
       }
     ]
   },
   {
     "id": "TC002",
-    "title": "AI Chat Assistant Widget Basic Flow and Rate Limit Handling",
-    "description": "Test the AI Chat Assistant floating button opens the chat panel, allows messaging, handles API failures and rate limits with retry logic and user notifications.",
-    "category": "functional",
+    "title": "Login failure with incorrect credentials",
+    "description": "Verify login fails with invalid username or password and appropriate error message is displayed.",
+    "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to any public page containing the AI Chat Assistant floating button."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm the floating button is visible and clickable."
+        "description": "Navigate to login page"
       },
       {
         "type": "action",
-        "description": "Click the AI Chat Assistant floating button to open the chat panel."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the chat panel opens smoothly with animation."
+        "description": "Enter invalid username or password"
       },
       {
         "type": "action",
-        "description": "Send a valid query message relevant to campus info."
+        "description": "Click login button"
       },
       {
         "type": "assertion",
-        "description": "Check the AI response is received and displayed in the chat panel."
-      },
-      {
-        "type": "action",
-        "description": "Simulate API rate limiting from the backend /api/chat endpoint."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm the widget performs retry with backoff and shows a meaningful retry or error message after retry limit reached."
-      },
-      {
-        "type": "action",
-        "description": "Close and reopen the chat panel."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify previous chat history is preserved or cleared as per requirements."
+        "description": "Verify login failure notification is shown and no session is created"
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "Role-Based Authentication and Protected Route Access",
-    "description": "Validate username-only login functionality supports all roles (ADMIN, HELPER, IT_PREFECT, STUDENT, GUEST) with correct redirection and authorization enforcement on protected routes.",
-    "category": "security",
+    "title": "Google OAuth login success",
+    "description": "Verify users can successfully authenticate using Google OAuth login method.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the login page."
+        "description": "Navigate to login page"
       },
       {
         "type": "action",
-        "description": "Attempt login with a valid ADMIN username."
+        "description": "Click on Google OAuth login button"
+      },
+      {
+        "type": "action",
+        "description": "Complete Google OAuth authentication flow with valid Google account"
       },
       {
         "type": "assertion",
-        "description": "Verify successful login and redirection to ADMIN dashboard."
-      },
-      {
-        "type": "action",
-        "description": "Attempt login with a valid IT_PREFECT username."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify successful login and redirection to IT Prefect Hub dashboard."
-      },
-      {
-        "type": "action",
-        "description": "Attempt access to an admin-only page while logged in as IT_PREFECT."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify access is denied and user is redirected or shown unauthorized page."
-      },
-      {
-        "type": "action",
-        "description": "Logout."
-      },
-      {
-        "type": "action",
-        "description": "Try to access a protected route without login."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify user is redirected to login page."
-      },
-      {
-        "type": "action",
-        "description": "Attempt login with an invalid username."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify login failure message is shown."
+        "description": "Verify user is authenticated and redirected to the appropriate dashboard"
       }
     ]
   },
   {
     "id": "TC004",
-    "title": "Admin Console Category and Resource Management CRUD Operations",
-    "description": "Verify the admin UI for creating, reading, updating, and deleting resource categories and resources including icon and color pickers with validation and error handling.",
-    "category": "functional",
+    "title": "Role-based access control enforcement for ADMIN",
+    "description": "Verify users with ADMIN role can access and perform actions on admin console pages and APIs.",
+    "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as ADMIN."
+        "description": "Login as ADMIN user"
       },
       {
         "type": "action",
-        "description": "Navigate to category management UI."
+        "description": "Navigate to admin console user management page"
       },
       {
         "type": "action",
-        "description": "Create a new resource category with valid name, select an icon and color."
+        "description": "Create, update, and delete users and categories"
       },
       {
         "type": "assertion",
-        "description": "Verify the new category appears in the list instantly with correct icon and color."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to create a category with a duplicate name."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify validation error message is displayed preventing duplicate category."
-      },
-      {
-        "type": "action",
-        "description": "Edit an existing category's icon and color."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify changes reflect immediately in the UI and database."
-      },
-      {
-        "type": "action",
-        "description": "Delete a category that has associated resources."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify appropriate confirmation is requested and cascading effects or error handling occur."
-      },
-      {
-        "type": "action",
-        "description": "Navigate to resource management for a category."
-      },
-      {
-        "type": "action",
-        "description": "Create, update, and delete resource entries verifying real-time UI update."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm validations on resource fields and error handling on failures."
+        "description": "Verify CRUD operations succeed with appropriate validation and persisted changes"
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "Training Library Multi-Type Resource Handling",
-    "description": "Validate the IT Prefect training library functionality supporting video, rich text, and file upload resources for listing, viewing, and downloading with correct permissions.",
-    "category": "functional",
+    "title": "Role-based access control denial for HELPER and STUDENT on admin pages",
+    "description": "Verify users with HELPER or STUDENT roles cannot access admin-only pages or APIs.",
+    "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as IT_PREFECT."
+        "description": "Login as HELPER user"
       },
       {
         "type": "action",
-        "description": "Navigate to training library dashboard."
+        "description": "Attempt to navigate to admin console pages"
       },
       {
         "type": "assertion",
-        "description": "Verify the list of training resources includes videos, text documents, and files."
+        "description": "Verify access is denied or redirected to unauthorized page"
       },
       {
         "type": "action",
-        "description": "Select a video resource and play it."
+        "description": "Login as STUDENT user"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access admin APIs via direct requests"
       },
       {
         "type": "assertion",
-        "description": "Verify video plays smoothly without errors."
-      },
-      {
-        "type": "action",
-        "description": "Select a rich text training resource and verify all formatted content is rendered correctly."
-      },
-      {
-        "type": "action",
-        "description": "Download a file resource."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm the file downloads completely and is openable."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to upload a new training resource with an invalid file format."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify validation errors are shown and upload is blocked."
-      },
-      {
-        "type": "action",
-        "description": "Upload a valid training resource file."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify resource appears in the library immediately after upload."
+        "description": "Verify API responses return permission denied errors"
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "IT Prefect Hub Dashboard Functionalities",
-    "description": "Verify that IT prefect users can access the hub dashboard to view internal communications, tasks, event calendar, and training materials with real-time data updates.",
+    "title": "Public Resource Hub real-time search functionality",
+    "description": "Verify that resource hub search updates results dynamically as the user types and filters results appropriately.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as IT_PREFECT user."
+        "description": "Navigate to public Resource Hub page"
       },
       {
         "type": "action",
-        "description": "Navigate to the IT Prefect Hub dashboard."
+        "description": "Enter partial keywords into search input"
       },
       {
         "type": "assertion",
-        "description": "Verify internal communication messages are displayed with timestamps."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the task list shows assigned tasks with statuses and deadlines."
-      },
-      {
-        "type": "assertion",
-        "description": "Check event calendar shows upcoming events with RSVP status."
+        "description": "Verify resource list updates in real-time to match search terms"
       },
       {
         "type": "action",
-        "description": "Update a task status if permitted."
+        "description": "Clear search input"
       },
       {
         "type": "assertion",
-        "description": "Confirm status updates in UI and backend."
-      },
-      {
-        "type": "action",
-        "description": "Select a training material link from the dashboard and verify it opens correctly."
+        "description": "Verify full resource list is displayed without filters"
       }
     ]
   },
   {
     "id": "TC007",
-    "title": "Activity News & Announcements Interaction and RSVP",
-    "description": "Ensure public users can view school activity news cards with announcements details, RSVP to events, and see visual progress bars reflecting attendance.",
+    "title": "Club announcement RSVP and attendance tracking flow",
+    "description": "Verify students can RSVP to club announcements, attendance progress bars update accordingly, and cannot RSVP multiple times.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the public activity news and announcements page."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify a modern card UI lists all upcoming events with summaries."
+        "description": "Login as STUDENT user"
       },
       {
         "type": "action",
-        "description": "Select an event/card to view full details."
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure event description, date/time, location, and club info are displayed."
+        "description": "Navigate to Club Announcements page"
       },
       {
         "type": "action",
-        "description": "Click RSVP button (as a guest) and submit RSVP with valid details."
+        "description": "Click RSVP button for a selected announcement"
       },
       {
         "type": "assertion",
-        "description": "Check RSVP is accepted and progress bar updates accordingly."
+        "description": "Verify RSVP confirmation and attendance progress bar increments"
       },
       {
         "type": "action",
-        "description": "Attempt to RSVP without required details or with invalid input."
+        "description": "Attempt to RSVP again to the same announcement"
       },
       {
         "type": "assertion",
-        "description": "Verify proper validation error messages are displayed."
-      },
-      {
-        "type": "action",
-        "description": "Verify progress bar accurately reflects RSVP counts after submission."
+        "description": "Verify duplicate RSVPs are prevented and user is notified"
       }
     ]
   },
   {
     "id": "TC008",
-    "title": "User Profile & Settings Security and Updates",
-    "description": "Test user profile pages to securely update personal information, change passwords, and modify preferences with access control and validation.",
+    "title": "AI Assistant chat rate limit handling",
+    "description": "Verify the AI chat widget enforces rate limits and provides user-friendly notifications when limit is reached.",
     "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as an authenticated user (any role except GUEST)."
+        "description": "Navigate to any public page with AI assistant"
       },
       {
         "type": "action",
-        "description": "Navigate to the user profile and settings page."
+        "description": "Send rapid consecutive chat requests exceeding rate limit"
       },
       {
         "type": "assertion",
-        "description": "Verify the page loads successfully with current user data."
+        "description": "Verify rate limit error message is shown to the user"
       },
       {
         "type": "action",
-        "description": "Attempt to update profile information with valid data and save."
-      },
-      {
-        "type": "assertion",
-        "description": "Check that changes persist after refresh and are not accessible by unauthorized users."
+        "description": "Wait until rate limit resets"
       },
       {
         "type": "action",
-        "description": "Change the password with correct current password and new valid password."
+        "description": "Send chat request again"
       },
       {
         "type": "assertion",
-        "description": "Verify password update success and that login works with new password."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to change password with incorrect current password."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm error message is displayed and password is not changed."
-      },
-      {
-        "type": "action",
-        "description": "Modify user preferences such as notification settings and save."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm preference changes are applied immediately and persist on reload."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to access profile/settings page while logged out."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify user is redirected to login page."
+        "description": "Verify chat response is returned successfully"
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Admin User Management - Batch Operations and Role Assignment",
-    "description": "Verify admin functionalities for managing user accounts including batch editing roles, bulk deletions, and permission checks to restrict non-admin users.",
+    "title": "IT Prefect dashboard profile update and password change",
+    "description": "Verify IT Prefect users can update their profiles and change passwords with validation and session persistence.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as ADMIN user."
+        "description": "Login as IT Prefect user"
       },
       {
         "type": "action",
-        "description": "Navigate to user management console."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify list of users is displayed with roles and statuses."
+        "description": "Navigate to profile page in dashboard"
       },
       {
         "type": "action",
-        "description": "Select multiple users and change their roles in batch."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm roles are updated correctly and UI reflects changes instantly."
+        "description": "Update profile fields such as display name and contact info"
       },
       {
         "type": "action",
-        "description": "Select multiple users and perform bulk deletion."
+        "description": "Change password providing current and new passwords"
       },
       {
         "type": "assertion",
-        "description": "Verify confirmation prompts appear and users are removed from the list and database."
+        "description": "Verify updates are saved and user remains logged in"
       },
       {
         "type": "action",
-        "description": "Login as a non-admin user attempting to access the user management console."
+        "description": "Logout and login again using new password"
       },
       {
         "type": "assertion",
-        "description": "Confirm access is denied and user is redirected or shown an unauthorized page."
+        "description": "Verify login is successful with new password"
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "System Settings Real-Time Update and Validation",
-    "description": "Validate that admins can update system settings via admin UI, with real-time effect, input validation, and error handling.",
+    "title": "Admin system-wide settings change with real-time application",
+    "description": "Verify admin users can update system settings and changes reflect immediately across the site and persist after export/import.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as ADMIN."
+        "description": "Login as ADMIN user"
       },
       {
         "type": "action",
-        "description": "Navigate to system settings console."
+        "description": "Navigate to system settings page in admin console"
       },
       {
         "type": "action",
-        "description": "Change various settings including security policies and backup configurations with valid inputs."
+        "description": "Change various site-wide settings (e.g. UI theme colors, feature toggles)"
       },
       {
         "type": "assertion",
-        "description": "Verify changes are applied in real-time without requiring site restart."
+        "description": "Verify changes immediately apply to the user interface"
       },
       {
         "type": "action",
-        "description": "Input invalid data into configuration fields."
+        "description": "Export current configuration to a backup file"
+      },
+      {
+        "type": "action",
+        "description": "Import configuration from the exported backup file"
       },
       {
         "type": "assertion",
-        "description": "Ensure validation messages appear and invalid changes are rejected."
-      },
-      {
-        "type": "action",
-        "description": "Reload the page and verify settings persist correctly."
+        "description": "Verify imported settings are correctly applied and persisted"
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "Database Schema Migration and Data Integrity",
-    "description": "Test Prisma migration and db push workflows to apply schema changes, ensuring no data loss or corruption and verifying related API endpoints.",
+    "title": "Training Library categorized video view and tracking",
+    "description": "Verify users can browse training library by categories, view videos, and views are tracked correctly.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Apply a database schema migration using Prisma CLI."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify migration executes successfully without errors."
+        "description": "Login as IT Prefect or STUDENT user"
       },
       {
         "type": "action",
-        "description": "Test data access through API endpoints that rely on changed schema."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm API responses are correct and data is consistent with schema."
+        "description": "Navigate to Training Library page"
       },
       {
         "type": "action",
-        "description": "Apply database push to update schema without migrations."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify schema updates without data loss and system stability is maintained."
+        "description": "Filter videos by category"
       },
       {
         "type": "action",
-        "description": "Rollback migration where possible and confirm data integrity."
+        "description": "Play a training video"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify video plays correctly and view count increments for the video"
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "API Endpoint Authentication and Specification Compliance",
-    "description": "Verify that all API endpoints require proper authentication, adhere to request/response schema specifications, and handle invalid inputs gracefully.",
-    "category": "security",
+    "title": "Event calendar syncing from activities",
+    "description": "Verify events created or updated from the activities module sync properly to both internal and public calendars.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Make authenticated requests to all protected API endpoints using valid tokens."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify responses match expected schemas with correct status codes."
+        "description": "Login as ADMIN user"
       },
       {
         "type": "action",
-        "description": "Make unauthenticated requests to protected endpoints."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm access denied errors (401/403) are returned."
+        "description": "Create or update an activity in activity news management"
       },
       {
         "type": "action",
-        "description": "Send malformed or invalid requests to API endpoints."
+        "description": "Trigger calendar sync from the admin calendar sync API"
       },
       {
         "type": "assertion",
-        "description": "Verify validation errors are returned with detailed messages."
+        "description": "Verify new or updated events appear correctly on internal and public calendars"
       }
     ]
   },
   {
     "id": "TC013",
-    "title": "UI Accessibility and Keyboard Navigation",
-    "description": "Confirm all UI components including navigation, forms, and interactive widgets meet accessibility standards for keyboard navigation and screen reader compatibility.",
-    "category": "ui",
+    "title": "Media upload and video playback end-to-end",
+    "description": "Verify that media uploads, including videos, are accepted, stored, and playable through the portal UI.",
+    "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Using keyboard only, navigate through header navigation, content links, form controls, and footer sitemap."
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure focus states are visible and logical tab order is maintained."
+        "description": "Login as ADMIN or authorized user"
       },
       {
         "type": "action",
-        "description": "Use a screen reader to navigate main pages including resource hub, admin console, and dashboards."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify all interactive elements have meaningful accessible names and roles."
+        "description": "Navigate to media upload page or component"
       },
       {
         "type": "action",
-        "description": "Test color contrast ratios on all UI components including icon and color pickers."
+        "description": "Upload a supported video file"
       },
       {
         "type": "assertion",
-        "description": "Ensure minimum WCAG contrast requirements are met."
+        "description": "Verify upload completes successfully without errors"
       },
       {
         "type": "action",
-        "description": "Check that error messages and validation feedback are accessible."
+        "description": "Navigate to the video playback component/page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the uploaded video plays correctly with controls"
       }
     ]
   },
   {
     "id": "TC014",
-    "title": "Logging and Error Monitoring Coverage",
-    "description": "Test that client, server, and edge runtime errors produce actionable logs and are captured by error monitoring systems.",
-    "category": "functional",
-    "priority": "Medium",
+    "title": "Security - Rate limiting enforcement on public APIs",
+    "description": "Verify that rate limiting is effectively applied to public APIs such as AI chat and announcements API, blocking excessive requests.",
+    "category": "security",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Trigger client-side JavaScript errors by invalid user inputs or actions."
+        "description": "Send rapid, repeated requests exceeding standard threshold to AI chat API"
       },
       {
         "type": "assertion",
-        "description": "Confirm errors are logged with stack traces and user context."
+        "description": "Verify rate limiting HTTP error response is returned"
       },
       {
         "type": "action",
-        "description": "Trigger server-side errors by calling API endpoints with invalid data or unauthorized access."
+        "description": "Send repeated requests exceeding threshold to announcements public API"
       },
       {
         "type": "assertion",
-        "description": "Verify server logs include request metadata and error details."
-      },
-      {
-        "type": "action",
-        "description": "Cause edge runtime errors using Next.js App Router middleware."
-      },
-      {
-        "type": "assertion",
-        "description": "Check monitoring catches these errors and sends alerts if configured."
+        "description": "Verify rate limiting error response is returned"
       }
     ]
   },
   {
     "id": "TC015",
-    "title": "End-to-End Workflow Tests with Playwright",
-    "description": "Run comprehensive Playwright e2e tests covering user login, resource browsing, admin CRUD operations, AI chat assistant, and event RSVP flows across popular browsers.",
-    "category": "functional",
+    "title": "Input sanitization prevents malicious input",
+    "description": "Verify all user inputs in forms and APIs are sanitized to prevent injection, XSS, or other common attack vectors.",
+    "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Execute existing Playwright scripts for login/logout flows with all user roles."
+        "description": "Submit form inputs or API payloads containing script or SQL injection patterns"
       },
       {
         "type": "assertion",
-        "description": "Verify test passes and correct UI flow is followed."
+        "description": "Verify input is sanitized, rejected, or safely handled without executing scripts or corrupting data"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Error logging captures client, server, and edge errors",
+    "description": "Verify that all types of errors occurring client-side and server-side are captured and logged with sufficient detail.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger client-side error by invalid operation on UI (e.g. accessing undefined component)"
       },
       {
         "type": "action",
-        "description": "Run Playwright tests for resource hub browsing and admin category/resource management."
+        "description": "Trigger server-side API error by sending malformed request"
+      },
+      {
+        "type": "action",
+        "description": "Trigger edge error via middleware by unauthorized access attempt"
       },
       {
         "type": "assertion",
-        "description": "Confirm all CRUD operations complete successfully with expected UI states."
-      },
+        "description": "Verify errors are logged with timestamps, stack traces, and user context in centralized logging"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Responsive design across desktop, tablet, and mobile",
+    "description": "Verify the portal UI layouts and components render properly and maintain usability on desktop, tablet, and mobile screen sizes.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
       {
         "type": "action",
-        "description": "Execute AI chat assistant interaction test including message sending and error/retry handling."
-      },
-      {
-        "type": "action",
-        "description": "Perform end-to-end test of event RSVP function and progress bar update."
+        "description": "Open the portal on desktop viewport size"
       },
       {
         "type": "assertion",
-        "description": "Ensure tests confirm success states and visual updates."
+        "description": "Verify all UI components are arranged correctly and fully visible"
+      },
+      {
+        "type": "action",
+        "description": "Resize viewport to tablet dimensions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI adapts fluidly with no overlapping or truncated text"
+      },
+      {
+        "type": "action",
+        "description": "Resize viewport to mobile dimensions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify navigation menus are accessible and content is readable without horizontal scrolling"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "UI animations and transitions performance",
+    "description": "Verify UI animations and transitions execute smoothly without jank and provide appropriate user feedback.",
+    "category": "ui",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate through the portal pages and interact with animated elements (dropdowns, modals, buttons)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify animations run smoothly and transitions provide clear visual feedback"
       }
     ]
   }

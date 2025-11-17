@@ -1,112 +1,227 @@
 {
   "tech_stack": [
-    "TypeScript",
-    "React 18",
+    "TypeScript 5",
     "Next.js 15 (App Router)",
-    "Node.js",
-    "Tailwind CSS",
-    "shadcn/ui (Radix + Tailwind)",
-    "Prisma ORM (MySQL)",
-    "NextAuth.js (username-only auth)",
-    "Zod (validation)",
-    "React Hook Form",
-    "Recharts (charts)",
-    "React Data Grid (tables)",
-    "Playwright (e2e tests)"
+    "Tailwind CSS 4",
+    "shadcn/ui",
+    "Prisma (MySQL)",
+    "NextAuth.js",
+    "Zod",
+    "Recharts",
+    "Playwright"
   ],
   "features": [
     {
-      "name": "Public Resource Hub",
-      "description": "Homepage resource hub showing curated links, categories, and training resources for students and staff.",
+      "name": "Authentication",
+      "description": "Username-based login with NextAuth.js and session provider integration.",
       "files": [
-        "app/page.tsx",
-        "components/resource-hub.tsx",
-        "components/ui/icon-picker.tsx",
-        "components/ui/color-picker.tsx",
-        "lib/favicon-utils.ts",
-        "app/api/resources/route.ts",
-        "app/api/categories/route.ts",
-        "prisma/schema.prisma"
-      ]
-    },
-    {
-      "name": "AI Chat Assistant Widget",
-      "description": "Floating AI assistant button and chat panel integrated globally, backed by the /api/chat OpenRouter endpoint.",
-      "files": [
-        "components/ai-chat-widget.tsx",
-        "app/providers.tsx",
-        "app/api/chat/route.ts"
-      ]
-    },
-    {
-      "name": "Role-Based Authentication & Authorization",
-      "description": "Username-based login with ADMIN, HELPER, IT_PREFECT/STUDENT roles and permission-guarded routes and navigation.",
-      "files": [
-        "lib/permissions.ts",
-        "lib/auth-middleware.ts",
-        "hooks/use-auth-permissions.ts",
-        "components/role-based-nav.tsx",
-        "components/user-role-display.tsx",
-        "components/auth/unified-login-dialog.tsx",
-        "app/unauthorized/page.tsx",
+        "auth.ts",
         "app/api/auth/[...nextauth]/route.ts",
-        "prisma/schema.prisma"
+        "components/auth/simple-login-dialog.tsx",
+        "components/auth/session-provider.tsx",
+        "components/auth/user-menu.tsx",
+        "app/unauthorized/page.tsx"
       ]
     },
     {
-      "name": "Admin Category & Resource Management",
-      "description": "Admin UI to manage resource categories, icons, colors, and individual resources with visual icon/color pickers.",
+      "name": "Permissions & Roles",
+      "description": "Server-side ABAC permissions and role enforcement across APIs and pages.",
       "files": [
-        "components/admin/category-management.tsx",
-        "components/admin/resource-management.tsx",
-        "components/ui/icon-picker.tsx",
-        "components/ui/color-picker.tsx",
-        "app/api/admin/categories/route.ts",
-        "app/api/admin/categories/meta/route.ts",
-        "app/api/resources/route.ts",
-        "prisma/schema.prisma"
-      ]
-    },
-    {
-      "name": "Training Library (Video, Text, File)",
-      "description": "IT Perfect training hub supporting multi-type resources: videos, rich text, and document/file uploads.",
-      "files": [
-        "components/dashboard/training-library.tsx",
-        "lib/training-resources.ts",
-        "hooks/use-training-resources.ts",
-        "app/api/training-resources/route.ts",
-        "app/api/upload/route.ts",
-        "prisma/schema.prisma"
-      ]
-    },
-    {
-      "name": "IT Perfect Hub Dashboard",
-      "description": "Dashboard view for IT Perfect members with quick access to tasks, training, and internal tools.",
-      "files": [
-        "components/dashboard/it-perfect-hub.tsx",
-        "app/(dashboard)/it-perfect/page.tsx",
         "lib/permissions.ts",
-        "hooks/use-auth-permissions.ts"
+        "lib/permissions/abac.ts",
+        "app/api/admin/users/route.ts",
+        "middleware.ts"
       ]
     },
     {
-      "name": "Activity News & Announcements",
-      "description": "Public activity and announcement listing for school events and club updates.",
+      "name": "Settings Management",
+      "description": "Site settings service with public and admin APIs and management UI.",
       "files": [
-        "app/activity-news/page.tsx",
+        "lib/settings-service.ts",
+        "app/api/settings/route.ts",
+        "app/api/admin/settings/route.ts",
+        "app/admin/settings/page.tsx",
+        "components/admin/system-settings.tsx"
+      ]
+    },
+    {
+      "name": "Announcements",
+      "description": "Club announcements CRUD with public and authenticated endpoints.",
+      "files": [
+        "lib/repositories/announcement.repository.ts",
         "app/api/announcements/route.ts",
-        "prisma/schema.prisma"
+        "app/api/announcements/[id]/route.ts",
+        "app/api/public/announcements/route.ts",
+        "app/admin/announcements/page.tsx",
+        "components/club-announcements.tsx"
       ]
     },
     {
-      "name": "Global Layout, Navigation & Footer Sitemap",
-      "description": "Application shell with header navigation, global providers, and an accessible sitemap footer.",
+      "name": "Articles CMS",
+      "description": "Article creation, listing, and public rendering with slug routing.",
       "files": [
-        "app/layout.tsx",
-        "app/providers.tsx",
-        "components/role-based-nav.tsx",
-        "components/footer-sitemap.tsx",
+        "lib/repositories/article.repository.ts",
+        "app/api/admin/articles/route.ts",
+        "app/api/public/articles/route.ts",
+        "app/articles/page.tsx",
+        "app/articles/[slug]/page.tsx",
+        "components/admin/article-management.tsx"
+      ]
+    },
+    {
+      "name": "Resources Hub",
+      "description": "Curated external links with categories and admin management UI.",
+      "files": [
+        "lib/services/resource.service.ts",
+        "lib/resources.ts",
+        "app/api/resources/route.ts",
+        "app/admin/resources/page.tsx",
+        "components/resource-hub.tsx",
+        "components/admin/resource-management.tsx"
+      ]
+    },
+    {
+      "name": "Activity News",
+      "description": "Activity news listing, join endpoints, and admin management UI.",
+      "files": [
+        "lib/activity-news.ts",
+        "app/api/activity-news/route.ts",
+        "app/api/activity-news/[id]/route.ts",
+        "app/api/activity-news/[id]/join/route.ts",
+        "app/activity-news/page.tsx",
+        "components/activity-news-public.tsx",
+        "components/admin/activity-news-management.tsx"
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "User dashboard with profile, team, history, training, and calendar.",
+      "files": [
+        "lib/dashboard-data.ts",
+        "app/dashboard/page.tsx",
+        "app/dashboard/profile/page.tsx",
+        "app/dashboard/team/page.tsx",
+        "app/dashboard/history/page.tsx",
+        "app/dashboard/training/page.tsx",
+        "components/dashboard/dashboard-layout.tsx",
+        "components/dashboard/user-profile.tsx",
+        "components/dashboard/team-information.tsx",
+        "components/dashboard/it-perfect-history.tsx",
+        "components/dashboard/training-library.tsx"
+      ]
+    },
+    {
+      "name": "Calendar",
+      "description": "Internal and public calendars with admin syncing from activities.",
+      "files": [
+        "components/dashboard/internal-calendar.tsx",
+        "app/dashboard/calendar/page.tsx",
+        "app/api/admin/calendar/route.ts",
+        "app/api/admin/calendar/[id]/route.ts",
+        "app/api/admin/calendar/from-activity/route.ts"
+      ]
+    },
+    {
+      "name": "Training Library",
+      "description": "Training resources with categories, views tracking, and admin endpoints.",
+      "files": [
+        "lib/training.ts",
+        "app/api/training/route.ts",
+        "app/api/training/[id]/route.ts",
+        "app/api/training/[id]/views/route.ts",
+        "app/api/training/categories/route.ts",
+        "components/dashboard/training-library.tsx"
+      ]
+    },
+    {
+      "name": "Upload & Media",
+      "description": "Media upload handling and video playback utilities.",
+      "files": [
+        "lib/video-storage.ts",
+        "app/api/upload/route.ts",
+        "components/video-player.tsx"
+      ]
+    },
+    {
+      "name": "AI Chat",
+      "description": "OpenRouter-powered AI chat with UI widget and server proxy.",
+      "files": [
+        "app/api/chat/route.ts",
+        "components/ai-chat.tsx",
+        "components/ai-chat-widget.tsx"
+      ]
+    },
+    {
+      "name": "Security & Rate Limiting",
+      "description": "Request sanitization, security headers, and rate-limit protections.",
+      "files": [
+        "lib/rate-limiter.ts",
+        "lib/security/sanitizer.ts",
+        "lib/security-headers.ts",
+        "middleware.ts"
+      ]
+    },
+    {
+      "name": "Logging & Error Handling",
+      "description": "Centralized logging and error handling for API routes.",
+      "files": [
+        "lib/logger.ts",
+        "lib/logging/logger.ts",
+        "lib/error-handler.ts",
+        "components/error-boundary.tsx",
+        "app/global-error.tsx"
+      ]
+    },
+    {
+      "name": "Browser Extension Cleanup",
+      "description": "Mitigates layout interference from browser extensions.",
+      "files": [
+        "lib/browser-extension-cleanup.ts",
+        "components/browser-extension-cleanup.tsx"
+      ]
+    },
+    {
+      "name": "Database Layer & Prisma",
+      "description": "Prisma client, schema, repositories, and base database utilities.",
+      "files": [
+        "lib/prisma.ts",
+        "prisma/schema.prisma",
+        "lib/database.ts",
+        "lib/repositories/base.repository.ts",
+        "lib/repositories/user.repository.ts",
+        "lib/repositories/category.repository.ts"
+      ]
+    },
+    {
+      "name": "Repositories & Services",
+      "description": "Domain repositories and services for articles and resources.",
+      "files": [
+        "lib/repositories/article.repository.ts",
+        "lib/repositories/resource.repository.ts",
+        "lib/services/article.service.ts",
+        "lib/services/resource.service.ts"
+      ]
+    },
+    {
+      "name": "UI Library",
+      "description": "Reusable UI components built on shadcn/ui and Tailwind.",
+      "files": [
+        "components/ui/button.tsx",
+        "components/ui/input.tsx",
+        "components/ui/table.tsx",
+        "components/ui/toaster.tsx",
+        "components/theme-provider.tsx",
         "components/icons.tsx"
+      ]
+    },
+    {
+      "name": "Configuration",
+      "description": "Site configuration and Next.js config settings.",
+      "files": [
+        "config/site.ts",
+        "next.config.mjs",
+        "eslint.config.js",
+        "playwright.config.ts"
       ]
     }
   ]
