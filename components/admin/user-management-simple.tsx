@@ -90,8 +90,10 @@ export function UserManagementSimple() {
     if (!confirm('Are you sure you want to delete this user?')) return
     
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/admin/users`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [userId] })
       })
       if (response.ok) {
         setUsers(users.filter(u => u.id !== userId))

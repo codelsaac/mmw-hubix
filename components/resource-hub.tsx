@@ -142,15 +142,18 @@ export function ResourceHub() {
     }
   }, [])
 
-  const filteredResources = resources.filter(
+  const filteredBySearch = resources.filter(
     (resource) =>
       resource.status === "active" &&
       (resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (resource.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (selectedCategory === "all" || resource.categoryId === selectedCategory),
+        (resource.description || "").toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
-  const resourcesByCategory = filteredResources.reduce(
+  const filteredResources = selectedCategory === "all"
+    ? filteredBySearch
+    : filteredBySearch.filter((r) => r.categoryId === selectedCategory)
+
+  const resourcesByCategory = (selectedCategory === "all" ? filteredBySearch : filteredResources).reduce(
     (acc, resource) => {
       if (!acc[resource.category]) {
         acc[resource.category] = []
