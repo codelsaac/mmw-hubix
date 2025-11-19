@@ -214,10 +214,10 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 |---|---|---|---|
 | **Admin** | `admin` | `admin123` | Full admin console access |
 | **Helper** | `helper` | `helper123` | IT dashboard access |
-| **Guest** | `guest` | `guest123` | Read-only access |
+| **Student** | `guest` | `guest123` | Read-only access to training and resources |
 
 **Features:**
-- ✅ Role-based access control (ADMIN, HELPER, STUDENT, GUEST)
+- ✅ Role-based access control (ADMIN, HELPER, STUDENT)
 - ✅ Protected routes with server-side auth
 - ✅ Session management with NextAuth.js
 - ✅ Password change functionality
@@ -251,13 +251,10 @@ This project uses NextAuth.js with **username-based** authentication (not email)
 - **Access Control**: Users can only edit their own profile information
 - **Settings Access**: Available via user menu dropdown or direct navigation to `/dashboard/profile`
 
-### IT Prefect System (Authenticated)
-- **Team Dashboard**: Mission statement, organizational structure, and internal communications
-- **Internal Calendar**: Manage team meetings, duties, and training sessions (viewable by all prefects, editable by admins)
-- **Training Library**: Categorized repository of training videos and materials with search functionality
-- **Event Management**: Create and track IT-related events and activities
-- **Task System**: Assign and manage team tasks and responsibilities
-- **User Profile & Settings**: Personal profile management with password change functionality and user preferences
+### IT Prefect System
+- **Public Hub (no login required)**: IT Perfect overview, goals, history timeline, and training library browse experience
+- **Public Events View**: See upcoming public events from the school calendar
+- **Authenticated Tools**: Internal calendar management, event management, task system, and user profile & settings for prefects/admins
 
 ### Admin Console (Admin Only)
 - **User Management**: Account permissions, role assignment, and access control
@@ -307,7 +304,7 @@ Content-Type: application/json
     "id": "user_id",
     "name": "New Name",
     "email": "user@example.com",
-    "role": "ADMIN" | "HELPER" | "GUEST",
+    "role": "ADMIN" | "HELPER" | "STUDENT",
     "department": "IT",
     "isActive": true
   }
@@ -476,7 +473,7 @@ Content-Type: application/json
 The application uses a comprehensive database schema with the following key models:
 
 ### Core Models
-- **User**: Username-based authentication with roles (ADMIN, HELPER, STUDENT, GUEST), permissions, and activity tracking
+- **User**: Username-based authentication with roles (ADMIN, HELPER, STUDENT), permissions, and activity tracking
 - **Category**: Resource categorization with icons, colors, sorting order, and status management
 - **Resource**: External links organized by category with click tracking and status control
 - **Article**: CMS system with slug, content, status workflow (Draft → Published → Archived), and featured images

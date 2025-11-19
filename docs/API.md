@@ -312,7 +312,7 @@ interface User {
   name: string
   email: string
   username: string
-  role: 'ADMIN' | 'HELPER' | 'GUEST'
+  role: 'ADMIN' | 'HELPER' | 'STUDENT'
   department: string
   isActive: boolean
   lastLoginAt?: string

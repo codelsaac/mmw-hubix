@@ -194,7 +194,7 @@ export function ResourceHub() {
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-serif font-bold text-foreground">Resource Hub</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Quick access to all essential school resources, tools, and information in one centralized location.
+            Quick access to all essential school resources, tools, and information in one location.
           </p>
         </div>
         <div className="max-w-md mx-auto">
@@ -240,7 +240,7 @@ export function ResourceHub() {
       <div className="text-center space-y-2">
         <h2 className="text-2xl sm:text-3xl font-serif font-bold text-foreground animate-in fade-in slide-in-from-top-4 duration-700">Resource Hub</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
-          Quick access to all essential school resources, tools, and information in one centralized location.
+          Quick access to all essential school resources, tools, and information in one location.
         </p>
       </div>
 

@@ -12,27 +12,6 @@ import { Calendar, File, FileText, Monitor, Mic, Megaphone, PlayCircle, Video, H
 
 const HERO_IMAGE: string | null = "/windows-computer.png"
 
-const GOALS = [
-  {
-    title: "Train confident student tech helpers",
-    description:
-      "Help students learn how to power on/off classroom systems, switch inputs, and handle simple technical issues.",
-  },
-  {
-    title: "Support school events",
-    description: "Provide AV support for assemblies, open days, competitions, and performances.",
-  },
-  {
-    title: "Create IT promotional content",
-    description: "Design slides, graphics, and simple media to promote school IT activities.",
-  },
-  {
-    title: "Build teamwork and responsibility",
-    description:
-      "Develop problem-solving skills, communication, and a responsible attitude when working with equipment.",
-  },
-]
-
 const RECENT_MOMENTS = [
   {
     id: "open-day",
@@ -222,22 +201,6 @@ export function ItPerfectHub() {
                 })}
             </CardContent>
           </Card>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h3 className="text-xl font-semibold tracking-tight text-foreground">Our Goals</h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          {GOALS.map((goal) => (
-            <Card key={goal.title} className="bg-card/60 backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-base">{goal.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{goal.description}</p>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </section>
     </div>

@@ -11,7 +11,6 @@ export interface UseAuthReturn {
   isAuthenticated: boolean
   isAdmin: boolean
   isHelper: boolean
-  isGuest: boolean
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
   hasPermission: (permission: Permission) => boolean
@@ -97,7 +96,6 @@ export function useAuth(): UseAuthReturn {
     isAuthenticated,
     isAdmin: user?.role === UserRole.ADMIN,
     isHelper: user?.role === UserRole.HELPER,
-    isGuest: user?.role === UserRole.GUEST,
     signOut: handleSignOut,
     refreshUser,
     hasPermission,

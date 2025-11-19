@@ -310,7 +310,7 @@ export async function requirePermission(
 ): Promise<void> {
   if (!user) {
     throw new PermissionDeniedError('Authentication required', {
-      user: { id: '', role: UserRole.GUEST },
+      user: { id: '', role: UserRole.STUDENT },
       action,
       resource,
     });

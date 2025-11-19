@@ -13,7 +13,7 @@ const DEMO_ACCOUNTS = [
     username: process.env.DEMO_GUEST_USERNAME || "guest", 
     password: process.env.DEMO_GUEST_PASSWORD || "guest123", 
     name: "Guest User", 
-    role: UserRole.GUEST, 
+    role: UserRole.STUDENT, 
     department: "Public",
     description: "Public access to training videos and learning materials"
   },

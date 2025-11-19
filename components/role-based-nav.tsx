@@ -66,6 +66,8 @@ export function RoleBasedNav({ className, showDescriptions = false }: RoleBasedN
       return (
         !item.requiredPermissions ||
         item.href === "/" ||
+        item.href === "/activity-news" ||
+        item.href === "/dashboard" ||
         item.href.startsWith("/#") // support hash anchors on home, e.g. /#activity-news
       )
     }

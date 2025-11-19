@@ -22,7 +22,7 @@ async function main() {
       name: 'Guest User',
       email: 'guest@cccmmw.edu.hk',
       password: 'guest123',
-      role: UserRole.GUEST,
+      role: UserRole.STUDENT,
       department: 'Public',
       isActive: true,
       image: '/abstract-profile.png',

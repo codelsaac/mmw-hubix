@@ -63,8 +63,8 @@ export const UserSchemas = {
     email: BaseSchemas.email,
     username: BaseSchemas.username,
     password: BaseSchemas.password,
-    role: z.enum(['ADMIN', 'HELPER', 'GUEST'], {
-      errorMap: () => ({ message: 'Role must be ADMIN, HELPER, or GUEST' })
+    role: z.enum(['ADMIN', 'HELPER', 'STUDENT'], {
+      errorMap: () => ({ message: 'Role must be ADMIN, HELPER, or STUDENT' })
     }),
     department: z.string().min(1, 'Department is required').max(100, 'Department name too long'),
     isActive: z.boolean().default(true)
@@ -74,7 +74,7 @@ export const UserSchemas = {
     name: BaseSchemas.name.optional(),
     email: BaseSchemas.email.optional(),
     username: BaseSchemas.username.optional(),
-    role: z.enum(['ADMIN', 'HELPER', 'GUEST']).optional(),
+    role: z.enum(['ADMIN', 'HELPER', 'STUDENT']).optional(),
     department: z.string().min(1).max(100).optional(),
     isActive: z.boolean().optional()
   }),

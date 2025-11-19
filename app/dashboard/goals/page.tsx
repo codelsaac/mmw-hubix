@@ -1,10 +1,10 @@
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
-import { ItPerfectHub } from "@/components/dashboard/it-perfect-hub"
+import { ItPerfectGoals } from "@/components/dashboard/it-perfect-goals"
 
-export default function DashboardPage() {
+export default function GoalsPage() {
   return (
     <DashboardLayout>
-      <ItPerfectHub />
+      <ItPerfectGoals />
     </DashboardLayout>
   )
 }

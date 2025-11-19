@@ -22,11 +22,13 @@ import {
   LinkIcon,
   FileText,
   BookOpen,
+  Target,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: Users },
+  { name: "About us", href: "/dashboard/goals", icon: Target },
   { name: "History", href: "/dashboard/history", icon: FileText },
   { name: "Learning Resources", href: "/dashboard/training", icon: PlayCircle },
   { name: "Calendar", href: "/dashboard/calendar", icon: Calendar },
@@ -55,60 +57,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </Button>
-
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  {isAdminRoute ? (
-                    <Shield className="w-4 h-4 text-primary-foreground" />
-                  ) : (
-                    <Settings className="w-4 h-4 text-primary-foreground" />
-                  )}
-                </div>
-                <div>
-                  <h1 className="text-lg font-serif font-bold text-foreground">
-                    {isAdminRoute ? "Admin Dashboard" : "IT Perfect Hub"}
-                  </h1>
-                  <p className="text-xs text-muted-foreground">
-                    {isAdminRoute ? "Content Management System" : "Internal Management System"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {user && (
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <div className="flex items-center gap-1">
-                      <Badge 
-                        variant={user.role === UserRole.ADMIN ? "default" : "secondary"} 
-                        className="text-xs"
-                      >
-                        {user.role === UserRole.ADMIN 
-                          ? "Admin" 
-                          : user.role === UserRole.HELPER 
-                            ? "Helper" 
-                            : "Guest"}
-                      </Badge>
-                    </div>
-                  </div>
-                  <UserMenu />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="flex">
         {/* Sidebar */}
         <aside
@@ -166,7 +114,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 pt-8 lg:pt-6">
+          <div className="lg:hidden mb-6">
+            <Button variant="outline" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)}>
+              <Menu className="w-4 h-4 mr-2" />
+              Menu
+            </Button>
+          </div>
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>

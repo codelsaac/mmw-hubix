@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { LogIn, UserCheck, UserPlus } from "lucide-react"
+import { LogIn, UserPlus } from "lucide-react"
 import { RegistrationForm } from "./registration-form"
 import { useSettings } from "@/hooks/use-settings"
 
@@ -58,29 +58,6 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
     }
   }
 
-  const guestLogin = async () => {
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const result = await signIn("credentials", {
-        username: "guest",
-        password: "guest123",
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError("Guest login failed")
-      } else {
-        setOpen(false)
-      }
-    } catch (error) {
-      setError("Guest login error occurred")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const switchToRegistration = () => {
     setShowRegistration(true)
     setError("")
@@ -110,39 +87,11 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
           <DialogHeader>
             <DialogTitle>MMW Hubix Login</DialogTitle>
             <DialogDescription>
-              Sign in with your credentials or continue as guest
+              Sign in with your credentials to access the IT Prefect system
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Guest Access Button */}
-            <div className="text-center">
-              <Button
-                onClick={guestLogin}
-                disabled={isLoading}
-                className="w-full"
-                variant="outline"
-              >
-                <UserCheck className="mr-2 h-4 w-4" />
-                {isLoading ? "Accessing..." : "Continue as Guest"}
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2">
-                Browse content without logging in
-              </p>
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or login with credentials
-                </span>
-              </div>
-            </div>
-
             {/* Manual Login Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">

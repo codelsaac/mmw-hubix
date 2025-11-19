@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         username: user.username || user.email?.split('@')[0] || 'user',
         name: user.name || 'IT Prefect',
         email: user.email,
-        role: (user.role as UserRole) || UserRole.GUEST,
+        role: (user.role as UserRole) || UserRole.STUDENT,
         department: user.department || 'IT',
       }
     })

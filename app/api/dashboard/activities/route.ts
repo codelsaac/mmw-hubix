@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         username: session.user.username || session.user.email?.split('@')[0] || 'user',
         name: session.user.name || 'IT Prefect',
         email: session.user.email,
-        role: (session.user.role as UserRole) || UserRole.GUEST,
+        role: (session.user.role as UserRole) || UserRole.STUDENT,
         department: session.user.department || 'IT',
       }
     })

@@ -28,8 +28,6 @@ export function UserRoleDisplay({ showDescription = true, className }: UserRoleD
         return "destructive" as const
       case UserRole.HELPER:
         return "default" as const
-      case UserRole.GUEST:
-        return "secondary" as const
       default:
         return "outline" as const
     }

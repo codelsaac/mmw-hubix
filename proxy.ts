@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt';
 // Rate limiting store (simple in-memory version, use Redis in production for multi-instance)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
   
   // 1. Security Headers

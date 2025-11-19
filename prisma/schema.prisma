@@ -46,7 +46,7 @@ model User {
   emailVerified DateTime?
   password      String?
   image         String?   @db.VarChar(2048)
-  role          UserRole  @default(GUEST)
+  role          UserRole  @default(STUDENT)
   department    String?
   permissions   String?   @db.Text
   isActive      Boolean   @default(true)
@@ -83,7 +83,6 @@ enum UserRole {
   ADMIN
   HELPER
   STUDENT
-  GUEST
 }
 
 // ------------------

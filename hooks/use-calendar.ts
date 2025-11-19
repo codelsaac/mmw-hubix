@@ -25,48 +25,59 @@ export function useCalendar() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { user, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   const loadEvents = useCallback(async () => {
-    if (!isAuthenticated) return
-
     setLoading(true)
     setError(null)
 
     try {
-      // Load internal events (IT Prefect only)
-      const internalResponse = await fetch('/api/dashboard/internal-events')
       let internalEvents: CalendarEvent[] = []
-      
-      if (internalResponse.ok) {
-        const data = await internalResponse.json()
-        internalEvents = data.map((event: any) => ({
-          ...event,
-          startTime: new Date(event.startTime),
-          endTime: new Date(event.endTime),
-          isInternal: true,
-          attendees: event.attendees ? JSON.parse(event.attendees) : []
-        }))
+
+      // Load internal events (IT Prefect only) when authenticated
+      if (isAuthenticated) {
+        const internalResponse = await fetch('/api/dashboard/internal-events')
+        if (internalResponse.ok) {
+          const data = await internalResponse.json()
+          internalEvents = data.map((event: any) => ({
+            ...event,
+            startTime: new Date(event.startTime),
+            endTime: new Date(event.endTime),
+            isInternal: true,
+            attendees: event.attendees ? JSON.parse(event.attendees) : []
+          }))
+        }
       }
 
-      // Load public events (shared between all accounts)
-      // All authenticated users can see public events
+      // Load public events
       let publicEvents: CalendarEvent[] = []
-      const publicResponse = await fetch('/api/admin/calendar')
-      
-      if (publicResponse.ok) {
-        const data = await publicResponse.json()
-        publicEvents = data.map((event: any) => ({
-          ...event,
-          startTime: new Date(event.startTime),
-          endTime: new Date(event.endTime),
-          isInternal: false
-        }))
-      } else if (publicResponse.status !== 401) {
-        // If not unauthorized, try public endpoint
-        const fallbackResponse = await fetch('/api/public/calendar')
-        if (fallbackResponse.ok) {
-          const data = await fallbackResponse.json()
+
+      if (isAuthenticated) {
+        const adminResponse = await fetch('/api/admin/calendar')
+        if (adminResponse.ok) {
+          const data = await adminResponse.json()
+          publicEvents = data.map((event: any) => ({
+            ...event,
+            startTime: new Date(event.startTime),
+            endTime: new Date(event.endTime),
+            isInternal: false
+          }))
+        } else {
+          const fallbackResponse = await fetch('/api/public/calendar')
+          if (fallbackResponse.ok) {
+            const data = await fallbackResponse.json()
+            publicEvents = data.map((event: any) => ({
+              ...event,
+              startTime: new Date(event.startTime),
+              endTime: new Date(event.endTime),
+              isInternal: false
+            }))
+          }
+        }
+      } else {
+        const publicResponse = await fetch('/api/public/calendar')
+        if (publicResponse.ok) {
+          const data = await publicResponse.json()
           publicEvents = data.map((event: any) => ({
             ...event,
             startTime: new Date(event.startTime),
