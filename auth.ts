@@ -42,7 +42,7 @@ const DEMO_ACCOUNTS = [
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development-only",
   pages: {
-    signIn: '/',
+    signIn: '/login',
   },
   providers: [
     CredentialsProvider({
