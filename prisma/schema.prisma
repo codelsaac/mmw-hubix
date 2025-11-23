@@ -83,6 +83,7 @@ enum UserRole {
   ADMIN
   HELPER
   STUDENT
+  GUEST
 }
 
 // ------------------

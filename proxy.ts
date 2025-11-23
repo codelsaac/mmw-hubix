@@ -72,20 +72,6 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 4. Dashboard Route Protection
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
-    });
-    
-    if (!token) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
   return response;
 }
 
@@ -93,6 +79,5 @@ export const config = {
   matcher: [
     '/api/:path*',
     '/admin/:path*',
-    '/dashboard/:path*',
   ],
 };

@@ -70,6 +70,8 @@ export function MobileNav() {
       return (
         !item.requiredPermissions ||
         item.href === "/" ||
+        item.href === "/activity-news" ||
+        item.href === "/dashboard" ||
         item.href.startsWith("/#")
       )
     }

@@ -20,7 +20,7 @@ import {
   Shield,
   Settings,
   LinkIcon,
-  FileText,ZZ
+  FileText,
   BookOpen,
   Target,
 } from "lucide-react"
