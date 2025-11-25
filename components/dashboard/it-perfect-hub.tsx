@@ -7,34 +7,96 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useTraining } from "@/hooks/use-training"
+import { useCalendar, type CalendarEvent } from "@/hooks/use-calendar"
 import type { TrainingResource } from "@/lib/training"
-import { Calendar, File, FileText, Monitor, Mic, Megaphone, PlayCircle, Video, Heart } from "lucide-react"
+import {
+  Calendar,
+  CalendarClock,
+  File,
+  FileText,
+  Monitor,
+  Megaphone,
+  PlayCircle,
+  Users,
+  Video,
+  Heart,
+  Wrench,
+  GraduationCap,
+} from "lucide-react"
 
 const HERO_IMAGE: string | null = "/windows-computer.png"
 
-const RECENT_MOMENTS = [
-  {
-    id: "open-day",
-    year: "2024",
-    title: "Open Day AV Support",
-    description: "Managed projection and sound for the open day programme.",
-    imageUrl: "/windows-computer.png",
+const EVENT_TYPE_META: Record<CalendarEvent["eventType"], {
+  label: string
+  icon: typeof Users
+  accent: string
+  badge: string
+}> = {
+  meeting: {
+    label: "Meeting",
+    icon: Users,
+    accent: "bg-sky-100 text-sky-700",
+    badge: "border-sky-100 text-sky-700",
   },
-  {
-    id: "hall-upgrade",
-    year: "2023",
-    title: "Assembly Hall Upgrade",
-    description: "Helped test the new projector and display setup in the hall.",
-    imageUrl: "/security-lock.png",
+  training: {
+    label: "Training",
+    icon: GraduationCap,
+    accent: "bg-emerald-100 text-emerald-700",
+    badge: "border-emerald-100 text-emerald-700",
   },
-  {
-    id: "promotion-week",
-    year: "2023",
-    title: "IT Promotion Week",
-    description: "Prepared looping slides and visuals for IT promotion.",
-    imageUrl: "/icon2.png",
+  maintenance: {
+    label: "Maintenance",
+    icon: Wrench,
+    accent: "bg-amber-100 text-amber-700",
+    badge: "border-amber-100 text-amber-700",
   },
-]
+  orientation: {
+    label: "Orientation",
+    icon: CalendarClock,
+    accent: "bg-fuchsia-100 text-fuchsia-700",
+    badge: "border-fuchsia-100 text-fuchsia-700",
+  },
+  general: {
+    label: "General",
+    icon: Megaphone,
+    accent: "bg-slate-100 text-slate-700",
+    badge: "border-slate-200 text-slate-700",
+  },
+}
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+})
+
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+})
+
+function getEventMeta(eventType: CalendarEvent["eventType"] | undefined) {
+  return EVENT_TYPE_META[eventType ?? "general"] ?? EVENT_TYPE_META.general
+}
+
+function formatEventDateRange(event: CalendarEvent) {
+  const start = event.startTime ? new Date(event.startTime) : null
+  const end = event.endTime ? new Date(event.endTime) : null
+
+  if (!start) return "Date TBA"
+
+  const base = dateFormatter.format(start)
+  if (!end) {
+    return `${base} · ${timeFormatter.format(start)}`
+  }
+
+  const sameDay = start.toDateString() === end.toDateString()
+  if (sameDay) {
+    return `${base} · ${timeFormatter.format(start)} – ${timeFormatter.format(end)}`
+  }
+
+  return `${base} – ${dateFormatter.format(end)}`
+}
 
 function resourceIcon(resource: TrainingResource) {
   if (resource.contentType === "VIDEO") return Video
@@ -44,6 +106,7 @@ function resourceIcon(resource: TrainingResource) {
 
 export function ItPerfectHub() {
   const { resources, loading } = useTraining()
+  const { events: calendarEvents, loading: calendarLoading } = useCalendar()
 
   const latestResources = useMemo(() => {
     if (!resources || resources.length === 0) return [] as TrainingResource[]
@@ -54,6 +117,16 @@ export function ItPerfectHub() {
     })
     return sorted.slice(0, 4)
   }, [resources])
+
+  const recentCalendarEvents = useMemo(() => {
+    if (!calendarEvents || calendarEvents.length === 0) return [] as CalendarEvent[]
+    const sorted = [...calendarEvents].sort((a, b) => {
+      const aTime = a.startTime ? new Date(a.startTime).getTime() : 0
+      const bTime = b.startTime ? new Date(b.startTime).getTime() : 0
+      return bTime - aTime
+    })
+    return sorted.slice(0, 3)
+  }, [calendarEvents])
 
   return (
     <div className="space-y-10">
@@ -142,25 +215,51 @@ export function ItPerfectHub() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-3">
-              {RECENT_MOMENTS.map((event) => (
-                <div
-                  key={event.id}
-                  className="flex gap-3 rounded-lg border bg-background/60 p-2 hover:border-primary/60 transition"
-                >
-                  <div className="relative h-14 w-20 overflow-hidden rounded-md bg-muted">
-                    <img src={event.imageUrl} alt={event.title} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                        {event.year}
-                      </Badge>
-                      <p className="text-sm font-medium leading-tight">{event.title}</p>
+              {calendarLoading && <p className="text-xs text-muted-foreground">Loading calendar events...</p>}
+              {!calendarLoading && recentCalendarEvents.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  No calendar activity yet. Add an event to see it appear here.
+                </p>
+              )}
+              {!calendarLoading &&
+                recentCalendarEvents.map((event) => {
+                  const meta = getEventMeta(event.eventType)
+                  const Icon = meta.icon
+                  const startTime = event.startTime ? new Date(event.startTime) : null
+
+                  return (
+                    <div
+                      key={event.id}
+                      className="flex gap-3 rounded-lg border bg-background/60 p-3 hover:border-primary/60 transition"
+                    >
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center rounded-md ${meta.accent}`}
+                        aria-hidden
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {startTime && (
+                            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${meta.badge}`}>
+                              {startTime.getFullYear()}
+                            </Badge>
+                          )}
+                          <p className="text-sm font-medium leading-tight">{event.title}</p>
+                          {event.isInternal && (
+                            <Badge variant="secondary" className="text-[10px]">Internal</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {meta.label} · {formatEventDateRange(event)}
+                        </p>
+                        {event.location && (
+                          <p className="text-xs text-muted-foreground">Location: {event.location}</p>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
-                  </div>
-                </div>
-              ))}
+                  )
+                })}
             </CardContent>
           </Card>
 

@@ -6,14 +6,14 @@ This project now standardizes on **MySQL** for both development and production e
 
 ### Understanding Environment Files
 
-**`.env`** - Base configuration, committed to Git (use placeholder values)  
-**`.env.local`** - Local overrides, **NOT** committed to Git (contains real credentials)
+**`.env`** - Base configuration for local development and default runtime  
+**`.env.production`** - Production deployment configuration (optional)
 
-> 💡 `.env.local` takes precedence over `.env`. Use it for local development.
+> 💡 Use `.env` for local development. URL‑encode special characters in passwords.
 
-### Configure `.env.local`
+### Configure `.env`
 
-Create a `.env.local` file in your project root with your MySQL connection:
+Create a `.env` file in your project root with your MySQL connection:
 
 #### Option 1: MySQL without password (default root user)
 ```env
@@ -129,7 +129,7 @@ FLUSH PRIVILEGES;
 SHOW GRANTS FOR 'mmw_user'@'localhost';
 ```
 
-Then update your `.env.local`:
+Then update your `.env`:
 ```env
 DATABASE_URL="mysql://mmw_user:your_secure_password@localhost:3306/mmw_hubix_dev?connection_limit=5"
 ```
@@ -202,7 +202,7 @@ npx prisma generate
 #### 4. "Access denied for user"
 **Cause:** Wrong username/password  
 **Solution:**
-- Verify credentials in `.env.local`
+- Verify credentials in `.env`
 - Check if password has special characters (URL-encode them)
 - Try connecting via MySQL Workbench with same credentials
 - Reset MySQL password if needed (see `docs/RESET-MYSQL-PASSWORD.md`)
@@ -247,7 +247,7 @@ npm run dev
 ## 📁 File Locations
 
 - Prisma schema: `prisma/schema.prisma`
-- Environment variables: `.env` (base), `.env.local` (developer overrides)
+- Environment variables: `.env` (local/default), `.env.production` (deployment)
 - Setup script: `setup-mysql.sql`
 - Seed script: `prisma/seed.ts`
 

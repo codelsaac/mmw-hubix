@@ -102,10 +102,14 @@ pnpm install
 
 3. Configure environment variables
 ```bash
-# Create .env.local file in project root
+# Create .env file in project root
 # Add your MySQL connection string:
 DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 
+# Example (學生 DB)
+# mysql://mmw20-1086:MmwS25555%40@10.125.145.49:3306/6A25?connection_limit=5
+
+# Note: URL-encode special characters in passwords (e.g. @ → %40)
 # See docs/DATABASE-SETUP-GUIDE.md for detailed configuration
 ```
 
@@ -114,7 +118,7 @@ DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 # Method 1: Using Prisma db push (faster, for development)
 npx prisma generate
 npx prisma db push
-npm run db:seed
+npm run db:seed  # (no demo data; customize prisma/seed.ts if needed)
 
 # Method 2: Using migrations (for production)
 npm run db:migrate
@@ -144,20 +148,17 @@ The project uses **MySQL** for both development and production, providing a cons
 **📚 Detailed Setup Guide:** [DATABASE-SETUP-GUIDE.md](./docs/DATABASE-SETUP-GUIDE.md)
 
 **Key Configuration Files:**
-- **`.env`** - Base configuration (committed to Git, placeholder values)
-- **`.env.local`** - Local overrides (NOT committed, contains real credentials)
+- **`.env`** - Base configuration used for local development
+- **`.env.production`** - Production deployment configuration (optional)
 - **`setup-mysql.sql`** - Database creation script
 - **`prisma/schema.prisma`** - Database schema definition
 
-**Environment File Priority:**
+**Environment Files:**
 ```
-.env.local (highest priority, local development)
-    ↓
-.env (base configuration, committed to Git)
+.env             # Local development and base configuration
+.env.production  # Production deployment (optional)
 ```
-
-> ⚠️ **Important:** Always use `.env.local` for local development with real credentials.  
-> The `.env.local` file is gitignored and will not be committed.
+> ⚠️ **Important:** Ensure sensitive values are stored safely. URL-encode special characters in passwords.
 
 #### Database Commands Quick Reference
 
@@ -165,7 +166,8 @@ The project uses **MySQL** for both development and production, providing a cons
 ```bash
 npx prisma generate      # Generate Prisma Client
 npx prisma db push       # Sync schema to database (no migrations)
-npm run db:seed          # Seed database with demo data
+npm run db:seed          # Seed database (empty by default; edit prisma/seed.ts)
+npm run quality-check    # Verify TS, build, ESLint
 ```
 
 **For Production (With Migrations):**
@@ -671,7 +673,7 @@ SENTRY_TRACES_SAMPLE_RATE="0.1"  # 10% performance monitoring
 
 ### Environment Variables
 
-Create a **`.env.local`** file in your project root for local development:
+Create a **`.env`** file in your project root for local development:
 
 ```env
 # ================================
@@ -680,6 +682,7 @@ Create a **`.env.local`** file in your project root for local development:
 
 # Database (MySQL) - Required
 # Format: mysql://USER:PASSWORD@HOST:PORT/DATABASE?connection_limit=5
+# Example: password with @ must be encoded as %40
 DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev?connection_limit=5"
 
 # NextAuth.js - Required
@@ -713,15 +716,14 @@ OPENROUTER_API_KEY="your-api-key-here"
   - Performs limited retries with backoff and, if still limited, returns `429` with a helpful message.
   - Clients should surface a “Please retry shortly” notice to users.
 - To reduce `429` errors:
-  - Add your own `OPENROUTER_API_KEY` to `.env.local` (https://openrouter.ai/settings/integrations).
+  - Add your own `OPENROUTER_API_KEY` to `.env` (https://openrouter.ai/settings/integrations).
   - Consider selecting a less rate-limited model via `OPENROUTER_MODEL`.
   - Avoid rapid consecutive requests; the app also enforces server-side rate limiting.
 
-**📁 File Priority:**
+**📁 Environment Files:**
 ```
-.env.local       # Local development (highest priority, gitignored)
+.env             # Local development and default configuration
 .env.production  # Production deployment
-.env             # Base configuration (committed to Git)
 ```
 
 > 💡 **Tip:** Use different database names for development and production  
@@ -850,7 +852,7 @@ npx prisma generate
 #### Issue: "Error validating datasource: the URL must start with mysql://"
 **Cause:** DATABASE_URL not configured correctly  
 **Solution:**
-- Check `.env` or `.env.local` has correct DATABASE_URL
+- Check `.env` has correct DATABASE_URL
 - For SQLite: `DATABASE_URL="file:./prisma/dev.db"`
 - For MySQL: `DATABASE_URL="mysql://root@localhost:3306/mmw_hubix_dev"`
 

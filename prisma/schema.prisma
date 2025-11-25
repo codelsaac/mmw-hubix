@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ------------------
-//  AUTHENTICATION
-// ------------------
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -24,10 +20,10 @@ model Account {
   scope             String? @db.Text
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId], map: "Account_userId_fkey")
 }
 
 model Session {
@@ -36,39 +32,37 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Session_userId_fkey")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  username      String    @unique
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?   @db.VarChar(2048)
-  role          UserRole  @default(STUDENT)
-  department    String?
-  permissions   String?   @db.Text
-  isActive      Boolean   @default(true)
-  lastLoginAt   DateTime?
-
-  accounts Account[]
-  sessions Session[]
-
-  createdResources         Resource[]
-  createdPublicEvents      PublicEvent[]
-  createdInternalEvents    InternalEvent[]    @relation("CreatedInternalEvents")
-  createdTrainingResources TrainingResource[]
+  id                       String             @id @default(cuid())
+  username                 String             @unique
+  name                     String?
+  email                    String?            @unique
+  emailVerified            DateTime?
+  password                 String?
+  image                    String?            @db.VarChar(2048)
+  role                     UserRole           @default(STUDENT)
+  department               String?
+  permissions              String?            @db.Text
+  isActive                 Boolean            @default(true)
+  lastLoginAt              DateTime?
+  accounts                 Account[]
+  assignedActivities       Activity[]         @relation("AssignedActivities")
+  createdActivities        Activity[]         @relation("CreatedActivities")
+  createdAnnouncements     Announcement[]
+  createdArticles          Article[]
   createdCategories        Category[]
-
   createdHistoryEvents     HistoryEvent[]
-
-  createdActivities    Activity[]     @relation("CreatedActivities")
-  assignedActivities   Activity[]     @relation("AssignedActivities")
-  createdTasks         Task[]         @relation("CreatedTasks")
-  assignedTasks        Task[]         @relation("AssignedTasks")
-  createdAnnouncements Announcement[]
-  createdArticles      Article[]
+  createdInternalEvents    InternalEvent[]    @relation("CreatedInternalEvents")
+  createdPublicEvents      PublicEvent[]
+  createdResources         Resource[]
+  sessions                 Session[]
+  assignedTasks            Task[]             @relation("AssignedTasks")
+  createdTasks             Task[]             @relation("CreatedTasks")
+  createdTrainingResources TrainingResource[]
 }
 
 model VerificationToken {
@@ -79,48 +73,40 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-enum UserRole {
-  ADMIN
-  HELPER
-  STUDENT
-  GUEST
-}
-
-// ------------------
-//  APP CONTENT
-// ------------------
-
 model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?  @db.Text
-  icon        String?  // Icon name for the category
-  color       String?  // Color code for the category
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?    @db.Text
+  icon        String?
+  color       String?
+  isActive    Boolean    @default(true)
+  sortOrder   Int        @default(0)
   createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  creator     User?      @relation(fields: [createdBy], references: [id])
+  resources   Resource[]
 
-  creator   User?      @relation(fields: [createdBy], references: [id])
-  resources Resource[]
+  @@index([createdBy], map: "Category_createdBy_fkey")
 }
 
 model Resource {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  url         String   @db.VarChar(2048)
-  description String?  @db.Text
-  icon        String?  // Icon name or favicon URL for the resource
+  url         String    @db.VarChar(2048)
+  description String?   @db.Text
+  icon        String?
   categoryId  String?
-  status      String   @default("active")
-  clicks      Int      @default(0)
+  status      String    @default("active")
+  clicks      Int       @default(0)
   createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
+  creator     User?     @relation(fields: [createdBy], references: [id])
 
-  category Category? @relation(fields: [categoryId], references: [id])
-  creator  User?     @relation(fields: [createdBy], references: [id])
+  @@index([categoryId], map: "Resource_categoryId_fkey")
+  @@index([createdBy], map: "Resource_createdBy_fkey")
 }
 
 model PublicEvent {
@@ -135,8 +121,9 @@ model PublicEvent {
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  creator     User?    @relation(fields: [createdBy], references: [id])
 
-  creator User? @relation(fields: [createdBy], references: [id])
+  @@index([createdBy], map: "PublicEvent_createdBy_fkey")
 }
 
 model InternalEvent {
@@ -149,9 +136,11 @@ model InternalEvent {
   eventType   String?
   attendees   Json?
   createdBy   String?
-  creator     User?    @relation("CreatedInternalEvents", fields: [createdBy], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  creator     User?    @relation("CreatedInternalEvents", fields: [createdBy], references: [id])
+
+  @@index([createdBy], map: "InternalEvent_createdBy_fkey")
 }
 
 model Activity {
@@ -165,9 +154,11 @@ model Activity {
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  assignee    User?    @relation("AssignedActivities", fields: [assignedTo], references: [id])
+  creator     User?    @relation("CreatedActivities", fields: [createdBy], references: [id])
 
-  assignee User? @relation("AssignedActivities", fields: [assignedTo], references: [id])
-  creator  User? @relation("CreatedActivities", fields: [createdBy], references: [id])
+  @@index([assignedTo], map: "Activity_assignedTo_fkey")
+  @@index([createdBy], map: "Activity_createdBy_fkey")
 }
 
 model Task {
@@ -181,11 +172,12 @@ model Task {
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  assignee User? @relation("AssignedTasks", fields: [assignedTo], references: [id])
-  creator  User? @relation("CreatedTasks", fields: [createdBy], references: [id])
+  assignee    User?    @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  creator     User?    @relation("CreatedTasks", fields: [createdBy], references: [id])
 
   @@index([status, priority, dueDate])
+  @@index([assignedTo], map: "Task_assignedTo_fkey")
+  @@index([createdBy], map: "Task_createdBy_fkey")
 }
 
 model TrainingResource {
@@ -193,52 +185,46 @@ model TrainingResource {
   title       String
   description String?             @db.Text
   contentType ResourceContentType
-
-  videoUrl    String? @db.VarChar(2048)
+  videoUrl    String?             @db.VarChar(2048)
   duration    Int?
-  textContent String? @db.LongText
-  fileName    String? @db.VarChar(255)
-  fileUrl     String? @db.VarChar(2048)
+  textContent String?             @db.LongText
+  fileName    String?             @db.VarChar(255)
+  fileUrl     String?             @db.VarChar(2048)
   fileSize    Int?
   mimeType    String?
-
-  tags        String? @db.Text    // JSON array of tags
+  tags        String?             @db.Text
   difficulty  String?
   instructor  String?
-  views       Int      @default(0)
-  isPublic    Boolean  @default(false)
+  views       Int                 @default(0)
+  isPublic    Boolean             @default(false)
   createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  creator     User?               @relation(fields: [createdBy], references: [id])
 
-  creator User? @relation(fields: [createdBy], references: [id])
-}
-
-enum ResourceContentType {
-  VIDEO
-  TEXT
-  FILE
+  @@index([createdBy], map: "TrainingResource_createdBy_fkey")
 }
 
 model Announcement {
-  id           String   @id @default(cuid())
-  title        String
-  club         String
-  date         DateTime
-  time         String
-  location     String?
-  description  String?  @db.Text
-  maxAttendees Int?
-  attendees    Int      @default(0)
-  type         String   @default("general")
-  status       String   @default("active")
-  isPublic     Boolean  @default(true)
-  createdBy    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  creator       User?                   @relation(fields: [createdBy], references: [id])
+  id            String                 @id @default(cuid())
+  title         String
+  club          String
+  date          DateTime
+  time          String
+  location      String?
+  description   String?                @db.Text
+  maxAttendees  Int?
+  attendees     Int                    @default(0)
+  type          String                 @default("general")
+  status        String                 @default("active")
+  isPublic      Boolean                @default(true)
+  createdBy     String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
   registrations ActivityRegistration[]
+  creator       User?                  @relation(fields: [createdBy], references: [id])
+
+  @@index([createdBy], map: "Announcement_createdBy_fkey")
 }
 
 model ActivityRegistration {
@@ -247,14 +233,13 @@ model ActivityRegistration {
   studentName    String
   studentEmail   String?
   studentPhone   String?
-  studentClass   String?      // e.g., "Form 1A", "F.2B"
-  studentNumber  String?      // Student ID number
+  studentClass   String?
+  studentNumber  String?
   message        String?      @db.Text
-  status         String       @default("pending") // pending, approved, rejected
+  status         String       @default("pending")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-
-  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
 
   @@index([announcementId])
   @@index([status])
@@ -272,11 +257,11 @@ model HistoryEvent {
   createdBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  creator User? @relation(fields: [createdBy], references: [id])
+  creator     User?    @relation(fields: [createdBy], references: [id])
 
   @@index([date])
   @@index([status])
+  @@index([createdBy], map: "HistoryEvent_createdBy_fkey")
 }
 
 model Article {
@@ -295,17 +280,11 @@ model Article {
   createdBy     String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-
-  creator User? @relation(fields: [createdBy], references: [id])
+  creator       User?         @relation(fields: [createdBy], references: [id])
 
   @@index([status, publishedAt])
   @@index([slug])
-}
-
-enum ArticleStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
+  @@index([createdBy], map: "Article_createdBy_fkey")
 }
 
 model TeamNotes {
@@ -329,6 +308,25 @@ model SiteSetting {
 
   @@index([category])
   @@index([key])
+}
+
+enum UserRole {
+  ADMIN
+  HELPER
+  STUDENT
+  GUEST
+}
+
+enum ResourceContentType {
+  VIDEO
+  TEXT
+  FILE
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
 enum SettingType {

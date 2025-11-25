@@ -1,3 +1,4 @@
 {
-    "sqltools.connections": []
+    "sqltools.connections": [],
+    "codium.codeCompletion.enable": true
 }

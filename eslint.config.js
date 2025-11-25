@@ -1,13 +1,13 @@
-const { FlatCompat } = require("@eslint/eslintrc")
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  resolvePluginsRelativeTo: __dirname,
-})
+const nextConfig = require("eslint-config-next")
 
 module.exports = [
   {
     ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "dist/**"],
   },
-  ...compat.extends("next/core-web-vitals"),
+  ...nextConfig,
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]

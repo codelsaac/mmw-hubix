@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -177,10 +178,14 @@ export default function ArticlePage({ params }: ArticlePageProps) {
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-center">
-                <img
+                <Image
                   src={article.featuredImage}
                   alt={article.title}
+                  width={1200}
+                  height={675}
                   className="max-w-full h-auto rounded-lg shadow-md"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  unoptimized
                 />
               </div>
             </CardContent>

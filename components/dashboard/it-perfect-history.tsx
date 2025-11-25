@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import type { FormEvent } from "react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -160,10 +161,13 @@ export function ItPerfectHistory() {
                 <div className="flex-1 overflow-hidden rounded-xl border bg-card/70 shadow-sm">
                   <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
                     <div className="relative h-32 w-full overflow-hidden bg-muted md:h-40">
-                      <img
+                      <Image
                         src={event.imageUrl || "/windows-computer.png"}
                         alt={event.title}
-                        className="h-full w-full object-cover transition-transform duration-500 ease-out hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-500 ease-out hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        unoptimized
                       />
                     </div>
                     <div className="flex flex-col justify-between p-4">

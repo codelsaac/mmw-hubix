@@ -17,6 +17,8 @@ export function SkeletonLoader({
     list: "space-y-3"
   }
 
+  const widthPattern = [65, 72, 88, 95, 78]
+
   return (
     <div className={cn("animate-pulse", variants[variant], className)}>
       {Array.from({ length: lines }).map((_, i) => (
@@ -24,7 +26,7 @@ export function SkeletonLoader({
           key={i}
           className="h-4 bg-muted rounded"
           style={{
-            width: `${Math.random() * 40 + 60}%`, // Random width between 60-100%
+            width: `${widthPattern[i % widthPattern.length]}%`,
           }}
         />
       ))}

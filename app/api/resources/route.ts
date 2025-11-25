@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
       categoryColor: resource.category?.color || "#6B7280",
       status: resource.status as "active" | "maintenance" | "inactive",
       clicks: resource.clicks,
-      lastUpdated: new Date(resource.updatedAt).toISOString().split("T")[0]
+      lastUpdated: new Date(resource.updatedAt).toISOString().split("T")[0],
+      icon: resource.icon || null,
     }));
     
     return NextResponse.json(transformedResources);
