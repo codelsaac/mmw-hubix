@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +20,7 @@ import { Calendar, MapPin, Users, Clock, CheckCircle2, Loader2, Sparkles } from 
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { COMPONENT_VARIANTS, getStaggerDelay, ANIMATION_TIMING } from "@/lib/animations"
 
 interface Announcement {
   id: string
@@ -111,9 +113,19 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
     activity.maxAttendees ? activity.attendees >= activity.maxAttendees : false
 
   return (
-    <div className="min-h-screen bg-background animate-in fade-in duration-500">
+    <motion.div
+      variants={COMPONENT_VARIANTS.fadeIn}
+      initial="initial"
+      animate="animate"
+      className="min-h-screen bg-background"
+    >
       {/* Hero Section - Compact */}
-      <div className="bg-gradient-to-r from-cyan-50 via-blue-50 to-cyan-50 border-b animate-in fade-in slide-in-from-top-4 duration-500">
+      <motion.div
+        variants={COMPONENT_VARIANTS.slideDown}
+        initial="initial"
+        animate="animate"
+        className="bg-gradient-to-r from-cyan-50 via-blue-50 to-cyan-50 border-b"
+      >
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -127,12 +139,22 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <motion.div
+        variants={COMPONENT_VARIANTS.slideUp}
+        initial="initial"
+        animate="animate"
+        className="max-w-6xl mx-auto px-6 py-8 space-y-6"
+      >
         {announcements.length === 0 ? (
-          <Card className="text-center py-16 border-dashed animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <motion.div
+            variants={COMPONENT_VARIANTS.scaleIn}
+            initial="initial"
+            animate="animate"
+          >
+            <Card className="text-center py-16 border-dashed">
             <CardContent className="pt-6">
               <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                 <Calendar className="w-8 h-8 text-muted-foreground" />
@@ -140,17 +162,24 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
               <p className="text-muted-foreground text-lg">No upcoming activities at the moment. Check back soon!</p>
             </CardContent>
           </Card>
+          </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {announcements.map((activity) => (
-              <Card
+            {announcements.map((activity, index) => (
+              <motion.div
                 key={activity.id}
-                className={cn(
-                  "group hover:shadow-xl transition-all duration-300 hover:border-primary/50 animate-in fade-in slide-in-from-bottom-4",
-                  isFull(activity) && "opacity-75 saturate-50"
-                )}
-                style={{ animationDelay: `${announcements.indexOf(activity) * 75}ms` }}
+                variants={COMPONENT_VARIANTS.slideUp}
+                initial="initial"
+                animate="animate"
+                transition={{ delay: getStaggerDelay(index, ANIMATION_TIMING.STAGGER_LARGE) }}
+                whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
               >
+                <Card
+                  className={cn(
+                    "h-full transition-all duration-300 hover:shadow-xl hover:border-primary/50",
+                    isFull(activity) && "opacity-75 saturate-50"
+                  )}
+                >
                 <CardHeader className="space-y-3">
                   <div className="flex justify-between items-start gap-2">
                     <Badge variant="secondary" className="text-xs font-medium">
@@ -222,12 +251,14 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
                   </Button>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
           </div>
         )}
+      </motion.div>
 
-        {/* Registration Dialog */}
-        <Dialog open={!!selectedActivity && !showSuccess} onOpenChange={() => setSelectedActivity(null)}>
+      {/* Registration Dialog */}
+      <Dialog open={!!selectedActivity && !showSuccess} onOpenChange={() => setSelectedActivity(null)}>
           <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
             <DialogHeader className="space-y-3">
               <div className="flex items-start gap-3">
@@ -359,8 +390,14 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
         <Dialog open={showSuccess} onOpenChange={() => setShowSuccess(false)}>
           <DialogContent className="sm:max-w-[450px]">
             <DialogHeader className="space-y-4">
-              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-in zoom-in duration-300">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <motion.div
+                  variants={COMPONENT_VARIANTS.scaleIn}
+                  initial="initial"
+                  animate="animate"
+                >
+                  <CheckCircle2 className="h-8 w-8 text-green-600" />
+                </motion.div>
               </div>
               <div className="text-center space-y-2">
                 <DialogTitle className="text-2xl">Registration Successful!</DialogTitle>
@@ -383,7 +420,6 @@ export function ActivityNewsPublic({ initialAnnouncements }: ActivityNewsPublicP
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+    </motion.div>
   )
 }

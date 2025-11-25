@@ -10,7 +10,33 @@ const defaultCategories = [
   { name: 'Library', description: 'Library and research resources', color: '#f59e0b', sortOrder: 5 },
 ]
 
+async function removeDemoAccounts() {
+  const adminUsername = process.env.DEMO_ADMIN_USERNAME || 'admin'
+  const demoUsernames = [
+    process.env.DEMO_GUEST_USERNAME || 'guest',
+    process.env.DEMO_HELPER_USERNAME || 'helper',
+    process.env.DEMO_STUDENT_USERNAME, // optional override
+  ]
+    .filter((username): username is string => Boolean(username))
+    .filter((username, index, arr) => arr.indexOf(username) === index)
+    .filter((username) => username !== adminUsername)
+
+  if (!demoUsernames.length) {
+    console.log('ℹ️ No demo accounts scheduled for removal.')
+    return
+  }
+
+  const result = await prisma.user.deleteMany({
+    where: { username: { in: demoUsernames } },
+  })
+
+  console.log(`🧹 Removed ${result.count} demo account(s): ${demoUsernames.join(', ')}`)
+}
+
 async function main() {
+  console.log('🧼 Cleaning up demo accounts...')
+  await removeDemoAccounts()
+
   console.log('🌱 Seeding default categories...')
 
   for (const categoryData of defaultCategories) {

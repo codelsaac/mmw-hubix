@@ -1,20 +1,28 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { motion } from "framer-motion"
+import { ANIMATION_TIMING, PAGE_TRANSITION_VARIANTS } from "@/lib/animations"
 
 interface PageTransitionProps {
   children: React.ReactNode
+  variant?: 'fadeIn' | 'slideInUp' | 'slideInDown'
 }
 
-export function PageTransition({ children }: PageTransitionProps) {
+export function PageTransition({ children, variant = 'fadeIn' }: PageTransitionProps) {
   const pathname = usePathname()
 
+  const variantConfig = PAGE_TRANSITION_VARIANTS[variant]
+
   return (
-    <div
+    <motion.div
       key={pathname}
-      className="animate-in fade-in duration-300"
+      initial={variantConfig.initial}
+      animate={variantConfig.animate}
+      exit={variantConfig.exit}
+      transition={variantConfig.transition}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }

@@ -386,9 +386,6 @@ export function ActivityNewsManagement() {
                 </div>
               )}
             </div>
-            <DialogFooter>
-              <Button onClick={() => setViewingActivityNews(null)}>Close</Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
