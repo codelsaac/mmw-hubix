@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ErrorBoundary>
         <div className="relative flex min-h-screen flex-col bg-background">
           <Header />
-          <main className="flex-1">
+          <main className="flex-1 flex flex-col">
             <PageTransition>{children}</PageTransition>
           </main>
           <FooterSitemap />

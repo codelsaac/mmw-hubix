@@ -14,6 +14,7 @@ const resourceSchema = z.object({
   name: z.string().min(2).max(100).transform(sanitizeString),
   url: z.string().url().max(2048),
   description: z.string().min(1).max(500).transform(sanitizeString).nullable().optional(),
+  icon: z.string().max(2048).nullable().optional(),
   categoryId: z.string().min(1).nullable().optional(),
 });
 
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
         name: true,
         url: true,
         description: true,
+        icon: true,
         categoryId: true,
         status: true,
         clicks: true,
@@ -107,6 +109,7 @@ export async function POST(req: NextRequest) {
         name: resourceData.name,
         url: resourceData.url,
         description: resourceData.description ?? null,
+        icon: resourceData.icon ?? null,
         categoryId: resourceData.categoryId ?? null,
         status: "active",
         clicks: 0,

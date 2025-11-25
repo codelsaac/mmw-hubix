@@ -7,6 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { logger } from "@/lib/logger"
 import Image from "next/image"
 import {
@@ -382,30 +388,38 @@ export function ResourceHub() {
                   }
 
                   return (
-                    <Card
-                      key={resource.id}
-                      className="hover:shadow-md transition-all duration-300 cursor-pointer group hover:border-primary/30 hover:-translate-y-0.5 gap-3 p-4 sm:p-5"
-                      onClick={() => handleResourceClick(resource)}
-                    >
-                      <CardHeader className="px-0 pb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
-                            {iconDisplay}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                              <span className="truncate">{resource.name}</span>
-                              <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
-                            </CardTitle>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0 px-0">
-                        <CardDescription className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                          {resource.description}
-                        </CardDescription>
-                      </CardContent>
-                    </Card>
+                    <TooltipProvider key={resource.id} delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Card
+                            className="hover:shadow-md transition-all duration-300 cursor-pointer group hover:border-primary/30 hover:-translate-y-0.5 gap-3 p-4 sm:p-5"
+                            onClick={() => handleResourceClick(resource)}
+                          >
+                            <CardHeader className="px-0 py-0">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
+                                  {iconDisplay}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                                    <span className="truncate">{resource.name}</span>
+                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
+                                  </CardTitle>
+                                </div>
+                              </div>
+                            </CardHeader>
+                          </Card>
+                        </TooltipTrigger>
+                        {resource.description && (
+                          <TooltipContent
+                            side="top"
+                            className="hidden sm:block max-w-[200px] p-2 bg-gray-900 text-white border border-gray-700 shadow-xl"
+                          >
+                            <p className="text-xs leading-snug">{resource.description}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   )
                 })}
               </div>
@@ -440,37 +454,45 @@ export function ResourceHub() {
                     const IconComponent = getResourceIcon(resource.name, resource.category)
                     const iconColor = getCategoryColor(resource.category as any)
                     return (
-                      <Card
-                        key={resource.id}
-                        className="hover:shadow-md transition-all duration-300 cursor-pointer group hover:border-primary/30 hover:-translate-y-0.5 gap-3 p-4 sm:p-5"
-                        onClick={() => handleResourceClick(resource)}
-                      >
-                        <CardHeader className="px-0 pb-2">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
-                              {IconComponent === Globe || IconComponent === Globe2 ? (
-                                <span
-                                  className="w-3.5 h-3.5 rounded-full border"
-                                  style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
-                                />
-                              ) : (
-                                <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                                <span className="truncate">{resource.name}</span>
-                                <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
-                              </CardTitle>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pt-0 px-0">
-                          <CardDescription className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {resource.description}
-                          </CardDescription>
-                        </CardContent>
-                      </Card>
+                      <TooltipProvider key={resource.id} delayDuration={300}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Card
+                              className="hover:shadow-md transition-all duration-300 cursor-pointer group hover:border-primary/30 hover:-translate-y-0.5 gap-3 p-4 sm:p-5"
+                              onClick={() => handleResourceClick(resource)}
+                            >
+                              <CardHeader className="px-0 py-0">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
+                                    {IconComponent === Globe || IconComponent === Globe2 ? (
+                                      <span
+                                        className="w-3.5 h-3.5 rounded-full border"
+                                        style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
+                                      />
+                                    ) : (
+                                      <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                                      <span className="truncate">{resource.name}</span>
+                                      <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
+                                    </CardTitle>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                            </Card>
+                          </TooltipTrigger>
+                          {resource.description && (
+                            <TooltipContent
+                              side="top"
+                              className="hidden sm:block max-w-[200px] p-2 bg-gray-900 text-white border border-gray-700 shadow-xl"
+                            >
+                              <p className="text-xs leading-snug">{resource.description}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     )
                   })}
                 </div>

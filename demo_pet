@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byte - 您的網站數位寵物</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=vt323&display=swap');
+
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #0f172a;
+            background-image: 
+                linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Character Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.8); }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        .character-wrapper {
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Character Construction */
+        .head-casing {
+            width: 160px;
+            height: 120px;
+            background: #e2e8f0;
+            border-radius: 24px;
+            position: relative;
+            border: 4px solid #334155;
+            box-shadow: inset 0 -8px 0 #cbd5e1, 0 10px 20px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .screen {
+            width: 130px;
+            height: 90px;
+            background: #1e1b4b;
+            border-radius: 16px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            border: 2px solid #334155;
+            box-shadow: inset 0 0 10px #8b5cf6;
+        }
+
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 2px 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .eye {
+            width: 24px;
+            height: 32px;
+            background: #22d3ee;
+            border-radius: 12px;
+            position: absolute;
+            top: 30px;
+            box-shadow: 0 0 10px #22d3ee;
+            animation: blink 4s infinite;
+        }
+        
+        .eye.left { left: 30px; }
+        .eye.right { right: 30px; }
+
+        .pupil {
+            width: 12px;
+            height: 16px;
+            background: #cffafe;
+            border-radius: 6px;
+            position: absolute;
+            top: 4px;
+            left: 6px;
+        }
+
+        .mouth {
+            width: 20px;
+            height: 8px;
+            background: #22d3ee;
+            border-radius: 4px;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px #22d3ee;
+            transition: all 0.2s;
+        }
+
+        .cheek {
+            width: 12px;
+            height: 6px;
+            background: #f472b6;
+            opacity: 0.6;
+            border-radius: 50%;
+            position: absolute;
+            top: 55px;
+        }
+        
+        .cheek.left { left: 20px; }
+        .cheek.right { right: 20px; }
+
+        /* Tech Ears */
+        .ear {
+            width: 20px;
+            height: 50px;
+            background: #cbd5e1;
+            position: absolute;
+            top: -35px;
+            border: 3px solid #334155;
+            border-radius: 10px;
+            z-index: 1;
+        }
+
+        .ear.left { left: 30px; transform: rotate(-15deg); }
+        .ear.right { right: 30px; transform: rotate(15deg); }
+
+        .antenna-tip {
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid #334155;
+            animation: pulse-glow 2s infinite;
+        }
+
+        .ear-inner {
+            width: 10px;
+            height: 30px;
+            background: #334155;
+            margin: 5px auto;
+            border-radius: 4px;
+        }
+
+        /* Body */
+        .body {
+            width: 80px;
+            height: 50px;
+            background: #f1f5f9;
+            border: 4px solid #334155;
+            border-radius: 20px;
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circuit {
+            width: 40px;
+            height: 20px;
+            background: #334155;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .circuit::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #22d3ee;
+            border-radius: 50%;
+            top: 6px;
+            left: 6px;
+            box-shadow: 12px 0 0 #ef4444, 24px 0 0 #eab308; 
+        }
+
+        /* Limbs */
+        .hand {
+            width: 20px;
+            height: 20px;
+            background: #e2e8f0;
+            border: 3px solid #334155;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -20px;
+            z-index: 20;
+            transition: transform 0.1s;
+        }
+
+        .hand.left { left: -10px; }
+        .hand.right { right: -10px; }
+
+        /* Speech Bubble */
+        .bubble {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 3px solid #334155;
+            font-size: 1.2rem;
+            color: #0f172a;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: #334155 transparent transparent transparent;
+        }
+
+        .bubble.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        /* Interactive Classes */
+        .happy .mouth {
+            height: 12px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .happy .eye {
+            height: 10px;
+            top: 40px;
+            border-radius: 4px;
+        }
+        
+        .control-panel {
+            margin-top: 80px;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pet" class="character-wrapper">
+        <div id="speech" class="bubble">Hello, Human!</div>
+
+        <!-- Ears -->
+        <div class="ear left">
+            <div class="antenna-tip"></div>
+            <div class="ear-inner"></div>
+        </div>
+        <div class="ear right">
+            <div class="antenna-tip"></div>
+            <div class="ear-inner"></div>
+        </div>
+
+        <!-- Head -->
+        <div class="head-casing">
+            <div class="screen">
+                <div class="screen-overlay"></div>
+                <div class="eye left">
+                    <div class="pupil"></div>
+                </div>
+                <div class="eye right">
+                    <div class="pupil"></div>
+                </div>
+                <div class="cheek left"></div>
+                <div class="cheek right"></div>
+                <div class="mouth"></div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="body">
+            <div class="circuit"></div>
+            <div class="hand left"></div>
+            <div class="hand right"></div>
+        </div>
+    </div>
+
+    <div class="control-panel text-center">
+        <h1 class="text-cyan-400 text-2xl mb-2">Project: BYTE</h1>
+        <p class="text-slate-400 text-sm mb-4">互動式網頁寵物</p>
+        <div class="flex gap-2 justify-center">
+            <button onclick="triggerAction('feed')" class="bg-violet-600 hover:bg-violet-500 text-white px-4 py-1 rounded border-b-4 border-violet-800 active:border-b-0 active:translate-y-1 transition-all">餵食數據</button>
+            <button onclick="triggerAction('poke')" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-1 rounded border-b-4 border-cyan-800 active:border-b-0 active:translate-y-1 transition-all">戳一下</button>
+        </div>
+        <p class="mt-4 text-xs text-slate-500">將此代碼複製到您的網站即可使用</p>
+    </div>
+
+    <script>
+        const pet = document.getElementById('pet');
+        const pupils = document.querySelectorAll('.pupil');
+        const speechBubble = document.getElementById('speech');
+        const mouth = document.querySelector('.mouth');
+        let idleTimer;
+
+        // Eye Tracking
+        document.addEventListener('mousemove', (e) => {
+            const rect = pet.getBoundingClientRect();
+            const petCenterX = rect.left + rect.width / 2;
+            const petCenterY = rect.top + rect.height / 2;
+
+            const angle = Math.atan2(e.clientY - petCenterY, e.clientX - petCenterX);
+            const distance = Math.min(5, Math.hypot(e.clientX - petCenterX, e.clientY - petCenterY) / 10);
+
+            pupils.forEach(pupil => {
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                pupil.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+
+        // Speech Function
+        function say(text, duration = 2000) {
+            speechBubble.textContent = text;
+            speechBubble.classList.add('visible');
+            
+            // Play simple sound (oscillator)
+            playSound(600, 'square', 0.1);
+            setTimeout(() => playSound(800, 'square', 0.1), 100);
+
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                speechBubble.classList.remove('visible');
+            }, duration);
+        }
+
+        // Interactions
+        function triggerAction(type) {
+            pet.classList.remove('happy');
+            
+            if (type === 'feed') {
+                say("Yummy! Data!");
+                pet.classList.add('happy');
+                setTimeout(() => pet.classList.remove('happy'), 2000);
+                createParticles('⚡');
+            } else if (type === 'poke') {
+                say("Hey! Do not touch screen!");
+                createParticles('💢');
+                pet.style.transform = "scale(0.95)";
+                setTimeout(() => pet.style.transform = "", 100);
+            }
+        }
+
+        // Click interaction on pet itself
+        pet.addEventListener('click', () => {
+            triggerAction('poke');
+        });
+
+        // Audio Context for retro sounds
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(freq, type, duration) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        // Particles effect
+        function createParticles(char) {
+            const rect = pet.getBoundingClientRect();
+            for(let i=0; i<5; i++) {
+                const p = document.createElement('div');
+                p.textContent = char;
+                p.style.position = 'absolute';
+                p.style.left = (rect.left + rect.width/2) + 'px';
+                p.style.top = (rect.top) + 'px';
+                p.style.color = '#fff';
+                p.style.pointerEvents = 'none';
+                p.style.fontSize = '20px';
+                p.style.transition = 'all 1s ease-out';
+                p.style.zIndex = '100';
+                document.body.appendChild(p);
+
+                // Random destination
+                const destX = (Math.random() - 0.5) * 100;
+                const destY = -50 - Math.random() * 50;
+
+                requestAnimationFrame(() => {
+                    p.style.transform = `translate(${destX}px, ${destY}px)`;
+                    p.style.opacity = '0';
+                });
+
+                setTimeout(() => p.remove(), 1000);
+            }
+        }
+
+        // Idle Chatter
+        setInterval(() => {
+            if (!speechBubble.classList.contains('visible') && Math.random() > 0.7) {
+                const phrases = [
+                    "Scanning...",
+                    "Battery at 98%",
+                    "Need input...",
+                    "System Normal",
+                    "( > ᴗ < )"
+                ];
+                say(phrases[Math.floor(Math.random() * phrases.length)], 1500);
+            }
+        }, 8000);
+
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getAllSettings, getSetting } from "@/lib/settings-service"
+import { logger } from "@/lib/logger"
 
 /**
  * GET /api/settings
@@ -19,9 +20,13 @@ export async function GET(req: Request) {
       registrationEnabled,
     })
   } catch (error) {
-    console.error("Failed to get public settings:", error)
+    logger.error("Failed to get public settings:", error)
+    // Log the specific error for debugging
+    if (error instanceof Error) {
+      logger.error("Settings error details:", error.message)
+    }
     return NextResponse.json(
-      { error: "Failed to fetch settings" },
+      { error: "Failed to fetch settings", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

@@ -75,7 +75,10 @@ export function useSettings() {
           logger.debug('Admin settings not available (user not authenticated)')
         }
       } else {
-        throw new Error('Public settings endpoint failed')
+        // Log response status and try to get error details
+        const errorData = await publicResponse.json().catch(() => ({}))
+        logger.error(`Public settings endpoint returned ${publicResponse.status}:`, errorData)
+        throw new Error(`Public settings endpoint failed with status ${publicResponse.status}: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       logger.error('Failed to load settings:', error)
@@ -96,6 +99,7 @@ export function useSettings() {
       }
       
       // Use default settings on error
+      logger.warn('Using default settings due to error loading from database')
       setSettings(defaultSettings)
     } finally {
       setIsLoading(false)

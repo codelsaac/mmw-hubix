@@ -14,12 +14,17 @@ interface Message {
   timestamp: Date
 }
 
-export function AIChat() {
+interface AIChatProps {
+  onMessageSent?: () => void
+  onResponseReceived?: () => void
+}
+
+export function AIChat({ onMessageSent, onResponseReceived }: AIChatProps = {}) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content:
-        "Hello! I'm the MMW Hubix AI Assistant. I can help you with campus navigation, schedules, IT support, and school policies. How can I assist you today?",
+        "Hello! 👋 I'm BYTE, your digital pet AI assistant! I'm here to help you with campus navigation, schedules, IT support, and school policies. What can I help you with today? ⚡",
       timestamp: new Date(),
     },
   ])
@@ -48,6 +53,7 @@ export function AIChat() {
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
+    onMessageSent?.()
 
     try {
       const response = await fetch("/api/chat", {
@@ -73,6 +79,8 @@ export function AIChat() {
       }
 
       setMessages((prev) => [...prev, assistantMessage])
+      onResponseReceived?.()
+      setTimeout(() => onResponseReceived?.(), 2000)
     } catch (error) {
       logger.error("Chat error:", error)
       const errorMessage: Message = {
@@ -92,11 +100,6 @@ export function AIChat() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 p-3 border-b border-border">
-        <Bot className="h-5 w-5 text-primary" />
-        <span className="font-medium text-sm">AI Assistant</span>
-      </div>
-
       <div className="flex-1 overflow-y-auto p-3">
         <div className="space-y-4">
           {messages.map((message, index) => (

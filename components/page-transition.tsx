@@ -12,7 +12,7 @@ export function PageTransition({ children }: PageTransitionProps) {
   return (
     <div
       key={pathname}
-      className="min-h-screen animate-in fade-in duration-300"
+      className="animate-in fade-in duration-300"
     >
       {children}
     </div>
