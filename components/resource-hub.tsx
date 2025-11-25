@@ -120,7 +120,10 @@ export function ResourceHub() {
         
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json()
+          logger.info('Categories fetched:', categoriesData)
           setCategories(categoriesData)
+        } else {
+          logger.warn('Categories API returned non-ok status:', categoriesResponse.status)
         }
       } catch (error) {
         logger.error('Error fetching data:', error)
