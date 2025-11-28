@@ -9,6 +9,13 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Settings, Database, Shield, Palette, Download, Upload, CheckCircle } from "lucide-react"
 import { useSettings } from "@/hooks/use-settings"
 import { toast } from "sonner"
@@ -29,7 +36,25 @@ export function SystemSettings() {
     setHasChanges(true)
   }
 
+  const validateSettings = () => {
+    if (parseInt(localSettings.maxFileSize) <= 0) {
+      toast.error("Max File Size must be a positive number")
+      return false
+    }
+    if (parseInt(localSettings.sessionTimeout) <= 0) {
+      toast.error("Session Timeout must be a positive number")
+      return false
+    }
+    if (parseInt(localSettings.maxLoginAttempts) <= 0) {
+      toast.error("Max Login Attempts must be a positive number")
+      return false
+    }
+    return true
+  }
+
   const handleSaveSettings = () => {
+    if (!validateSettings()) return
+    
     updateSettings(localSettings)
     setHasChanges(false)
     toast.success("Settings saved successfully!", {
@@ -228,24 +253,28 @@ export function SystemSettings() {
               </div>
               <div className="space-y-2">
                 <Label>Backup Frequency</Label>
-                <select
-                  className="w-full p-2 border border-border rounded-md"
+                <Select
                   value={localSettings.backupFrequency}
-                  onChange={(e) => handleSettingChange("backupFrequency", e.target.value)}
+                  onValueChange={(value) => handleSettingChange("backupFrequency", value)}
                 >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-4">
                 <Button onClick={handleExportData} className="flex-1">
                   <Download className="w-4 h-4 mr-2" />
-                  Export Data
+                  Export Settings
                 </Button>
                 <Button onClick={handleImportData} variant="outline" className="flex-1 bg-transparent">
                   <Upload className="w-4 h-4 mr-2" />
-                  Import Data
+                  Import Settings
                 </Button>
               </div>
             </CardContent>

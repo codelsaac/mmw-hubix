@@ -1,9 +1,9 @@
 "use client"
 
-import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { UserRole, Permission, PermissionService } from "@/lib/permissions"
 import { AuthUser } from "@/types/auth"
+import { useSession, signOut } from "@/lib/auth-client"
 
 export interface UseAuthReturn {
   user: AuthUser | null
@@ -28,18 +28,18 @@ export interface UseAuthReturn {
  * Combines functionality from use-auth and use-auth-permissions
  */
 export function useAuth(): UseAuthReturn {
-  const { data: session, status, update } = useSession()
+  const { data: session, isPending, refetch } = useSession()
   const router = useRouter()
   
   const user = (session?.user as AuthUser) || null
   const isAuthenticated = !!session?.user
-  const isLoading = status === "loading"
+  const isLoading = isPending
   const userRole = user?.role as UserRole
   const customPermissions = user?.permissions || null
 
   const refreshUser = async () => {
     try {
-      await update()
+      await refetch?.()
       router.refresh()
     } catch (error) {
       console.error("Failed to refresh user:", error)
@@ -47,7 +47,8 @@ export function useAuth(): UseAuthReturn {
   }
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" })
+    await signOut()
+    router.push("/")
   }
 
   const hasPermission = (permission: Permission): boolean => {

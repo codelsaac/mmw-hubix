@@ -37,8 +37,11 @@
 - **Quality Assurance**: Implemented mandatory bug checking procedures and comprehensive testing
 - **User Profile**: Enhanced profile management with modern UI
 - **AI Chat**: Polished floating button with pulsing animation
+- **🤖 Flexible AI Avatar**: Chat widget now supports switching between the classic Digital Pet and a standard bot icon, with persistent user preference
 - **System Settings**: Admin interface for site configuration with real-time updates
 - **IT Perfect History Timeline**: New `HistoryEvent` model, API, and dashboard UI allowing ADMIN/HELPER to add, edit, and delete timeline cards directly from the IT Perfect Hub.
+- **Robust Authentication**: Upgraded to `better-auth` v1.4.3 with full username support and improved session management.
+- **Admin Settings Refinement**: Enhanced validation, modern UI components (shadcn/ui), and improved export capabilities.
 
 ### Architecture Highlights
 - **📊 Phase 2**: Real-time error logging pipeline (client + server + edge)

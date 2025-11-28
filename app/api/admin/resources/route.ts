@@ -1,8 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { UserRole } from "@/lib/permissions"
 import { authenticateAdminRequest } from "@/lib/auth-server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
 import { z } from "zod"
 import { validateInput, createErrorResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
@@ -147,8 +145,11 @@ export async function PATCH(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
+    const { user, response } = await authenticateAdminRequest();
+    if (response) {
+      return response;
+    }
+    if (user.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
@@ -201,8 +202,11 @@ export async function DELETE(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
+    const { user, response } = await authenticateAdminRequest();
+    if (response) {
+      return response;
+    }
+    if (user.role !== UserRole.ADMIN) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 

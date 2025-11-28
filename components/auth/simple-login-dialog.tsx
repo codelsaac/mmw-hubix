@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { signIn } from "next-auth/react"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LogIn, UserPlus } from "lucide-react"
 import { RegistrationForm } from "./registration-form"
 import { useSettings } from "@/hooks/use-settings"
+import { signIn } from "@/lib/auth-client"
 
 interface SimpleLoginDialogProps {
   children?: React.ReactNode
@@ -38,10 +38,9 @@ export function SimpleLoginDialog({ children }: SimpleLoginDialogProps) {
     setError("")
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn.username({
         username,
         password,
-        redirect: false,
       })
 
       if (result?.error) {

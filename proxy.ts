@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/better-auth";
 
 // Rate limiting store (simple in-memory version, use Redis in production for multi-instance)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -19,7 +19,7 @@ export async function proxy(request: NextRequest) {
   );
 
   // 2. API Route Rate Limiting
-  if (request.nextUrl.pathname.startsWith('/api/')) {
+  if (request.nextUrl.pathname.startsWith("/api/")) {
     const tm = process.env.TEST_MODE
     const ne = process.env.NODE_ENV
     if (tm === 'true' || ne === 'test') {
@@ -55,20 +55,17 @@ export async function proxy(request: NextRequest) {
   }
 
   // 3. Admin Route Protection
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
-    });
-    
-    if (!token) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    if (token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    if ((session.user as any).role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }
 
@@ -77,7 +74,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/api/:path*',
-    '/admin/:path*',
+    "/api/:path*",
+    "/admin/:path*",
   ],
 };

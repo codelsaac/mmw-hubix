@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSearchParams } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { useSearchParams, useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { LogIn } from "lucide-react"
+import { signIn } from "@/lib/auth-client"
 
 export default function LoginPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -26,15 +27,15 @@ export default function LoginPage() {
     setError("")
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn.username({
         username,
         password,
-        callbackUrl,
-        redirect: true,
       })
 
-      if (result && result.error) {
+      if (result?.error) {
         setError("Login failed. Please check your username and password.")
+      } else {
+        router.push(callbackUrl)
       }
     } catch (err) {
       setError("An error occurred during login. Please try again.")

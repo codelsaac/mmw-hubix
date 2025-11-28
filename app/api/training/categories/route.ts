@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { PermissionService, Permission, UserRole } from "@/lib/permissions"
 import { logger } from "@/lib/logger"
+import { authenticateRequest } from "@/lib/auth-server"
 
 export async function GET() {
   try {
@@ -35,37 +34,30 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     logger.log('Categories API POST request received')
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
-      logger.log('No session found, returning 401')
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
+    const { user, response } = await authenticateRequest()
+    if (response) return response
 
     // Ensure the user exists in the database first
-    const user = await prisma.user.upsert({
-      where: { id: session.user.id },
+    const dbUser = await prisma.user.upsert({
+      where: { id: user.id },
       update: {
-        name: session.user.name,
-        email: session.user.email,
-        role: session.user.role as UserRole,
-        department: session.user.department,
+        name: user.name,
+        email: user.email,
+        role: user.role as UserRole,
+        department: user.department || undefined,
       },
       create: {
-        id: session.user.id,
-        username: session.user.username || session.user.email?.split('@')[0] || 'user',
-        name: session.user.name || 'User',
-        email: session.user.email,
-        role: (session.user.role as UserRole) || UserRole.STUDENT,
-        department: session.user.department || 'General',
+        id: user.id,
+        username: user.username || user.email?.split('@')[0] || 'user',
+        name: user.name || 'User',
+        email: user.email,
+        role: (user.role as UserRole) || UserRole.STUDENT,
+        department: user.department || 'General',
       }
     })
 
     // Check permissions
-    if (!PermissionService.hasPermission(user.role as UserRole, Permission.MANAGE_TRAINING_VIDEOS)) {
+    if (!PermissionService.hasPermission(dbUser.role as UserRole, Permission.MANAGE_TRAINING_VIDEOS)) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }

@@ -17,14 +17,16 @@ interface Message {
 interface AIChatProps {
   onMessageSent?: () => void
   onResponseReceived?: () => void
+  avatarType?: 'pet' | 'icon'
 }
 
-export function AIChat({ onMessageSent, onResponseReceived }: AIChatProps = {}) {
+export function AIChat({ onMessageSent, onResponseReceived, avatarType = 'icon' }: AIChatProps = {}) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content:
-        "Hello! 👋 I'm BYTE, your digital pet AI assistant! I'm here to help you with campus navigation, schedules, IT support, and school policies. What can I help you with today? ⚡",
+      content: avatarType === 'pet' 
+        ? "Hello! 👋 I'm BYTE, your digital pet AI assistant! I'm here to help you with campus navigation, schedules, IT support, and school policies. What can I help you with today? ⚡"
+        : "Hello! I am the MMW Hubix Assistant. I can help you with campus navigation, schedules, IT support, and school policies. How can I assist you today?",
       timestamp: new Date(),
     },
   ])

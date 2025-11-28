@@ -8,6 +8,9 @@
 - Use project import aliases, Tailwind with `cn()`, and default to server components.
 - Never commit secrets; rely on environment variables.
 - Do not run destructive commands without explicit user approval.
+- Use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
 
 # MMW Hubix – Project Rules
 

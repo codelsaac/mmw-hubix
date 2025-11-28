@@ -1,17 +1,38 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { X } from "lucide-react"
+import { X, MessageCircle, Bot, Settings2 } from "lucide-react"
 
 import { AIChat } from "@/components/ai-chat"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { usePetBehavior, type PetMood, type PetPosition } from "@/hooks/use-pet-behavior"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface DigitalPetProps {
   onClick?: () => void
   mood?: PetMood
   showParticles?: boolean
+}
+
+function StandardChatIcon({ onClick }: { onClick?: () => void }) {
+  return (
+    <div 
+      onClick={onClick}
+      className="relative group cursor-pointer"
+    >
+      <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-75" />
+      <div className="relative flex items-center justify-center w-16 h-16 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
+        <Bot className="w-8 h-8" />
+      </div>
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
+    </div>
+  )
 }
 
 function DigitalPet({ onClick, mood = 'idle', showParticles }: DigitalPetProps) {
@@ -189,17 +210,40 @@ export function AIChatWidget() {
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null)
   
   const behavior = usePetBehavior()
+  
+  const [avatarType, setAvatarType] = useState<'pet' | 'icon'>('icon')
 
-  const handlePetClick = () => {
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem('chat-avatar-preference')
+    if (savedAvatar === 'pet' || savedAvatar === 'icon') {
+      setAvatarType(savedAvatar)
+    }
+  }, [])
+
+  const handleAvatarChange = (type: 'pet' | 'icon') => {
+    setAvatarType(type)
+    localStorage.setItem('chat-avatar-preference', type)
+    if (type === 'icon') {
+      behavior.setPosition('bottom-right')
+    }
+  }
+
+  const handlePetReaction = () => {
+    if (avatarType === 'pet') {
+      behavior.setMood('happy')
+      behavior.resetInteraction()
+      behavior.showRandomMessage('happy')
+      setShowParticles(true)
+      setTimeout(() => {
+        setShowParticles(false)
+        behavior.setMood('idle')
+      }, 2000)
+    }
+  }
+
+  const handleOpenChat = () => {
     setIsOpen(true)
-    behavior.setMood('happy')
-    behavior.resetInteraction()
-    behavior.showRandomMessage('happy')
-    setShowParticles(true)
-    setTimeout(() => {
-      setShowParticles(false)
-      behavior.setMood('idle')
-    }, 2000)
+    handlePetReaction()
   }
 
   const handleMultiClick = () => {
@@ -215,25 +259,27 @@ export function AIChatWidget() {
       setClickCount(0)
     }, 1000)
 
-    // Triple click: change position
-    if (clickCount === 2) {
-      const positions: PetPosition[] = ['bottom-right', 'bottom-left']
-      const currentIndex = positions.indexOf(behavior.position)
-      const nextPosition = positions[(currentIndex + 1) % positions.length]
-      behavior.setPosition(nextPosition)
-      setClickCount(0)
-    }
+    if (avatarType === 'pet') {
+      // Triple click: change position
+      if (clickCount === 2) {
+        const positions: PetPosition[] = ['bottom-right', 'bottom-left']
+        const currentIndex = positions.indexOf(behavior.position)
+        const nextPosition = positions[(currentIndex + 1) % positions.length]
+        behavior.setPosition(nextPosition)
+        setClickCount(0)
+      }
 
-    // 5 rapid clicks: excited/dizzy
-    if (clickCount === 4) {
-      behavior.setMood('excited')
-      behavior.showRandomMessage('excited')
-      setShowParticles(true)
-      setTimeout(() => {
-        setShowParticles(false)
-        behavior.setMood('idle')
-      }, 3000)
-      setClickCount(0)
+      // 5 rapid clicks: excited/dizzy
+      if (clickCount === 4) {
+        behavior.setMood('excited')
+        behavior.showRandomMessage('excited')
+        setShowParticles(true)
+        setTimeout(() => {
+          setShowParticles(false)
+          behavior.setMood('idle')
+        }, 3000)
+        setClickCount(0)
+      }
     }
   }
 
@@ -258,29 +304,41 @@ export function AIChatWidget() {
     'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2',
   }
 
+  const renderTrigger = () => {
+    if (avatarType === 'icon') {
+      return <StandardChatIcon onClick={handleOpenChat} />
+    }
+    
+    return (
+      <>
+        {/* Speech Bubble */}
+        {behavior.showMessage && (
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-lg border-2 border-slate-700 shadow-lg whitespace-nowrap animate-in slide-in-from-bottom-4 z-10">
+            <p className="text-sm font-medium text-slate-900">{behavior.message}</p>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-slate-700" />
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white" />
+          </div>
+        )}
+        
+        <DigitalPet
+          onClick={handlePetReaction}
+          mood={behavior.mood}
+          showParticles={showParticles}
+        />
+      </>
+    )
+  }
+
   return (
     <>
       {!isOpen && (
         <div
-          className={`fixed z-50 animate-in fade-in slide-in-from-bottom-4 transition-all duration-500 scale-[0.6] ${positionClasses[behavior.position]}`}
+          className={`fixed z-50 animate-in fade-in slide-in-from-bottom-4 transition-all duration-500 scale-[0.6] ${positionClasses[avatarType === 'icon' ? 'bottom-right' : behavior.position]}`}
           style={{ cursor: 'pointer' }}
           onClick={handleMultiClick}
-          onDoubleClick={handlePetClick}
+          onDoubleClick={handleOpenChat}
         >
-          {/* Speech Bubble */}
-          {behavior.showMessage && (
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-lg border-2 border-slate-700 shadow-lg whitespace-nowrap animate-in slide-in-from-bottom-4 z-10">
-              <p className="text-sm font-medium text-slate-900">{behavior.message}</p>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-slate-700" />
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white" />
-            </div>
-          )}
-          
-          <DigitalPet
-            onClick={handlePetClick}
-            mood={behavior.mood}
-            showParticles={showParticles}
-          />
+          {renderTrigger()}
         </div>
       )}
 
@@ -289,33 +347,63 @@ export function AIChatWidget() {
           <div className="flex items-center justify-between px-3 py-2 bg-muted/50 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 flex items-center justify-center scale-[0.35] origin-center">
-                <DigitalPet mood={behavior.mood} showParticles={false} />
+                {avatarType === 'pet' ? (
+                  <DigitalPet mood={behavior.mood} showParticles={false} />
+                ) : (
+                  <Bot className="w-8 h-8 text-primary" />
+                )}
               </div>
-              <span className="text-sm font-medium">BYTE - Your AI Pet</span>
+              <span className="text-sm font-medium">
+                {avatarType === 'pet' ? 'BYTE - Your AI Pet' : 'MMW Hubix Assistant'}
+              </span>
               <Badge variant="secondary" className="text-[10px]">
                 Beta
               </Badge>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close chat"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Settings2 className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleAvatarChange('pet')}>
+                    <span>Use Digital Pet</span>
+                    {avatarType === 'pet' && <span className="ml-2">✓</span>}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleAvatarChange('icon')}>
+                    <span>Use Standard Icon</span>
+                    {avatarType === 'icon' && <span className="ml-2">✓</span>}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close chat"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
           <div className="h-96">
             <AIChat 
+              avatarType={avatarType}
               onMessageSent={() => {
-                behavior.setMood('thinking')
-                behavior.resetInteraction()
+                if (avatarType === 'pet') {
+                  behavior.setMood('thinking')
+                  behavior.resetInteraction()
+                }
               }} 
               onResponseReceived={() => {
-                behavior.setMood('happy')
-                behavior.showRandomMessage('happy')
-                setTimeout(() => behavior.setMood('idle'), 2000)
+                if (avatarType === 'pet') {
+                  behavior.setMood('happy')
+                  behavior.showRandomMessage('happy')
+                  setTimeout(() => behavior.setMood('idle'), 2000)
+                }
               }} 
             />
           </div>

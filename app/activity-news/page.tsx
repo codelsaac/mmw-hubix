@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { ActivityNewsPublic } from "@/components/activity-news-public"
 
+export const dynamic = "force-dynamic";
+
 export default async function ActivityNewsPage() {
   // Fetch active public announcements
   const announcements = await prisma.announcement.findMany({
