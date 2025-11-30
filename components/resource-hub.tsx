@@ -13,9 +13,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { logger } from "@/lib/logger"
 import Image from "next/image"
 import {
+  ArrowUpDown,
   BookOpen,
   Calendar,
   FileText,
@@ -94,6 +102,7 @@ export function ResourceHub() {
   const [categories, setCategories] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [sortBy, setSortBy] = useState<string>("name")
   const [isHydrated, setIsHydrated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -162,7 +171,15 @@ export function ResourceHub() {
     ? filteredBySearch
     : filteredBySearch.filter((r) => r.categoryId === selectedCategory)
 
-  const resourcesByCategory = (selectedCategory === "all" ? filteredBySearch : filteredResources).reduce(
+  // Sorting logic
+  const sortedResources = [...filteredResources].sort((a, b) => {
+    if (sortBy === "name") return a.name.localeCompare(b.name)
+    if (sortBy === "popular") return (b.clicks || 0) - (a.clicks || 0)
+    if (sortBy === "newest") return new Date(b.lastUpdated || 0).getTime() - new Date(a.lastUpdated || 0).getTime()
+    return 0
+  })
+
+  const resourcesByCategory = (selectedCategory === "all" ? sortedResources : sortedResources).reduce(
     (acc, resource) => {
       if (!acc[resource.category]) {
         acc[resource.category] = []
@@ -267,10 +284,11 @@ export function ResourceHub() {
           <GoogleSearchButton disabled={!searchQuery.trim()} />
         </form>
 
-        {/* Category Filter Tabs */}
-        <div className="w-full px-4 sm:px-0">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex gap-2 min-w-max px-2 sm:px-0">
+        {/* Controls: Categories & Sort */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between px-4 sm:px-0">
+          {/* Category Filter Tabs */}
+          <div className="w-full overflow-x-auto pb-2 scrollbar-hide flex-1">
+            <div className="flex gap-2 min-w-max">
               <Button
                 variant={selectedCategory === "all" ? "default" : "outline"}
                 size="sm"
@@ -306,12 +324,28 @@ export function ResourceHub() {
               })}
             </div>
           </div>
+
+          {/* Sort Dropdown - Compact */}
+          <div className="flex items-center gap-2 min-w-[140px] flex-shrink-0">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full h-8 text-xs">
+                <ArrowUpDown className="w-3 h-3 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Name (A-Z)</SelectItem>
+                <SelectItem value="popular">Popularity</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       <div className="grid gap-8">
-        {selectedCategory === "all" ? (
-          Object.entries(resourcesByCategory).map(([category, categoryResources], index) => (
+        {Object.keys(resourcesByCategory).length > 0 ? (
+          selectedCategory === "all" ? (
+            Object.entries(resourcesByCategory).map(([category, categoryResources], index) => (
             <div
               key={category}
               className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -502,13 +536,30 @@ export function ResourceHub() {
               </div>
             )
           })()
-        )}
-
-        {filteredResources.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              {searchQuery ? "No resources found matching your search." : "No resources available."}
+          )
+        ) : (
+          <div className="text-center py-12 bg-muted/30 rounded-xl border border-dashed border-muted-foreground/20">
+            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-1">No resources found</h3>
+            <p className="text-muted-foreground max-w-sm mx-auto text-sm">
+              {searchQuery 
+                ? `We couldn't find any resources matching "${searchQuery}". Try adjusting your search or filters.`
+                : "No resources are currently available in this category."}
             </p>
+            {searchQuery && (
+              <Button 
+                variant="link" 
+                onClick={() => {
+                  setSearchQuery("")
+                  setSelectedCategory("all")
+                }}
+                className="mt-2"
+              >
+                Clear all filters
+              </Button>
+            )}
           </div>
         )}
       </div>

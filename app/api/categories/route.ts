@@ -42,8 +42,16 @@ export async function GET(req: NextRequest) {
     
     return NextResponse.json(categories)
   } catch (error) {
-    logger.error("[CATEGORIES_GET]", error)
     const { message, statusCode } = handleApiError(error)
+    
+    // Suppress connection error noise
+    if (message.includes("Can't reach database server") || message.includes("P1001")) {
+       logger.warn("Database unreachable - returning 503 Service Unavailable");
+       return NextResponse.json({ error: "Database unreachable" }, { status: 503 });
+    }
+
+    logger.error("[CATEGORIES_GET]", error)
+
     // Return empty array on client errors to prevent breaking the homepage
     if (statusCode >= 400 && statusCode < 500) {
       return NextResponse.json([])

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 // Better Auth server instance.
 // This is the single entry-point for authentication on the server.
 export const auth = betterAuth({
+  basePath: "/api/better-auth",
   // Reuse existing NextAuth-compatible Prisma schema (User, Account, Session, VerificationToken)
   database: prismaAdapter(prisma, {
     provider: "mysql",

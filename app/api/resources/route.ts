@@ -38,8 +38,16 @@ export async function GET(req: NextRequest) {
     
     return NextResponse.json(transformedResources);
   } catch (error) {
-    logger.error("Error fetching resources", error as Error);
     const { message, statusCode } = handleApiError(error);
+    
+    // Suppress connection error noise
+    if (message.includes("Can't reach database server") || message.includes("P1001")) {
+       logger.warn("Database unreachable - returning 503 Service Unavailable");
+       return NextResponse.json({ error: "Database unreachable" }, { status: 503 });
+    }
+
+    logger.error("Error fetching resources", error as Error);
+
     // Return empty array on client errors to prevent breaking the homepage
     if (statusCode >= 400 && statusCode < 500) {
       return NextResponse.json([]);
