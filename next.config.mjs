@@ -6,6 +6,7 @@ const __dirname = dirname(__filename)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true, // Enable Next.js 16 Cache Components
   typescript: {
     ignoreBuildErrors: false, // Enable TypeScript validation
   },

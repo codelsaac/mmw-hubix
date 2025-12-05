@@ -15,7 +15,7 @@ tools to resolve library id and get library docs without me having to explicitly
 # MMW Hubix – Project Rules
 
 ## Tech Stack Facts
-- Next.js 15 App Router with TypeScript, Tailwind CSS, shadcn/ui.
+- Next.js 16 App Router with TypeScript, Tailwind CSS, shadcn/ui.
 - Prisma ORM (MySQL backend).
 - NextAuth.js with username-based login only.
 - Validation via Zod; forms use React Hook Form; charts via Recharts; tabular data via React Data Grid.

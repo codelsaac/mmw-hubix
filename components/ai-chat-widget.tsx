@@ -343,38 +343,41 @@ export function AIChatWidget() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[22rem] md:w-[28rem] bg-background border border-border rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 fade-in duration-300">
-          <div className="flex items-center justify-between px-3 py-2 bg-muted/50 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 flex items-center justify-center scale-[0.35] origin-center">
+        <div className="fixed bottom-6 right-6 z-50 w-[22rem] md:w-[28rem] bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 fade-in duration-300 ring-1 ring-primary/10">
+          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 flex items-center justify-center scale-[0.4] origin-center bg-background rounded-full shadow-sm ring-1 ring-border">
                 {avatarType === 'pet' ? (
                   <DigitalPet mood={behavior.mood} showParticles={false} />
                 ) : (
                   <Bot className="w-8 h-8 text-primary" />
                 )}
               </div>
-              <span className="text-sm font-medium">
-                {avatarType === 'pet' ? 'BYTE - Your AI Pet' : 'MMW Hubix Assistant'}
-              </span>
-              <Badge variant="secondary" className="text-[10px]">
-                Beta
-              </Badge>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold tracking-tight">
+                  {avatarType === 'pet' ? 'BYTE' : 'Hubix Assistant'}
+                </span>
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Online
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Settings2 className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-background/50">
+                    <Settings2 className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleAvatarChange('pet')}>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => handleAvatarChange('pet')} className="cursor-pointer">
                     <span>Use Digital Pet</span>
-                    {avatarType === 'pet' && <span className="ml-2">✓</span>}
+                    {avatarType === 'pet' && <span className="ml-auto text-primary">✓</span>}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAvatarChange('icon')}>
+                  <DropdownMenuItem onClick={() => handleAvatarChange('icon')} className="cursor-pointer">
                     <span>Use Standard Icon</span>
-                    {avatarType === 'icon' && <span className="ml-2">✓</span>}
+                    {avatarType === 'icon' && <span className="ml-auto text-primary">✓</span>}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -389,7 +392,7 @@ export function AIChatWidget() {
               </Button>
             </div>
           </div>
-          <div className="h-96">
+          <div className="h-[450px] bg-gradient-to-b from-background/50 to-background">
             <AIChat 
               avatarType={avatarType}
               onMessageSent={() => {

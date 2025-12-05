@@ -34,6 +34,13 @@ export function AIChat({ onMessageSent, onResponseReceived, avatarType = 'icon' 
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  const SUGGESTED_ACTIONS = [
+    { label: "📅 Events", text: "What are the upcoming events?" },
+    { label: "📚 Library", text: "When is the library open?" },
+    { label: "🔑 Wifi", text: "What is the wifi password?" },
+    { label: "💻 IT Help", text: "How do I contact IT support?" },
+  ]
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -42,13 +49,20 @@ export function AIChat({ onMessageSent, onResponseReceived, avatarType = 'icon' 
     scrollToBottom()
   }, [messages])
 
-  const sendMessage = async (e: React.FormEvent) => {
+  const handleSuggestionClick = (text: string) => {
+    setInput(text)
+    // Optional: auto-send
+    // sendMessage(new Event('submit') as any, text) 
+  }
+
+  const sendMessage = async (e: React.FormEvent, overrideInput?: string) => {
     e.preventDefault()
-    if (!input.trim() || isLoading) return
+    const messageText = overrideInput || input
+    if (!messageText.trim() || isLoading) return
 
     const userMessage: Message = {
       role: "user",
-      content: input.trim(),
+      content: messageText.trim(),
       timestamp: new Date(),
     }
 
@@ -102,70 +116,107 @@ export function AIChat({ onMessageSent, onResponseReceived, avatarType = 'icon' 
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="space-y-4">
-          {messages.map((message, index) => (
-            <div key={index} className={`flex gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              {message.role === "assistant" && (
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="h-3 w-3 text-primary" />
-                </div>
-              )}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth scrollbar-hide">
+        {messages.length === 1 && (
+          <div className="flex flex-col items-center justify-center py-8 space-y-4 animate-in fade-in duration-500 slide-in-from-bottom-4">
+            <div className="relative">
+              <div className="w-20 h-20 bg-gradient-to-tr from-primary/20 to-primary/5 rounded-full flex items-center justify-center shadow-inner ring-1 ring-primary/10">
+                <Bot className="w-10 h-10 text-primary/60" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-background rounded-full flex items-center justify-center shadow-sm ring-1 ring-border/50">
+                <span className="text-xs">✨</span>
+              </div>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-semibold text-foreground/80">Welcome to Hubix</p>
+              <p className="text-xs text-muted-foreground">Ask me anything about the school!</p>
+            </div>
+          </div>
+        )}
 
-              <div
-                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                  message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+        {messages.map((message, index) => (
+          <div 
+            key={index} 
+            className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+          >
+            {message.role === "assistant" && (
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/10 flex items-center justify-center shadow-sm mt-1">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+            )}
+
+            <div
+              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
+                message.role === "user" 
+                  ? "bg-primary text-primary-foreground rounded-tr-sm" 
+                  : "bg-muted/50 border border-border/50 text-foreground rounded-tl-sm"
+              }`}
+            >
+              <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+              <p
+                className={`text-[10px] mt-1.5 text-right ${
+                  message.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
                 }`}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
-                <p
-                  className={`text-xs mt-1 opacity-70 ${
-                    message.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground/70"
-                  }`}
-                >
-                  {formatTime(message.timestamp)}
-                </p>
-              </div>
-
-              {message.role === "user" && (
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <User className="h-3 w-3 text-primary-foreground" />
-                </div>
-              )}
+                {formatTime(message.timestamp)}
+              </p>
             </div>
-          ))}
 
-          {isLoading && (
-            <div className="flex gap-2 justify-start">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                <Bot className="h-3 w-3 text-primary" />
+            {message.role === "user" && (
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/90 flex items-center justify-center shadow-sm mt-1">
+                <User className="h-4 w-4 text-primary-foreground" />
               </div>
-              <div className="bg-muted text-muted-foreground rounded-lg px-3 py-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  <span>Thinking...</span>
-                </div>
-              </div>
+            )}
+          </div>
+        ))}
+
+        {isLoading && (
+          <div className="flex gap-3 justify-start animate-in fade-in duration-300">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/10 flex items-center justify-center shadow-sm">
+              <Bot className="h-4 w-4 text-primary" />
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            <div className="bg-muted/50 border border-border/50 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-primary/50 rounded-full animate-bounce" />
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="p-3 border-t border-border">
-        <div className="flex gap-2">
+      <div className="p-4 bg-background/50 backdrop-blur-sm border-t border-border/50">
+        {messages.length <= 2 && (
+          <div className="flex gap-2 overflow-x-auto pb-3 mb-1 scrollbar-hide snap-x">
+            {SUGGESTED_ACTIONS.map((action, i) => (
+              <button
+                key={i}
+                onClick={() => handleSuggestionClick(action.text)}
+                className="flex-shrink-0 text-xs bg-background/80 hover:bg-primary/10 border border-border/50 hover:border-primary/20 text-foreground/80 hover:text-primary px-3 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap snap-start shadow-sm"
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        )}
+        <form onSubmit={sendMessage} className="relative flex items-center gap-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything about school..."
+            placeholder="Ask me anything..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 pr-12 h-11 rounded-full border-border/50 bg-background/50 shadow-sm focus-visible:ring-primary/20"
           />
-          <Button type="submit" size="sm" disabled={!input.trim() || isLoading}>
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={!input.trim() || isLoading}
+            className="absolute right-1.5 top-1.5 h-8 w-8 rounded-full shadow-sm transition-all duration-200 hover:scale-105"
+          >
             <Send className="h-4 w-4" />
           </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }

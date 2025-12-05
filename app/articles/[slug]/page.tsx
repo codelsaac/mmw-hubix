@@ -10,8 +10,6 @@ import Link from "next/link"
 import { usePublicArticles, type Article } from "@/hooks/use-articles"
 import { notFound } from "next/navigation"
 
-export const dynamic = "force-dynamic"
-
 interface ArticlePageProps {
   params: Promise<{ slug: string }>
 }

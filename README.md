@@ -2,7 +2,7 @@
 > A modern, centralized web portal consolidating essential school information, resources, and tools for students, teachers, and IT administrators at C.C.C. Mong Man Wai College
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0-black.svg)](https://nextjs.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.14-2D3748.svg)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
@@ -38,6 +38,7 @@
 - **User Profile**: Enhanced profile management with modern UI
 - **AI Chat**: Polished floating button with pulsing animation
 - **🤖 Flexible AI Avatar**: Chat widget now supports switching between the classic Digital Pet and a standard bot icon, with persistent user preference
+- **✨ Enhanced AI Chat UI**: Glassmorphism design, gradient message bubbles, smooth scrolling, and animated typing indicators
 - **System Settings**: Admin interface for site configuration with real-time updates
 - **IT Perfect History Timeline**: New `HistoryEvent` model, API, and dashboard UI allowing ADMIN/HELPER to add, edit, and delete timeline cards directly from the IT Perfect Hub.
 - **Robust Authentication**: Upgraded to `better-auth` v1.4.3 with full username support and improved session management.
@@ -447,7 +448,7 @@ Content-Type: application/json
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Next.js 15** — Full-stack React framework with App Router
+- **Next.js 16** — Full-stack React framework with App Router
 - **TypeScript 5** — Type safety and developer experience
 - **Tailwind CSS 4** — Utility-first styling with modern features
 - **shadcn/ui** — Beautiful, accessible component library
