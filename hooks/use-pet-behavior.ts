@@ -55,7 +55,11 @@ export function usePetBehavior() {
     showMessage: false,
   })
 
-  const [lastInteraction, setLastInteraction] = useState(() => Date.now())
+  const [lastInteraction, setLastInteraction] = useState(0)
+
+  useEffect(() => {
+    setLastInteraction(Date.now())
+  }, [])
 
   // Load saved position from localStorage
   useEffect(() => {

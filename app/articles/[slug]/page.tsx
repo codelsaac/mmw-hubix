@@ -1,205 +1,123 @@
-"use client"
-
-import Image from "next/image"
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Eye, FileText, ArrowLeft, Share2 } from "lucide-react"
-import Link from "next/link"
-import { usePublicArticles, type Article } from "@/hooks/use-articles"
 import { notFound } from "next/navigation"
+import { prisma } from "@/lib/prisma"
 
-interface ArticlePageProps {
-  params: Promise<{ slug: string }>
+// Generate static params for all articles at build time
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    where: {
+      status: 'PUBLISHED',
+    },
+    select: {
+      slug: true,
+    },
+  })
+  
+  return articles.map((article) => ({
+    slug: article.slug,
+  }))
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
-  const { fetchArticleBySlug } = usePublicArticles()
-  const [article, setArticle] = useState<Article | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [slug, setSlug] = useState<string | null>(null)
+// Helper function to format article date (static for build-time safety)
+function formatArticleDate(dateString: string | Date): string {
+  // During build, return a static placeholder to avoid dynamic data access
+  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+    return 'Date'
+  }
+  
+  // In development or on client side, format the date properly
+  try {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString
+    return date.toLocaleDateString()
+  } catch {
+    return 'Invalid Date'
+  }
+}
 
-  useEffect(() => {
-    params.then(p => setSlug(p.slug))
-  }, [params])
-
-  useEffect(() => {
-    if (!slug) return
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  
+  // Fetch article data directly from database
+  try {
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+          },
+        },
+      },
+    })
     
-    const loadArticle = async () => {
-      try {
-        setLoading(true)
-        const data = await fetchArticleBySlug(slug)
-        setArticle(data)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load article')
-        if (err instanceof Error && err.message.includes('404')) {
-          notFound()
-        }
-      } finally {
-        setLoading(false)
-      }
+    if (!article) {
+      notFound()
     }
-
-    loadArticle()
-  }, [slug, fetchArticleBySlug])
-
-  const handleShare = async () => {
-    if (navigator.share && article) {
-      try {
-        await navigator.share({
-          title: article.title,
-          text: article.excerpt,
-          url: window.location.href,
-        })
-      } catch (err) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(window.location.href)
-      }
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href)
-    }
-  }
-
-  if (loading) {
+    
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center py-8 text-muted-foreground">Loading article...</div>
-        </div>
-      </div>
-    )
-  }
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Navigation */}
+          <div className="flex items-center gap-4">
+            <a href="/articles">
+              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                ← Back to Articles
+              </button>
+            </a>
+          </div>
 
-  if (error || !article) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center py-8 text-destructive">
-            {error || 'Article not found'}
+          {/* Article Header */}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="flex items-center gap-2">
+                {article.category && (
+                  <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                    {article.category}
+                  </div>
+                )}
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight">{article.title}</h1>
+              {article.excerpt && (
+                <p className="text-muted-foreground">{article.excerpt}</p>
+              )}
+            </div>
+            <div className="p-6 pt-0">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  {formatArticleDate(article.publishedAt || article.createdAt)}
+                </div>
+                <div className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  {article.views} views
+                </div>
+                {article.creator && (
+                  <div className="flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    By {article.creator.name || article.creator.username}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Article Content */}
+          <div className="prose max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: article.content }} />
           </div>
         </div>
       </div>
     )
+  } catch (error) {
+    console.error('Error fetching article:', error)
+    notFound()
   }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Navigation */}
-        <div className="flex items-center gap-4">
-          <Link href="/articles">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Articles
-            </Button>
-          </Link>
-        </div>
-
-        {/* Article Header */}
-        <Card>
-          <CardHeader className="space-y-4">
-            <div className="flex items-center gap-2">
-              {article.category && (
-                <Badge variant="secondary" className="text-sm">
-                  {article.category}
-                </Badge>
-              )}
-              {article.tags && (
-                <div className="flex flex-wrap gap-1">
-                  {article.tags.split(',').map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-sm">
-                      {tag.trim()}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <CardTitle className="text-3xl font-serif leading-tight">
-              {article.title}
-            </CardTitle>
-            
-            {article.excerpt && (
-              <CardDescription className="text-lg">
-                {article.excerpt}
-              </CardDescription>
-            )}
-
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {article.publishedAt 
-                    ? `Published ${new Date(article.publishedAt).toLocaleDateString()}`
-                    : `Created ${new Date(article.createdAt).toLocaleDateString()}`
-                  }
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4" />
-                <span>{article.views} views</span>
-              </div>
-              {article.creator && (
-                <div className="flex items-center gap-1">
-                  <FileText className="w-4 h-4" />
-                  <span>By {article.creator.name || article.creator.username}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
-
-        {/* Article Content */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="prose prose-gray dark:prose-invert max-w-none">
-              <div className="whitespace-pre-wrap text-base leading-relaxed">
-                {article.content}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Featured Image */}
-        {article.featuredImage && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-center">
-                <Image
-                  src={article.featuredImage}
-                  alt={article.title}
-                  width={1200}
-                  height={675}
-                  className="max-w-full h-auto rounded-lg shadow-md"
-                  sizes="(max-width: 768px) 100vw, 768px"
-                  unoptimized
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Back to Articles */}
-        <div className="text-center">
-          <Link href="/articles">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to All Articles
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </div>
-  )
 }

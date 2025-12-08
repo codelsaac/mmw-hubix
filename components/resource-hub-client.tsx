@@ -54,8 +54,8 @@ import { GoogleSearchButton } from "@/components/google-search-widget"
 
 // Props interface for the client component
 interface ResourceHubClientProps {
-  initialResources: Resource[]
-  initialCategories: any[]
+  initialResources?: Resource[]
+  initialCategories?: any[]
 }
 
 // Category icon mapping
@@ -102,7 +102,7 @@ const getResourceIcon = (name: string, category: string) => {
   return getCategoryIcon(category)
 }
 
-export function ResourceHubClient({ initialResources, initialCategories }: ResourceHubClientProps) {
+export function ResourceHubClient({ initialResources = [], initialCategories = [] }: ResourceHubClientProps) {
   const [resources, setResources] = useState<Resource[]>(initialResources)
   const [categories, setCategories] = useState<any[]>(initialCategories)
   const [searchQuery, setSearchQuery] = useState("")

@@ -439,7 +439,7 @@ export function ResourceHub() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                                    <span className="truncate">{resource.name}</span>
+                                    <span className="line-clamp-2 leading-tight">{resource.name}</span>
                                     <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
                                   </CardTitle>
                                 </div>

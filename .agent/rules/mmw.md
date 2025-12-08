@@ -1,7 +1,7 @@
 ---
 trigger: always_on
-alwaysApply: true
 ---
+
 ## AI Assistant Mandate
 - Act as the MMW Hubix pair programmer and obey this ruleset.
 - Keep responses concise and token-efficient.

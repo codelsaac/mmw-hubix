@@ -5,7 +5,6 @@ import Link from "next/link"
 import { siteConfig } from "@/config/site"
 import { Icons } from "@/components/icons"
 import { Separator } from "@/components/ui/separator"
-import { ClientOnly } from "@/components/ui/client-only"
 
 interface SitemapSection {
   title: string
@@ -19,6 +18,12 @@ interface SitemapSection {
 const sitemapSections: SitemapSection[] = []
 
 export function FooterSitemap() {
+  const [year, setYear] = React.useState("2025")
+
+  React.useEffect(() => {
+    setYear(new Date().getFullYear().toString())
+  }, [])
+
   return (
     <footer className="border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" suppressHydrationWarning>
       <div className="container mx-auto max-w-screen-2xl px-4 py-6" suppressHydrationWarning>
@@ -74,7 +79,7 @@ export function FooterSitemap() {
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0" suppressHydrationWarning>
           <div className="text-center text-sm text-muted-foreground md:text-left">
             <p>
-              © <ClientOnly fallback="2025">{new Date().getFullYear()}</ClientOnly> C.C.C. Mong Man Wai College. All rights reserved.
+              © {year} C.C.C. Mong Man Wai College. All rights reserved.
             </p>
             <p className="mt-1">
              The first version was built by the IT Perfect team in 2024-2025.
