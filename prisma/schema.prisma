@@ -12,6 +12,8 @@ model Account {
   userId            String
   type              String
   provider          String
+  providerId        String? @default("credential")
+  password          String?
   providerAccountId String
   refresh_token     String? @db.Text
   access_token      String? @db.Text
@@ -31,6 +33,10 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ipAddress    String?
+  userAgent    String?
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "Session_userId_fkey")
@@ -39,9 +45,10 @@ model Session {
 model User {
   id                       String             @id @default(cuid())
   username                 String             @unique
+  displayUsername           String?
   name                     String?
   email                    String?            @unique
-  emailVerified            DateTime?
+  emailVerified            Boolean?
   password                 String?
   image                    String?            @db.VarChar(2048)
   role                     UserRole           @default(STUDENT)
@@ -49,6 +56,8 @@ model User {
   permissions              String?            @db.Text
   isActive                 Boolean            @default(true)
   lastLoginAt              DateTime?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
   accounts                 Account[]
   assignedActivities       Activity[]         @relation("AssignedActivities")
   createdActivities        Activity[]         @relation("CreatedActivities")
@@ -314,7 +323,6 @@ enum UserRole {
   ADMIN
   HELPER
   STUDENT
-  GUEST
 }
 
 enum ResourceContentType {

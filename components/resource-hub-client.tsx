@@ -113,7 +113,7 @@ export function ResourceHubClient({ initialResources = [], initialCategories = [
 
   useEffect(() => {
     setIsHydrated(true)
-    
+
     const fetchData = async () => {
       setIsLoading(true)
       try {
@@ -122,7 +122,7 @@ export function ResourceHubClient({ initialResources = [], initialCategories = [
           fetch('/api/resources'),
           fetch('/api/categories')
         ])
-        
+
         if (resourcesResponse.ok) {
           const resourcesData = await resourcesResponse.json()
           setResources(resourcesData)
@@ -131,7 +131,7 @@ export function ResourceHubClient({ initialResources = [], initialCategories = [
           const loadedResources = resourceService.getResources()
           setResources(loadedResources)
         }
-        
+
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json()
           logger.info('Categories fetched:', categoriesData)
@@ -349,150 +349,84 @@ export function ResourceHubClient({ initialResources = [], initialCategories = [
         {Object.keys(resourcesByCategory).length > 0 ? (
           selectedCategory === "all" ? (
             Object.entries(resourcesByCategory).map(([category, categoryResources], index) => (
-            <div
-              key={category}
-              className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center gap-2 flex-wrap">
-                {(() => {
-                  const iconColor = getCategoryColor(category)
-                  return (
-                    <span
-                      className="w-3.5 h-3.5 rounded-full border flex-shrink-0"
-                      style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
-                    />
-                  )
-                })()}
-                <h3 className="text-lg sm:text-xl font-serif font-semibold text-foreground">{category}</h3>
-                <Badge variant="secondary" className="text-xs flex-shrink-0">
-                  {categoryResources.length} resources
-                </Badge>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
-                {categoryResources.map((resource) => {
-                  const iconColor = getCategoryColor(resource.category as any)
-                  const resourceIconData = parseIconValue((resource as any).icon)
-
-                  let iconDisplay: React.ReactNode
-                  if (resourceIconData?.type === "url" && resourceIconData.value) {
-                    iconDisplay = (
-                      <Image
-                        src={resourceIconData.value}
-                        alt={resource.name}
-                        width={20}
-                        height={20}
-                        className="rounded object-contain"
+              <div
+                key={category}
+                className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  {(() => {
+                    const iconColor = getCategoryColor(category)
+                    return (
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border flex-shrink-0"
+                        style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
                       />
                     )
-                  } else if (resourceIconData?.type === "icon") {
-                    const iconMap = {
-                      BookOpen,
-                      Calendar,
-                      FileText,
-                      Globe,
-                      Library,
-                      Mail,
-                      Users,
-                      Clock,
-                      MapPin,
-                      ExternalLink,
-                      Laptop,
-                      Building,
-                      Heart,
-                      Briefcase,
-                      DollarSign,
-                      Home,
-                      Car,
-                      PartyPopper,
-                      UserCheck,
-                      Microscope,
-                      Globe2,
-                      GraduationCap,
-                      Phone,
-                    }
-                    const IconComponent = iconMap[resourceIconData.value as keyof typeof iconMap] || Globe
-                    iconDisplay = <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
-                  } else {
-                    const IconComponent = getResourceIcon(resource.name, resource.category)
-                    if (IconComponent === Globe || IconComponent === Globe2) {
-                      iconDisplay = (
-                        <span
-                          className="w-3.5 h-3.5 rounded-full border"
-                          style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
-                        />
-                      )
-                    } else {
-                      iconDisplay = <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
-                    }
-                  }
-
-                  return (
-                    <TooltipProvider key={resource.id} delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Card
-                            className="hover:shadow-md transition-all duration-300 cursor-pointer group hover:border-primary/30 hover:-translate-y-0.5 gap-3 p-4 sm:p-5"
-                            onClick={() => handleResourceClick(resource)}
-                          >
-                            <CardHeader className="px-0 py-0">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
-                                  {iconDisplay}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                                    <span className="truncate">{resource.name}</span>
-                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
-                                  </CardTitle>
-                                </div>
-                              </div>
-                            </CardHeader>
-                          </Card>
-                        </TooltipTrigger>
-                        {resource.description && (
-                          <TooltipContent
-                            side="top"
-                            className="hidden sm:block max-w-[200px] p-2 bg-gray-900 text-white border border-gray-700 shadow-xl"
-                          >
-                            <p className="text-xs leading-snug">{resource.description}</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
-                  )
-                })}
-              </div>
-            </div>
-          ))
-        ) : (
-          (() => {
-            const selectedCategoryData = categories.find((cat) => cat.id === selectedCategory)
-            const categoryResources = filteredResources.filter((resource) => resource.categoryId === selectedCategory)
-
-            if (!selectedCategoryData || categoryResources.length === 0) {
-              return null
-            }
-
-            return (
-              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full border flex-shrink-0"
-                    style={{
-                      backgroundColor: selectedCategoryData.color || undefined,
-                      borderColor: (selectedCategoryData.color || '#d1d5db') as string,
-                    }}
-                  />
-                  <h3 className="text-lg sm:text-xl font-serif font-semibold text-foreground">{selectedCategoryData.name}</h3>
+                  })()}
+                  <h3 className="text-lg sm:text-xl font-serif font-semibold text-foreground">{category}</h3>
                   <Badge variant="secondary" className="text-xs flex-shrink-0">
                     {categoryResources.length} resources
                   </Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                   {categoryResources.map((resource) => {
-                    const IconComponent = getResourceIcon(resource.name, resource.category)
                     const iconColor = getCategoryColor(resource.category as any)
+                    const resourceIconData = parseIconValue((resource as any).icon)
+
+                    let iconDisplay: React.ReactNode
+                    if (resourceIconData?.type === "url" && resourceIconData.value) {
+                      iconDisplay = (
+                        <Image
+                          src={resourceIconData.value}
+                          alt={resource.name}
+                          width={20}
+                          height={20}
+                          className="rounded object-contain"
+                        />
+                      )
+                    } else if (resourceIconData?.type === "icon") {
+                      const iconMap = {
+                        BookOpen,
+                        Calendar,
+                        FileText,
+                        Globe,
+                        Library,
+                        Mail,
+                        Users,
+                        Clock,
+                        MapPin,
+                        ExternalLink,
+                        Laptop,
+                        Building,
+                        Heart,
+                        Briefcase,
+                        DollarSign,
+                        Home,
+                        Car,
+                        PartyPopper,
+                        UserCheck,
+                        Microscope,
+                        Globe2,
+                        GraduationCap,
+                        Phone,
+                      }
+                      const IconComponent = iconMap[resourceIconData.value as keyof typeof iconMap] || Globe
+                      iconDisplay = <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
+                    } else {
+                      const IconComponent = getResourceIcon(resource.name, resource.category)
+                      if (IconComponent === Globe || IconComponent === Globe2) {
+                        iconDisplay = (
+                          <span
+                            className="w-3.5 h-3.5 rounded-full border"
+                            style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
+                          />
+                        )
+                      } else {
+                        iconDisplay = <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
+                      }
+                    }
+
                     return (
                       <TooltipProvider key={resource.id} delayDuration={300}>
                         <Tooltip>
@@ -504,41 +438,107 @@ export function ResourceHubClient({ initialResources = [], initialCategories = [
                               <CardHeader className="px-0 py-0">
                                 <div className="flex items-center gap-3">
                                   <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
-                                    {IconComponent === Globe || IconComponent === Globe2 ? (
-                                      <span
-                                        className="w-3.5 h-3.5 rounded-full border"
-                                        style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
-                                      />
-                                    ) : (
-                                      <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
-                                    )}
+                                    {iconDisplay}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                                      <span className="truncate">{resource.name}</span>
-                                      <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0" />
+                                    <CardTitle className="text-sm font-semibold truncate" title={resource.name}>
+                                      {resource.name}
                                     </CardTitle>
                                   </div>
                                 </div>
                               </CardHeader>
                             </Card>
                           </TooltipTrigger>
-                          {resource.description && (
-                            <TooltipContent
-                              side="top"
-                              className="hidden sm:block max-w-[200px] p-2 bg-gray-900 text-white border border-gray-700 shadow-xl"
-                            >
-                              <p className="text-xs leading-snug">{resource.description}</p>
-                            </TooltipContent>
-                          )}
+                          <TooltipContent
+                            side="top"
+                            className="hidden sm:block max-w-[250px] p-2 bg-gray-900 text-white border border-gray-700 shadow-xl"
+                          >
+                            <p className="text-sm font-semibold mb-1">{resource.name}</p>
+                            {resource.description && (
+                              <p className="text-xs leading-snug text-gray-300">{resource.description}</p>
+                            )}
+                          </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     )
                   })}
                 </div>
               </div>
-            )
-          })()
+            ))
+          ) : (
+            (() => {
+              const selectedCategoryData = categories.find((cat) => cat.id === selectedCategory)
+              const categoryResources = filteredResources.filter((resource) => resource.categoryId === selectedCategory)
+
+              if (!selectedCategoryData || categoryResources.length === 0) {
+                return null
+              }
+
+              return (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border flex-shrink-0"
+                      style={{
+                        backgroundColor: selectedCategoryData.color || undefined,
+                        borderColor: (selectedCategoryData.color || '#d1d5db') as string,
+                      }}
+                    />
+                    <h3 className="text-lg sm:text-xl font-serif font-semibold text-foreground">{selectedCategoryData.name}</h3>
+                    <Badge variant="secondary" className="text-xs flex-shrink-0">
+                      {categoryResources.length} resources
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
+                    {categoryResources.map((resource) => {
+                      const IconComponent = getResourceIcon(resource.name, resource.category)
+                      const iconColor = getCategoryColor(resource.category as any)
+                      return (
+                        <TooltipProvider key={resource.id} delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Card
+                                className="hover:shadow-md transition-all duration-300 cursor-pointer group hover:border-primary/30 hover:-translate-y-0.5 gap-3 p-4 sm:p-5"
+                                onClick={() => handleResourceClick(resource)}
+                              >
+                                <CardHeader className="px-0 py-0">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0">
+                                      {IconComponent === Globe || IconComponent === Globe2 ? (
+                                        <span
+                                          className="w-3.5 h-3.5 rounded-full border"
+                                          style={{ backgroundColor: iconColor, borderColor: (iconColor || '#d1d5db') as string }}
+                                        />
+                                      ) : (
+                                        <IconComponent className="w-4 h-4 transition-transform duration-300" style={{ color: iconColor }} />
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <CardTitle className="text-sm font-semibold truncate" title={resource.name}>
+                                        {resource.name}
+                                      </CardTitle>
+                                    </div>
+                                  </div>
+                                </CardHeader>
+                              </Card>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              className="hidden sm:block max-w-[250px] p-2 bg-gray-900 text-white border border-gray-700 shadow-xl"
+                            >
+                              <p className="text-sm font-semibold mb-1">{resource.name}</p>
+                              {resource.description && (
+                                <p className="text-xs leading-snug text-gray-300">{resource.description}</p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()
           )
         ) : (
           <div className="text-center py-12 bg-muted/30 rounded-xl border border-dashed border-muted-foreground/20">
@@ -547,13 +547,13 @@ export function ResourceHubClient({ initialResources = [], initialCategories = [
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-1">No resources found</h3>
             <p className="text-muted-foreground max-w-sm mx-auto text-sm">
-              {searchQuery 
+              {searchQuery
                 ? `We couldn't find any resources matching "${searchQuery}". Try adjusting your search or filters.`
                 : "No resources are currently available in this category."}
             </p>
             {searchQuery && (
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 onClick={() => {
                   setSearchQuery("")
                   setSelectedCategory("all")

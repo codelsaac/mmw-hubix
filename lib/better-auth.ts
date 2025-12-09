@@ -27,6 +27,10 @@ export const auth = betterAuth({
       permissions: {
         type: "string",
       },
+      displayUsername: {
+        type: "string",
+        required: false,
+      },
     },
   },
   session: {

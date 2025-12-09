@@ -5,11 +5,6 @@ const passwordUpdates = new Map<string, string>()
 // Demo accounts for password verification
 const DEMO_ACCOUNTS = [
   { 
-    id: "0", 
-    username: process.env.DEMO_GUEST_USERNAME || "guest", 
-    password: process.env.DEMO_GUEST_PASSWORD || "guest123"
-  },
-  { 
     id: "1", 
     username: process.env.DEMO_ADMIN_USERNAME || "admin", 
     password: process.env.DEMO_ADMIN_PASSWORD || "admin123"

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `displayUsername` VARCHAR(191) NULL,
+    MODIFY `role` ENUM('ADMIN', 'HELPER', 'STUDENT', 'GUEST') NOT NULL DEFAULT 'STUDENT';

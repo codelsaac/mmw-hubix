@@ -15,46 +15,6 @@
 - 🗃️ [Settings System](./docs/SETTINGS_IMPLEMENTATION.md)
 - 🛠️ [Database Setup Guide](./docs/DATABASE-SETUP-GUIDE.md)
 
-## Recent Updates
-
-### Latest Improvements (November 2024)
-- **🎨 Unified Animation System**: Centralized animation configuration with Framer Motion, standardized timing constants, and reusable component variants
-- **⚡ Enhanced Page Transitions**: Smooth page navigation with consistent fadeIn/slideIn animations and staggered list entries
-- **🔄 Unified Loading States**: Consolidated loader component with 4 types (spinner, skeleton, pulse, dots) replacing scattered implementations
-- **🎉 Phase 2 Complete**: Unified error logging and monitoring hooks across client, server, and edge runtimes
-- **🚀 Enterprise Architecture**: Repository/Service/Controller pattern with ABAC permission system (Phase 0-1)
-- **🔒 Production-Ready Security**: Rate limiting, CSP headers, input sanitization, XSS protection
-- **📊 Error Monitoring**: Comprehensive Sentry integration with automatic error tracking and performance monitoring
-- **📝 Structured Logging**: Development-friendly colored logs, production JSON logs with context
-- **🔍 Google Search Widget**: Quick Google search functionality integrated into Resource Hub for convenient web searches
-- **Resource Icon Support**: Resources now support custom icons with automatic favicon fetching from URLs
-- **Visual Icon & Color Pickers**: Interactive selection interfaces for category icons and colors with search functionality
-- **Categories Management System**: Complete admin interface for managing resource categories with icons, colors, and sorting
-- **Enhanced Resource Hub**: Resources now properly organized by dynamic categories with visual indicators
-- **Database-Backed Settings System**: Comprehensive site configuration with categories (General, Security, Backup)
-- **Database Schema Updates**: New Category and SiteSetting models with full CRUD operations and proper relationships
-- **Enhanced UI & Animations**: Smooth transitions, hover effects, staggered animations across all components
-- **Quality Assurance**: Implemented mandatory bug checking procedures and comprehensive testing
-- **User Profile**: Enhanced profile management with modern UI
-- **AI Chat**: Polished floating button with pulsing animation
-- **🤖 Flexible AI Avatar**: Chat widget now supports switching between the classic Digital Pet and a standard bot icon, with persistent user preference
-- **✨ Enhanced AI Chat UI**: Glassmorphism design, gradient message bubbles, smooth scrolling, and animated typing indicators
-- **System Settings**: Admin interface for site configuration with real-time updates
-- **IT Perfect History Timeline**: New `HistoryEvent` model, API, and dashboard UI allowing ADMIN/HELPER to add, edit, and delete timeline cards directly from the IT Perfect Hub.
-- **Robust Authentication**: Upgraded to `better-auth` v1.4.3 with full username support and improved session management.
-- **Admin Settings Refinement**: Enhanced validation, modern UI components (shadcn/ui), and improved export capabilities.
-
-### Architecture Highlights
-- **📊 Phase 2**: Real-time error logging pipeline (client + server + edge)
-- **🏗️ Phase 1**: Repository/Service/ABAC pattern for enterprise-grade architecture
-- **🛡️ Phase 0**: Security middleware, structured logging, input sanitization
-
-### Coming Soon (Phase 3)
-- Redis caching layer for performance
-- Comprehensive unit test suite
-- E2E testing with Playwright
-- Advanced analytics dashboard
-
 ## Project Overview & Vision
 MMW Hubix replaces outdated IT Prefect sites with a modern, unified platform that serves both public and internal needs. The portal provides:
 
@@ -628,15 +588,6 @@ NEXT_PUBLIC_APP_URL="https://your-domain.com"
 OPENROUTER_API_KEY="your-openrouter-key"  # For AI chat feature
 OPENROUTER_BASE_URL="https://openrouter.ai/api/v1/chat/completions"  # Optional override
 OPENROUTER_MODEL="openai/gpt-oss-20b:free"  # Optional model selection
-
-# Error Monitoring (Sentry)
-SENTRY_DSN="https://abc123@sentry.io/123456"  # Get from sentry.io
-NEXT_PUBLIC_SENTRY_DSN="https://abc123@sentry.io/123456"
-SENTRY_AUTH_TOKEN="your-auth-token"  # For source map upload
-SENTRY_ORG="your-org-slug"
-SENTRY_PROJECT="mmw-hubix"
-SENTRY_ENVIRONMENT="production"
-SENTRY_TRACES_SAMPLE_RATE="0.1"  # 10% performance monitoring
 ```
 
 ## 📚 Documentation

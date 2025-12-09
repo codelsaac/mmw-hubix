@@ -13,7 +13,6 @@ const defaultCategories = [
 async function removeDemoAccounts() {
   const adminUsername = process.env.DEMO_ADMIN_USERNAME || 'admin'
   const demoUsernames = [
-    process.env.DEMO_GUEST_USERNAME || 'guest',
     process.env.DEMO_HELPER_USERNAME || 'helper',
     process.env.DEMO_STUDENT_USERNAME, // optional override
   ]
@@ -38,6 +37,51 @@ async function main() {
   await removeDemoAccounts()
 
   console.log('🌱 Seeding default categories...')
+
+  // Create Admin User
+  // Note: Passwords are handled by Better Auth via Account model (see seed-credential-accounts.ts)
+  const adminUsername = process.env.DEMO_ADMIN_USERNAME || 'admin'
+  try {
+    const admin = await prisma.user.upsert({
+      where: { username: adminUsername },
+      update: {
+        role: 'ADMIN',
+        isActive: true,
+      },
+      create: {
+        username: adminUsername,
+        name: 'System Administrator',
+        role: 'ADMIN',
+        isActive: true,
+      },
+    })
+    console.log(`✅ Admin user ready: ${admin.username}`)
+  } catch (e) {
+    console.error('Error creating admin:', e)
+  }
+
+  // Create Helper User
+  // Note: Passwords are handled by Better Auth via Account model (see seed-credential-accounts.ts)
+  const helperUsername = process.env.DEMO_HELPER_USERNAME || 'helper'
+  try {
+    const helper = await prisma.user.upsert({
+      where: { username: helperUsername },
+      update: {
+        role: 'HELPER',
+        isActive: true,
+      },
+      create: {
+        username: helperUsername,
+        name: 'IT Helper',
+        role: 'HELPER',
+        isActive: true,
+      },
+    })
+    console.log(`✅ Helper user ready: ${helper.username}`)
+  } catch (e) {
+    console.error('Error creating helper:', e)
+  }
+
 
   for (const categoryData of defaultCategories) {
     try {
