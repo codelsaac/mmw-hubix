@@ -26,7 +26,6 @@ function StandardChatIcon({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       className="relative group cursor-pointer"
     >
-      <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-75" />
       <div className="relative flex items-center justify-center w-16 h-16 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
         <Bot className="w-8 h-8" />
       </div>

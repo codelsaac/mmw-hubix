@@ -11,7 +11,7 @@ export function GoogleSearchButton({ disabled }: GoogleSearchButtonProps) {
     <Button
       type="submit"
       variant="default"
-      className="flex items-center gap-2 bg-[#4285f4] hover:bg-[#357ae8] text-white font-medium px-4 sm:px-6"
+      className="flex items-center gap-2 bg-[#1565c0] hover:bg-[#0d47a1] text-white font-medium px-4 sm:px-6"
       disabled={disabled}
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
