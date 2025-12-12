@@ -1,13 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
-import { validateInput, createErrorResponse, createSuccessResponse, sanitizeString } from "@/lib/validation-schemas"
+import { validateInput, createErrorResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limiter"
 import { handleApiError } from "@/lib/error-handler"
+import { authenticateAdminRequest } from "@/lib/auth-server"
 
 const userSchema = z.object({
   username: z.string().min(2).max(50).transform(sanitizeString),
@@ -27,10 +26,8 @@ export async function GET(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
-    }
+    const { user, response } = await authenticateAdminRequest();
+    if (response) return response;
     
     const users = await prisma.user.findMany({
       select: {
@@ -63,10 +60,8 @@ export async function POST(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return createErrorResponse("Unauthorized", 403);
-    }
+    const { user, response } = await authenticateAdminRequest();
+    if (response) return response;
 
     const body = await req.json();
     const validation = validateInput(userSchema, body);
@@ -136,10 +131,8 @@ export async function PATCH(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
-    }
+    const { user, response } = await authenticateAdminRequest();
+    if (response) return response;
 
     const body = await req.json();
     const usersToUpdate = z.array(userUpdateSchema).parse(body);
@@ -185,10 +178,8 @@ export async function DELETE(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
-    }
+    const { user, response } = await authenticateAdminRequest();
+    if (response) return response;
 
     const body = await req.json();
     const idsSchema = z.object({ ids: z.array(z.string().min(1)) });
@@ -199,7 +190,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Prevent deleting the current user
-    if (session.user.id && ids.includes(session.user.id)) {
+    if (user.id && ids.includes(user.id)) {
       return new NextResponse("Cannot delete your own account", { status: 400 });
     }
 

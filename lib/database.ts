@@ -491,7 +491,7 @@ export const UserDB = {
   },
 
   // Update user role/department
-  async updateUser(id: string, data: { role?: 'ADMIN' | 'HELPER' | 'GUEST', department?: string }) {
+  async updateUser(id: string, data: { role?: 'ADMIN' | 'HELPER' | 'STUDENT', department?: string }) {
     return await prisma.user.update({
       where: { id },
       data

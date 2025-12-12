@@ -33,6 +33,9 @@ export class UserRepository extends BaseRepository<SafeUser> {
           permissions: true,
           isActive: true,
           lastLoginAt: true,
+          displayUsername: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
@@ -78,6 +81,9 @@ export class UserRepository extends BaseRepository<SafeUser> {
           permissions: true,
           isActive: true,
           lastLoginAt: true,
+          displayUsername: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
@@ -131,6 +137,9 @@ export class UserRepository extends BaseRepository<SafeUser> {
           permissions: true,
           isActive: true,
           lastLoginAt: true,
+          displayUsername: true,
+          createdAt: true,
+          updatedAt: true,
         },
         orderBy: { username: 'asc' },
         take: filter?.limit,
@@ -163,6 +172,9 @@ export class UserRepository extends BaseRepository<SafeUser> {
           permissions: true,
           isActive: true,
           lastLoginAt: true,
+          displayUsername: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
@@ -198,6 +210,9 @@ export class UserRepository extends BaseRepository<SafeUser> {
           permissions: true,
           isActive: true,
           lastLoginAt: true,
+          displayUsername: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 

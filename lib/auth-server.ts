@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { headers } from "next/headers";
 
+import { prisma } from "@/lib/prisma";
 import { UserRole, Permission, PermissionService } from "@/lib/permissions";
 import { AuthenticatedUser } from "@/types/auth";
 import { auth } from "@/lib/better-auth";
@@ -9,7 +10,43 @@ import { auth } from "@/lib/better-auth";
 // Cache authentication checks to reduce repeated session lookups
 const cachedAuth = cache(async () => {
   const h = await headers();
-  return auth.api.getSession({ headers: h });
+  const session = await auth.api.getSession({ headers: h });
+  
+  // If we have a user, fetch additional fields from the database
+  if (session?.user?.id) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        role: true,
+        department: true,
+        permissions: true,
+        isActive: true,
+        lastLoginAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    
+    if (dbUser) {
+      // Create a new user object with properly typed properties
+      const userData = {
+        ...dbUser,
+        // Ensure email is always a string (Better Auth expects string, not string | null)
+        email: dbUser.email || "",
+        // Ensure name is always a string
+        name: dbUser.name || "",
+        // Ensure permissions is always a string
+        permissions: dbUser.permissions || ""
+      };
+      session.user = { ...session.user, ...userData };
+    }
+  }
+  
+  return session;
 });
 
 /**

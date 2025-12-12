@@ -21,7 +21,7 @@ export async function PATCH(
   const schema = z.object({
     name: z.string().min(1).optional(),
     email: z.string().email().optional(),
-    role: z.enum(['ADMIN', 'HELPER', 'GUEST']).optional(),
+    role: z.enum(['ADMIN', 'HELPER', 'STUDENT']).optional(),
     department: z.string().optional(),
     isActive: z.boolean().optional()
   });

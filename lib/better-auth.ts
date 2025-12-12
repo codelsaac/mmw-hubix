@@ -14,8 +14,16 @@ export const auth = betterAuth({
     provider: "mysql",
   }),
 
+  // Enable both authentication methods for migration period
   emailAndPassword: {
     enabled: true,
+  },
+  
+  // Enable username-only authentication for existing users
+  username: {
+    enabled: true,
+    // Configure username field to match our existing schema
+    usernameField: "username",
   },
 
   // Map existing NextAuth Prisma fields to Better Auth’s expectations
@@ -29,6 +37,17 @@ export const auth = betterAuth({
       },
       displayUsername: {
         type: "string",
+        required: false,
+      },
+      department: {
+        type: "string",
+        required: false,
+      },
+      isActive: {
+        type: "boolean",
+      },
+      lastLoginAt: {
+        type: "date",
         required: false,
       },
     },
