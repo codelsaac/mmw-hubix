@@ -6,13 +6,9 @@ import { handleApiError } from '@/lib/error-handler'
 import { cacheLife } from 'next/cache'
 
 // Cached function for fetching articles (rate limiting happens outside)
-async function getCachedArticles(searchParams: URLSearchParams) {
+async function getCachedArticles(page: number, limit: number, search: string | null) {
   'use cache'
   cacheLife('minutes')
-  
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '10')
-  const search = searchParams.get('search')
 
   const skip = (page - 1) * limit
 
@@ -70,7 +66,10 @@ export async function GET(request: NextRequest) {
     if (rateLimitResult) return rateLimitResult
 
     const { searchParams } = new URL(request.url)
-    const result = await getCachedArticles(searchParams)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const search = searchParams.get('search')
+    const result = await getCachedArticles(page, limit, search)
 
     return NextResponse.json(result)
   } catch (error) {

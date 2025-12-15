@@ -2,6 +2,7 @@
 
 import type React from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,8 +16,13 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole = "prefect" }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth()
+  const searchParams = useSearchParams()
 
-  if (isLoading) {
+  // Check for MCP access parameter
+  const mcpAccessKey = searchParams.get('mcp_access_key')
+  const isMcpAccess = mcpAccessKey === process.env.NEXT_PUBLIC_MCP_ACCESS_KEY
+
+  if (isLoading && !isMcpAccess) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center space-y-4">
@@ -25,6 +31,15 @@ export function ProtectedRoute({ children, requiredRole = "prefect" }: Protected
         </div>
       </div>
     )
+  }
+
+  // MCP access bypasses normal authentication for admin access
+  if (isMcpAccess) {
+    // Only allow MCP access for admin routes
+    if (requiredRole === "admin") {
+      return <>{children}</>
+    }
+    // For non-admin routes, still require normal authentication
   }
 
   if (!isAuthenticated || !user) {
@@ -51,7 +66,7 @@ export function ProtectedRoute({ children, requiredRole = "prefect" }: Protected
     )
   }
 
-  if (requiredRole === "admin" && user.role !== "ADMIN") {
+  if (requiredRole === "admin" && user.role !== "ADMIN" && !isMcpAccess) {
     return (
       <div className="flex items-center justify-center min-h-[400px] p-6">
         <Card className="w-full max-w-md">

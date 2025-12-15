@@ -57,6 +57,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.MANAGE_TASKS,
     Permission.MANAGE_ACTIVITIES,
     Permission.MANAGE_CALENDAR,
+    Permission.MANAGE_ANNOUNCEMENTS,
     Permission.VIEW_TRAINING_VIDEOS,
     Permission.VIEW_RESOURCES,
     Permission.VIEW_DASHBOARD,
@@ -139,7 +140,8 @@ export class PermissionService {
    * Check if user can access admin panel
    */
   static canAccessAdmin(userRole: UserRole, customPermissions?: string | null): boolean {
-    return this.hasPermission(userRole, Permission.MANAGE_WEBSITE, customPermissions)
+    // Allow access for both ADMIN and HELPER roles
+    return [UserRole.ADMIN, UserRole.HELPER].includes(userRole)
   }
 
   /**
@@ -160,7 +162,9 @@ export class PermissionService {
       Permission.MANAGE_RESOURCES,
       Permission.MANAGE_TRAINING_VIDEOS,
       Permission.MANAGE_TASKS,
-      Permission.MANAGE_ACTIVITIES
+      Permission.MANAGE_ACTIVITIES,
+      Permission.MANAGE_ANNOUNCEMENTS,
+      Permission.MANAGE_CALENDAR
     ]
     return !this.hasAnyPermission(userRole, managementPerms, customPermissions)
   }

@@ -8,8 +8,7 @@ import { AuthenticatedUser } from "@/types/auth";
 import { auth } from "@/lib/better-auth";
 
 // Cache authentication checks to reduce repeated session lookups
-const cachedAuth = cache(async () => {
-  const h = await headers();
+const cachedAuth = cache(async (h: Headers) => {
   const session = await auth.api.getSession({ headers: h });
   
   // If we have a user, fetch additional fields from the database
@@ -52,9 +51,10 @@ const cachedAuth = cache(async () => {
 /**
  * Get current user without redirecting (cached)
  */
-export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
+export async function getCurrentUser(h?: Headers): Promise<AuthenticatedUser | null> {
   try {
-    const session = await cachedAuth();
+    const reqHeaders = h || await headers();
+    const session = await cachedAuth(reqHeaders);
     return (session?.user || null) as AuthenticatedUser | null;
   } catch {
     return null;
@@ -64,8 +64,10 @@ export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
 /**
  * Server-side authentication check for pages (redirects on failure)
  */
-export async function requireAuth(roles?: UserRole[]): Promise<AuthenticatedUser> {
-  const session = await cachedAuth();
+export async function requireAuth(roles?: UserRole[], h?: Headers): Promise<AuthenticatedUser> {
+  // For Server Components, headers() works. For API routes, headers must be passed explicitly
+  const reqHeaders = h || await headers();
+  const session = await cachedAuth(reqHeaders);
 
   if (!session?.user) {
     redirect("/");
@@ -83,8 +85,10 @@ export async function requireAuth(roles?: UserRole[]): Promise<AuthenticatedUser
 /**
  * Server-side authentication check for API routes (throws errors instead of redirecting)
  */
-export async function requireAuthAPI(roles?: UserRole[]): Promise<AuthenticatedUser> {
-  const session = await cachedAuth();
+export async function requireAuthAPI(roles?: UserRole[], h?: Headers): Promise<AuthenticatedUser> {
+  // In API routes, headers must be explicitly passed
+  const reqHeaders = h || new Headers();
+  const session = await cachedAuth(reqHeaders);
 
   if (!session?.user) {
     throw new Error("Unauthorized");
@@ -102,8 +106,8 @@ export async function requireAuthAPI(roles?: UserRole[]): Promise<AuthenticatedU
 /**
  * Server-side permission check (redirects on failure)
  */
-export async function requirePermission(permission: Permission): Promise<AuthenticatedUser> {
-  const user = await requireAuth();
+export async function requirePermission(permission: Permission, h?: Headers): Promise<AuthenticatedUser> {
+  const user = await requireAuth(undefined, h);
 
   if (!PermissionService.hasPermission(user.role, permission, user.permissions)) {
     redirect("/unauthorized");
@@ -115,8 +119,8 @@ export async function requirePermission(permission: Permission): Promise<Authent
 /**
  * Server-side admin access check (redirects on failure)
  */
-export async function requireAdmin(): Promise<AuthenticatedUser> {
-  const user = await requireAuth();
+export async function requireAdmin(h?: Headers): Promise<AuthenticatedUser> {
+  const user = await requireAuth(undefined, h);
 
   if (!PermissionService.canAccessAdmin(user.role, user.permissions)) {
     redirect("/unauthorized");
@@ -128,8 +132,8 @@ export async function requireAdmin(): Promise<AuthenticatedUser> {
 /**
  * Server-side IT system management check (redirects on failure)
  */
-export async function requireITSystemAccess(): Promise<AuthenticatedUser> {
-  const user = await requireAuth();
+export async function requireITSystemAccess(h?: Headers): Promise<AuthenticatedUser> {
+  const user = await requireAuth(undefined, h);
 
   if (!PermissionService.canManageITSystem(user.role, user.permissions)) {
     redirect("/unauthorized");
@@ -141,8 +145,8 @@ export async function requireITSystemAccess(): Promise<AuthenticatedUser> {
 /**
  * Check if user has any of the specified roles (redirects on failure)
  */
-export async function requireAnyRole(roles: UserRole[]): Promise<AuthenticatedUser> {
-  const user = await requireAuth();
+export async function requireAnyRole(roles: UserRole[], h?: Headers): Promise<AuthenticatedUser> {
+  const user = await requireAuth(undefined, h);
 
   if (!roles.includes(user.role)) {
     redirect("/unauthorized");
@@ -154,8 +158,8 @@ export async function requireAnyRole(roles: UserRole[]): Promise<AuthenticatedUs
 /**
  * Check if current user has permission without redirecting (cached)
  */
-export async function checkPermission(permission: Permission): Promise<boolean> {
-  const user = await getCurrentUser();
+export async function checkPermission(permission: Permission, h?: Headers): Promise<boolean> {
+  const user = await getCurrentUser(h);
   if (!user) return false;
 
   return PermissionService.hasPermission(user.role, permission, user.permissions);
@@ -164,8 +168,8 @@ export async function checkPermission(permission: Permission): Promise<boolean> 
 /**
  * Check if current user can access admin panel (cached)
  */
-export async function canAccessAdmin(): Promise<boolean> {
-  const user = await getCurrentUser();
+export async function canAccessAdmin(h?: Headers): Promise<boolean> {
+  const user = await getCurrentUser(h);
   if (!user) return false;
 
   return PermissionService.canAccessAdmin(user.role, user.permissions);
@@ -174,8 +178,8 @@ export async function canAccessAdmin(): Promise<boolean> {
 /**
  * Check if current user can manage IT system (cached)
  */
-export async function canManageITSystem(): Promise<boolean> {
-  const user = await getCurrentUser();
+export async function canManageITSystem(h?: Headers): Promise<boolean> {
+  const user = await getCurrentUser(h);
   if (!user) return false;
 
   return PermissionService.canManageITSystem(user.role, user.permissions);
@@ -201,9 +205,9 @@ export function createSuccessResponse(data: any, status: number = 200): Response
 /**
  * Standardized API route authentication
  */
-export async function authenticateRequest(): Promise<{ user: AuthenticatedUser; response?: Response }> {
+export async function authenticateRequest(h?: Headers): Promise<{ user: AuthenticatedUser; response?: Response }> {
   try {
-    const user = await requireAuthAPI();
+    const user = await requireAuthAPI(undefined, h);
     return { user };
   } catch (error) {
     return {
@@ -213,9 +217,9 @@ export async function authenticateRequest(): Promise<{ user: AuthenticatedUser; 
   }
 }
 
-export async function authenticateAdminRequest(): Promise<{ user: AuthenticatedUser; response?: Response }> {
+export async function authenticateAdminRequest(h?: Headers): Promise<{ user: AuthenticatedUser; response?: Response }> {
   try {
-    const user = await requireAuthAPI([UserRole.ADMIN]);
+    const user = await requireAuthAPI([UserRole.ADMIN, UserRole.HELPER], h);
     return { user };
   } catch (error) {
     return {

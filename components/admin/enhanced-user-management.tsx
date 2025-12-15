@@ -98,6 +98,7 @@ const IT_DEPARTMENTS = [
 export function EnhancedUserManagement() {
   const [users, setUsers] = useState<UserForGrid[]>([])
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
+  const [selectAllFiltered, setSelectAllFiltered] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserForGrid | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -109,12 +110,24 @@ export function EnhancedUserManagement() {
     department: 'all',
     status: 'all'
   })
+  const [showSelectAllFiltered, setShowSelectAllFiltered] = useState(false)
+  const [isBulkLoading, setIsBulkLoading] = useState(false)
+  const [bulkOperationStatus, setBulkOperationStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   
   const usersPerPage = 10
 
   useEffect(() => {
     fetchUsers()
   }, [])
+
+  useEffect(() => {
+    if (bulkOperationStatus) {
+      const timer = setTimeout(() => {
+        setBulkOperationStatus(null)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [bulkOperationStatus])
 
   const fetchUsers = async () => {
     try {
@@ -175,10 +188,23 @@ export function EnhancedUserManagement() {
   }
 
   const handleSelectAll = () => {
-    if (selectedUsers.size === paginatedUsers.length) {
+    if (selectAllFiltered) {
+      // Clear selection if already in select all mode
       setSelectedUsers(new Set())
+      setSelectAllFiltered(false)
+      setShowSelectAllFiltered(false)
+    } else if (selectedUsers.size === paginatedUsers.length && paginatedUsers.length > 0) {
+      // If all paginated users are selected, select all filtered users across all pages
+      const filteredUserIds = filteredUsers.map(user => user.id)
+      setSelectedUsers(new Set(filteredUserIds))
+      setSelectAllFiltered(true)
+      setShowSelectAllFiltered(true)
     } else {
-      setSelectedUsers(new Set(paginatedUsers.map(user => user.id)))
+      // Select all users on the current page
+      const paginatedUserIds = paginatedUsers.map(user => user.id)
+      setSelectedUsers(new Set(paginatedUserIds))
+      setSelectAllFiltered(false)
+      setShowSelectAllFiltered(false)
     }
   }
 
@@ -227,6 +253,9 @@ export function EnhancedUserManagement() {
     if (!confirm(`Are you sure you want to delete ${selectedUsers.size} user(s)?`)) return
     
     try {
+      setIsBulkLoading(true)
+      setBulkOperationStatus(null)
+      
       const response = await fetch(`/api/admin/users`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -235,9 +264,15 @@ export function EnhancedUserManagement() {
       if (response.ok) {
         setUsers(users.filter(u => !selectedUsers.has(u.id)))
         setSelectedUsers(new Set())
+        setBulkOperationStatus({ type: 'success', message: `Successfully deleted ${selectedUsers.size} user(s)` })
+      } else {
+        setBulkOperationStatus({ type: 'error', message: 'Failed to delete users' })
       }
     } catch (error) {
       logger.error('Error batch deleting users:', error)
+      setBulkOperationStatus({ type: 'error', message: 'An error occurred while deleting users' })
+    } finally {
+      setIsBulkLoading(false)
     }
   }
 
@@ -245,6 +280,9 @@ export function EnhancedUserManagement() {
     if (selectedUsers.size === 0) return
     
     try {
+      setIsBulkLoading(true)
+      setBulkOperationStatus(null)
+      
       const updates = Array.from(selectedUsers).map(id => ({ id, role: newRole }))
       const response = await fetch('/api/admin/users', {
         method: 'PATCH',
@@ -259,9 +297,15 @@ export function EnhancedUserManagement() {
             : user
         ))
         setSelectedUsers(new Set())
+        setBulkOperationStatus({ type: 'success', message: `Successfully updated roles for ${selectedUsers.size} user(s)` })
+      } else {
+        setBulkOperationStatus({ type: 'error', message: 'Failed to update user roles' })
       }
     } catch (error) {
       logger.error('Error updating user roles:', error)
+      setBulkOperationStatus({ type: 'error', message: 'An error occurred while updating user roles' })
+    } finally {
+      setIsBulkLoading(false)
     }
   }
 
@@ -269,6 +313,9 @@ export function EnhancedUserManagement() {
     if (selectedUsers.size === 0) return
     
     try {
+      setIsBulkLoading(true)
+      setBulkOperationStatus(null)
+      
       const updates = Array.from(selectedUsers).map(id => ({ id, isActive }))
       const response = await fetch('/api/admin/users', {
         method: 'PATCH',
@@ -282,9 +329,18 @@ export function EnhancedUserManagement() {
             : user
         ))
         setSelectedUsers(new Set())
+        setBulkOperationStatus({ 
+          type: 'success', 
+          message: `Successfully ${isActive ? 'activated' : 'deactivated'} ${selectedUsers.size} user(s)` 
+        })
+      } else {
+        setBulkOperationStatus({ type: 'error', message: 'Failed to update user status' })
       }
     } catch (error) {
       logger.error('Error updating user status:', error)
+      setBulkOperationStatus({ type: 'error', message: 'An error occurred while updating user status' })
+    } finally {
+      setIsBulkLoading(false)
     }
   }
 
@@ -345,6 +401,27 @@ export function EnhancedUserManagement() {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Bulk Operation Status Notification */}
+          {bulkOperationStatus && (
+            <div className={`flex items-center gap-2 p-3 mb-4 rounded-lg ${bulkOperationStatus.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+              <div className={`flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center ${bulkOperationStatus.type === 'success' ? 'bg-green-200 text-green-600' : 'bg-red-200 text-red-600'}`}>
+                {bulkOperationStatus.type === 'success' ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="m9 11 3 3L22 4" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                )}
+              </div>
+              <span className="text-sm font-medium">{bulkOperationStatus.message}</span>
+            </div>
+          )}
+
           {/* Search and Filters */}
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-4">
@@ -414,12 +491,14 @@ export function EnhancedUserManagement() {
             {selectedUsers.size > 0 && (
               <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                 <span className="text-sm font-medium">
-                  {selectedUsers.size} user(s) selected
+                  {selectAllFiltered 
+                    ? `${selectedUsers.size}/${filteredUsers.length} filtered users selected` 
+                    : `${selectedUsers.size} user(s) selected`}
                 </span>
                 <div className="flex items-center gap-1 ml-auto">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" disabled={isBulkLoading}>
                         <Shield className="h-4 w-4 mr-1" />
                         Change Role
                       </Button>
@@ -444,7 +523,7 @@ export function EnhancedUserManagement() {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" disabled={isBulkLoading}>
                         <Settings className="h-4 w-4 mr-1" />
                         Status
                       </Button>
@@ -467,6 +546,7 @@ export function EnhancedUserManagement() {
                     variant="destructive" 
                     size="sm"
                     onClick={handleBatchDelete}
+                    disabled={isBulkLoading}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
@@ -476,6 +556,7 @@ export function EnhancedUserManagement() {
                     variant="ghost" 
                     size="sm"
                     onClick={() => setSelectedUsers(new Set())}
+                    disabled={isBulkLoading}
                   >
                     Clear
                   </Button>
@@ -528,11 +609,12 @@ export function EnhancedUserManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedUsers.size === paginatedUsers.length && paginatedUsers.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
+                    <Checkbox
+                      checked={selectAllFiltered ? selectedUsers.size === filteredUsers.length : selectedUsers.size === paginatedUsers.length && paginatedUsers.length > 0}
+                      onCheckedChange={handleSelectAll}
+                      indeterminate={!selectAllFiltered && selectedUsers.size > 0 && selectedUsers.size < paginatedUsers.length}
+                    />
+                  </TableHead>
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Department</TableHead>

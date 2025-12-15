@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/auth'
-import { UserRole } from '@/lib/permissions'
+import { UserRole, Permission, PermissionService } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import { logger } from "@/lib/logger"
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { handleApiError } from '@/lib/error-handler'
 import { z } from 'zod'
+import { authenticateAdminRequest } from '@/lib/auth-server'
 
 // GET /api/admin/announcements - Get all announcements for admin management
 export async function GET(req: NextRequest) {
@@ -14,10 +13,25 @@ export async function GET(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions)
+    const { user, response: authResponse } = await authenticateAdminRequest(req.headers)
+    if (authResponse) return authResponse
     
-    if (!session?.user || session.user.role !== UserRole.ADMIN) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Debug user information
+    logger.info('User info:', {
+      userId: user.id,
+      userRole: user.role,
+      expectedRoles: [UserRole.ADMIN, UserRole.HELPER]
+    })
+    
+    // Check if user has permission to manage announcements
+    if (!PermissionService.hasPermission(user.role, Permission.MANAGE_ANNOUNCEMENTS, user.permissions)) {
+      logger.error('Authorization failed:', {
+        userId: user.id,
+        userRole: user.role,
+        requiredPermission: Permission.MANAGE_ANNOUNCEMENTS,
+        userPermissions: user.permissions
+      })
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
     const announcements = await prisma.announcement.findMany({
@@ -63,13 +77,19 @@ export async function POST(request: NextRequest) {
     const rateLimitResult = await rateLimit(request, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const session = await getServerSession(authOptions)
+    const { user, response: authResponse } = await authenticateAdminRequest(request.headers)
+    if (authResponse) return authResponse
     
-    if (!session?.user || session.user.role !== UserRole.ADMIN) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Check if user has permission to manage announcements
+    if (!PermissionService.hasPermission(user.role, Permission.MANAGE_ANNOUNCEMENTS, user.permissions)) {
+      logger.error('Authorization failed:', {
+        userId: user.id,
+        userRole: user.role,
+        requiredPermission: Permission.MANAGE_ANNOUNCEMENTS,
+        userPermissions: user.permissions
+      })
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    
-    const user = session.user
 
     const data = await request.json()
     const validated = announcementSchema.parse(data)

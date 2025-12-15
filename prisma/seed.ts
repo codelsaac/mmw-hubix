@@ -33,8 +33,8 @@ async function removeDemoAccounts() {
 }
 
 async function main() {
-  console.log('🧼 Cleaning up demo accounts...')
-  await removeDemoAccounts()
+  // Skip demo account cleanup since we'll be recreating the standard accounts below
+  console.log('🧼 Skipping demo account cleanup...')
 
   console.log('🌱 Seeding default categories...')
 

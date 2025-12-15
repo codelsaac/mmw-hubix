@@ -8,7 +8,7 @@ export interface ActivityNews {
   location: string
   description: string
   attendees: number
-  maxAttendees: number
+  maxAttendees: number | null
   type: string
   status: "active" | "cancelled" | "completed"
   isPublic: boolean

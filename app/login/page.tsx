@@ -21,23 +21,45 @@ export default function LoginPage() {
 
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsLoading(true)
     setError("")
 
     try {
-      const result = await signIn.username({
-        username,
-        password,
+      // Get form values directly from input elements to ensure we get the latest values
+      const usernameInput = event.currentTarget.elements.namedItem('username') as HTMLInputElement
+      const passwordInput = event.currentTarget.elements.namedItem('password') as HTMLInputElement
+      
+      const username = usernameInput.value
+      const password = passwordInput.value
+      
+      console.log('Attempting direct fetch login with:', { username, password })
+      
+      const response = await fetch('/api/better-auth/sign-in/username', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+        credentials: 'include', // Important for cookies
       })
+      
+      const result = await response.json()
+      console.log('Direct fetch result:', result)
 
-      if (result?.error) {
-        setError("Login failed. Please check your username and password.")
+      if (!response.ok) {
+        setError(`Login failed: ${result.error?.message || "Invalid username or password"}`)
+        console.error('Login error:', result)
       } else {
+        console.log('Login successful, redirecting to dashboard...')
         router.push(callbackUrl)
       }
     } catch (err) {
+      console.error('Login exception:', err)
       setError("An error occurred during login. Please try again.")
     } finally {
       setIsLoading(false)

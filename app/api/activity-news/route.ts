@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
         time,
         location,
         description,
-        maxAttendees: parseInt(maxAttendees),
+        maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
         type,
         status,
         isPublic,

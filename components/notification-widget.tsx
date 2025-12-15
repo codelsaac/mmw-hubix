@@ -91,9 +91,6 @@ export function NotificationWidget() {
           </div>
           <CardTitle className="text-lg font-semibold">Notifications</CardTitle>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Important notices about library hours and portal maintenance.
-        </p>
       </CardHeader>
       
       <CardContent className="pt-4 space-y-3">
