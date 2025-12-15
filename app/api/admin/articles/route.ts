@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuthAPI } from '@/lib/auth-server'
+import { authenticateAdminRequest } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import { UserRole } from '@/lib/permissions'
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { handleApiError } from '@/lib/error-handler'
 import { z } from 'zod'
@@ -13,7 +12,11 @@ export async function GET(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const user = await requireAuthAPI([UserRole.ADMIN])
+    const { user, response } = await authenticateAdminRequest(req.headers);
+    
+    if (response) {
+      return response;
+    }
 
     const articles = await prisma.article.findMany({
       include: {
@@ -53,7 +56,11 @@ export async function POST(request: NextRequest) {
     const rateLimitResult = await rateLimit(request, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const user = await requireAuthAPI([UserRole.ADMIN])
+    const { user, response } = await authenticateAdminRequest(request.headers);
+    
+    if (response) {
+      return response;
+    }
 
     const data = await request.json()
     const validated = articleSchema.parse(data)

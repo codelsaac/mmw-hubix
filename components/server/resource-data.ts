@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma"
 
 // Cached resource data fetching
 async function getCachedResources() {
-  'use cache'
-  cacheLife('hours')
-  
+  //   'use cache'
+  //   cacheLife('hours')
+
   const resourceService = new ResourceService()
   const resources = await resourceService.getAllResources()
-  
+
   // Transform to match the expected Resource interface
   return resources.map(resource => ({
     id: resource.id,
@@ -29,9 +29,9 @@ async function getCachedResources() {
 
 // Cached category data fetching
 async function getCachedCategories() {
-  'use cache'
-  cacheLife('hours')
-  
+  //   'use cache'
+  //   cacheLife('hours')
+
   const categories = await prisma.category.findMany({
     where: {
       isActive: true
@@ -58,7 +58,7 @@ async function getCachedCategories() {
       { name: 'asc' }
     ]
   })
-  
+
   return categories
 }
 

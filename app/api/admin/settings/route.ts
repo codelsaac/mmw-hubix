@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { requireAuthAPI } from "@/lib/auth-server"
-import { UserRole } from "@/lib/permissions"
+import { authenticateAdminRequest } from "@/lib/auth-server"
 import { getAllSettings, updateSettings, initializeSettings } from "@/lib/settings-service"
 import { SettingsSchemas } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
@@ -11,7 +10,11 @@ import { logger } from "@/lib/logger"
  */
 export async function GET(req: Request) {
   try {
-    await requireAuthAPI([UserRole.ADMIN])
+    const { user, response } = await authenticateAdminRequest(req.headers)
+    
+    if (response) {
+      return response
+    }
     
     // Initialize settings if needed
     await initializeSettings()
@@ -50,7 +53,11 @@ export async function GET(req: Request) {
  */
 export async function PUT(req: Request) {
   try {
-    await requireAuthAPI([UserRole.ADMIN])
+    const { user, response } = await authenticateAdminRequest(req.headers)
+    
+    if (response) {
+      return response
+    }
     
     const json = await req.json()
 

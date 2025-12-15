@@ -26,13 +26,8 @@ export async function GET(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    // ========== TEMPORARY AUTHENTICATION BYPASS FOR TESTING ==========
-    // This section should be RESTORED before deployment!
-    // Comment out the bypass code and uncomment the authenticateAdminRequest() call
-    // const { user, response } = await authenticateAdminRequest();
-    // if (response) return response;
-    const user = { id: "1", role: "ADMIN" }; // Mock admin user for testing
-    // ================================================================
+    const { user, response } = await authenticateAdminRequest(req.headers);
+    if (response) return response;
     
     const users = await prisma.user.findMany({
       select: {

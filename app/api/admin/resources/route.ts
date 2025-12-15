@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const rateLimitResult = await rateLimit(req, RATE_LIMITS.ADMIN)
     if (rateLimitResult) return rateLimitResult
 
-    const { user, response } = await authenticateAdminRequest();
+    const { user, response } = await authenticateAdminRequest(req.headers);
     
     if (response) {
       return response;

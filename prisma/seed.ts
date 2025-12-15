@@ -83,9 +83,10 @@ async function main() {
   }
 
 
+  const categories = []
   for (const categoryData of defaultCategories) {
     try {
-      await prisma.category.upsert({
+      const cat = await prisma.category.upsert({
         where: { name: categoryData.name },
         update: { isActive: true },
         create: {
@@ -96,10 +97,73 @@ async function main() {
           isActive: true,
         },
       })
+      categories.push(cat)
       console.log(`✅ Created/updated category: ${categoryData.name}`)
     } catch (error) {
       console.error(`❌ Error creating category ${categoryData.name}:`, error)
     }
+  }
+
+  // --- DEMO CONTENT ---
+  console.log('🌱 Seeding demo content...')
+  const adminUser = await prisma.user.findUnique({ where: { username: adminUsername } })
+
+  if (adminUser && categories.length > 0) {
+    // 1. Resources
+    const demoResources = [
+      { name: 'School Portal', url: 'https://example.com', description: 'Main school portal access', categoryName: 'Academics' },
+      { name: 'Library Catalog', url: 'https://example.com/lib', description: 'Search book inventory', categoryName: 'Library' },
+      { name: 'IT Helpdesk', url: 'https://example.com/help', description: 'Submit technical tickets', categoryName: 'Technology' },
+    ]
+
+    for (const res of demoResources) {
+      const cat = categories.find(c => c.name === res.categoryName)
+      if (cat) {
+        await prisma.resource.create({
+          data: {
+            name: res.name,
+            url: res.url,
+            description: res.description,
+            categoryId: cat.id,
+            createdBy: adminUser.id,
+            status: 'active'
+          }
+        })
+      }
+    }
+    console.log('✅ Demo Resources created')
+
+    // 2. Announcements (Activities)
+    await prisma.announcement.create({
+      data: {
+        title: 'Welcome to New Term',
+        club: 'School Office',
+        date: new Date(),
+        time: '09:00',
+        location: 'Hall',
+        description: 'Welcome ceremony for all students',
+        type: 'general',
+        status: 'active',
+        isPublic: true,
+        createdBy: adminUser.id
+      }
+    })
+    console.log('✅ Demo Announcements created')
+
+    // 3. Articles
+    await prisma.article.create({
+      data: {
+        title: 'Getting Started with IT Perfect',
+        slug: 'getting-started-it-perfect-' + Date.now(),
+        content: '# Welcome\nThis is a demo article showing how to use the system.',
+        excerpt: 'Learn the basics of using our new platform.',
+        status: 'PUBLISHED',
+        isPublic: true,
+        publishedAt: new Date(),
+        createdBy: adminUser.id
+      }
+    })
+    console.log('✅ Demo Articles created')
   }
 
   console.log('✅ Seed script finished successfully!')

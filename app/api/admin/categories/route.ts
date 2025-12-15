@@ -1,9 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/auth"
+import { authenticateAdminRequest } from "@/lib/auth-server"
 import { UserRole } from "@/lib/permissions"
 import { z } from "zod"
-import { validateInput, createErrorResponse, sanitizeString } from "@/lib/validation-schemas"
+import { createErrorResponse, sanitizeString } from "@/lib/validation-schemas"
 import { logger } from "@/lib/logger"
 import { prisma } from "@/lib/prisma"
 
@@ -18,11 +17,12 @@ const categorySchema = z.object({
 
 const categoryUpdateSchema = categorySchema.partial().extend({ id: z.string() });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
+    const { user, response } = await authenticateAdminRequest(req.headers);
+    
+    if (response) {
+      return response;
     }
     
     const categories = await prisma.category.findMany({
@@ -54,29 +54,28 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return createErrorResponse("Unauthorized", 403);
+    const { user, response } = await authenticateAdminRequest(req.headers);
+    
+    if (response) {
+      return response;
     }
 
     const body = await req.json();
-    const validation = validateInput(categorySchema, body);
-    if (!validation.success) {
-      return createErrorResponse(validation.error, 400);
-    }
-    const categoryData = validation.data;
+    
+    // Validate input
+    const categoryData = categorySchema.parse(body);
 
     // Verify user exists in database before setting createdBy
     let createdById: string | null = null;
-    if (session.user?.id) {
+    if (user.id) {
       const userExists = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: user.id },
         select: { id: true }
       });
       if (userExists) {
-        createdById = session.user.id;
+        createdById = user.id;
       } else {
-        logger.warn(`[ADMIN_CATEGORIES_POST] Session user ID ${session.user.id} not found in database`);
+        logger.warn(`[ADMIN_CATEGORIES_POST] Session user ID ${user.id} not found in database`);
       }
     }
 
@@ -118,9 +117,10 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
+    const { user, response } = await authenticateAdminRequest(req.headers);
+    
+    if (response) {
+      return response;
     }
 
     const body = await req.json();
@@ -168,9 +168,10 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== UserRole.ADMIN) {
-      return new NextResponse("Unauthorized", { status: 403 });
+    const { user, response } = await authenticateAdminRequest(req.headers);
+    
+    if (response) {
+      return response;
     }
 
     const body = await req.json();
